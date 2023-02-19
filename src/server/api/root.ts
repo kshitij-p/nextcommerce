@@ -1,3 +1,4 @@
+import imageRouter from "./routers/imageRouter";
 import productRouter from "./routers/productRouter";
 import { createTRPCRouter } from "./trpc";
 
@@ -8,6 +9,7 @@ import { createTRPCRouter } from "./trpc";
  */
 export const appRouter = createTRPCRouter({
   product: productRouter,
+  image: imageRouter,
 });
 
 export type AppRouter = typeof appRouter;

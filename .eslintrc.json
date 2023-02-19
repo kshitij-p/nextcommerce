@@ -9,7 +9,8 @@
         "project": "tsconfig.json"
       },
       "rules": {
-        "prefer-const": "off"
+        "prefer-const": "off",
+        "@typescript-eslint/no-misused-promises": "off"
       }
     }
   ],

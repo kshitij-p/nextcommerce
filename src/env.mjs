@@ -16,7 +16,15 @@ const server = z.object({
   ),
   // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
   GOOGLE_CLIENT_ID: z.string(),
-  GOOGLE_CLIENT_SECRET: z.string()
+  GOOGLE_CLIENT_SECRET: z.string(),
+
+  CLOUDFLARE_ID: z.string(),
+  R2_ACCESS_ID: z.string(),
+  R2_SECRET_KEY: z.string(),
+
+
+  R2_BUCKET_NAME: z.string(),
+  R2_PUBLIC_URL: z.string(),
 
 });
 
@@ -37,6 +45,12 @@ const processEnv = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  CLOUDFLARE_ID: process.env.CLOUDFLARE_ID,
+  R2_ACCESS_ID: process.env.R2_ACCESS_ID,
+  R2_SECRET_KEY: process.env.R2_SECRET_KEY,
+
+  R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
+  R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
 };
 
 // Don't touch the part below

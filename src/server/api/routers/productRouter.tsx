@@ -1,6 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { env } from "../../../env.mjs";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { deleteImage, deleteImageFromR2 } from "./imageRouter/util";
+
+const getPublicUrlFromKey = (imageKey: string) => {
+  return `${env.R2_PUBLIC_URL}/${imageKey}`;
+};
 
 const productRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -22,37 +28,46 @@ const productRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         description: z.string().min(1),
-        imageKey: z.string(),
-        imagePublicUrl: z.string(),
+        imageKey: z.string().optional(),
       })
     )
-    .mutation(
-      async ({
-        input: { title, description, imageKey, imagePublicUrl },
-        ctx,
-      }) => {
-        const product = await ctx.prisma.product.create({
+    .mutation(async ({ input: { title, description, imageKey }, ctx }) => {
+      const images = [];
+
+      if (imageKey) {
+        images.push({
+          key: imageKey,
+          publicUrl: getPublicUrlFromKey(imageKey),
+        });
+      }
+
+      let product;
+
+      try {
+        product = await ctx.prisma.product.create({
           data: {
             description: description,
             title: title,
             userId: ctx.session.user.id,
             images: {
-              createMany: {
-                data: {
-                  key: imageKey,
-                  publicUrl: imagePublicUrl,
-                },
-              },
+              create: images,
             },
           },
         });
-
-        return {
-          message: "Successfully created the requested product.",
-          product: product,
-        };
+      } catch (e) {
+        if (imageKey) {
+          await deleteImageFromR2(imageKey);
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
       }
-    ),
+
+      return {
+        message: "Successfully created the requested product.",
+        product: product,
+      };
+    }),
   update: protectedProcedure
     .input(
       z.object({
@@ -113,6 +128,7 @@ const productRouter = createTRPCRouter({
         },
         include: {
           user: {},
+          images: {},
         },
       });
 
@@ -126,6 +142,14 @@ const productRouter = createTRPCRouter({
         throw new TRPCError({
           code: "UNAUTHORIZED",
         });
+      }
+
+      for (let image of product.images) {
+        try {
+          await deleteImage(ctx.prisma, image.id);
+        } catch (e) {
+          continue;
+        }
       }
 
       const deletedProduct = await ctx.prisma.product.delete({

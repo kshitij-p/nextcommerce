@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ImageUploader from "../../components/ImageUploader";
 import { api } from "../../utils/api";
 
 /* 
@@ -9,6 +10,7 @@ https://img.fruugo.com/product/8/62/185698628_max.jpg
 const CreateProductPage = () => {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [imageKey, setImageKey] = useState("");
 
   const { mutate } = api.product.create.useMutation();
 
@@ -16,8 +18,7 @@ const CreateProductPage = () => {
     mutate({
       title: title,
       description: desc,
-      imageKey: "https://img.fruugo.com/product/8/62/185698628_max.jpg",
-      imagePublicUrl: "https://img.fruugo.com/product/8/62/185698628_max.jpg",
+      imageKey: imageKey,
     });
   };
 
@@ -37,6 +38,18 @@ const CreateProductPage = () => {
         onChange={(e) => setDesc(e.currentTarget.value)}
       />
       <br />
+      Image Key
+      <input
+        value={imageKey}
+        onChange={(e) => {
+          setImageKey(e.currentTarget.value);
+        }}
+      />
+      <ImageUploader
+        onSuccess={(key) => {
+          setImageKey(key);
+        }}
+      />
       <button onClick={handleCreate}>Create</button>
     </div>
   );
