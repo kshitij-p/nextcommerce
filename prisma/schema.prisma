@@ -42,6 +42,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    Product       Product[]
 }
 
 model VerificationToken {
@@ -50,4 +51,23 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Image {
+    id        String  @id @default(cuid())
+    Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId String
+    //This is the S3 key
+    key       String  @db.Text
+    //This is the actual image link to publically see the image
+    publicUrl String  @db.Text
+}
+
+model Product {
+    id          String  @id @default(cuid())
+    user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
+    title       String  @db.Text
+    description String  @db.Text
+    images      Image[]
 }
