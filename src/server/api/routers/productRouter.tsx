@@ -53,6 +53,53 @@ const productRouter = createTRPCRouter({
         };
       }
     ),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        imageKey: z.string().optional(),
+        imagePublicUrl: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input: { id, title, description }, ctx }) => {
+      const product = await ctx.prisma.product.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          user: {},
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      if (product.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      const updatedProduct = await ctx.prisma.product.update({
+        where: {
+          id: id,
+        },
+        data: {
+          description: description?.length ? description : undefined,
+          title: title?.length ? title : undefined,
+        },
+      });
+
+      return {
+        message: "Successfully updated the requested product.",
+        updatedProduct: updatedProduct,
+      };
+    }),
   delete: protectedProcedure
     .input(
       z.object({
