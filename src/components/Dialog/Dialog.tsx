@@ -1,15 +1,30 @@
-import React, { ForwardedRef, useState } from "react";
-import ControlledDialog, { ControlledDialogProps } from "./ControlledDialog";
+import React, { type ForwardedRef, useState } from "react";
+import ControlledDialog, {
+  type ControlledDialogProps,
+} from "./ControlledDialog";
 
-type AutoControlledDialogProps = Omit<ControlledDialogProps, "open" | "setOpen"> & {
+type AutoControlledDialogProps = Omit<
+  ControlledDialogProps,
+  "open" | "setOpen"
+> & {
   defaultValue?: ControlledDialogProps["open"];
 };
 
 const AutoControlledDialog = React.forwardRef(
-  ({ defaultValue = false, ...rest }: AutoControlledDialogProps, passedRef: ForwardedRef<HTMLDivElement>) => {
+  (
+    { defaultValue = false, ...rest }: AutoControlledDialogProps,
+    passedRef: ForwardedRef<HTMLDivElement>
+  ) => {
     const [open, setOpen] = useState(defaultValue);
 
-    return <ControlledDialog {...rest} open={open} setOpen={setOpen} ref={passedRef} />;
+    return (
+      <ControlledDialog
+        {...rest}
+        open={open}
+        setOpen={setOpen}
+        ref={passedRef}
+      />
+    );
   }
 );
 

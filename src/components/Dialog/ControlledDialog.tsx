@@ -1,5 +1,5 @@
 import { Dialog as HeadlessDialog, Transition } from "@headlessui/react";
-import React, { ForwardedRef, Fragment } from "react";
+import React, { type ForwardedRef, Fragment } from "react";
 
 const DEFAULT_DIALOG_SIZE = {
   width: "50rem" as React.CSSProperties["width"],
@@ -40,13 +40,16 @@ const transitionToProps = (props: typeof DEFAULT_TRANSITION) => {
   };
 };
 
-export type ControlledDialogProps = Omit<React.ComponentProps<"div">, "defaultValue"> & {
+export type ControlledDialogProps = Omit<
+  React.ComponentProps<"div">,
+  "defaultValue"
+> & {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  Root?: React.ReactElement;
-  Opener?: React.ReactElement;
-  Container?: React.ReactElement;
-  Backdrop?: React.ReactElement;
+  Root?: React.ReactElement<Record<string, unknown>>;
+  Opener?: React.ReactElement<Record<string, unknown>>;
+  Container?: React.ReactElement<Record<string, unknown>>;
+  Backdrop?: React.ReactElement<Record<string, unknown>>;
   TitleElement?: React.FunctionComponent;
   DescriptionElement?: React.FunctionComponent;
   title?: React.ReactNode;
@@ -56,7 +59,10 @@ export type ControlledDialogProps = Omit<React.ComponentProps<"div">, "defaultVa
 };
 
 const DefaultTitle = React.forwardRef(
-  ({ children, ...rest }: React.ComponentProps<"h2">, passedRef: ForwardedRef<HTMLHeadingElement>) => {
+  (
+    { children, ...rest }: React.ComponentProps<"h2">,
+    passedRef: ForwardedRef<HTMLHeadingElement>
+  ) => {
     return (
       <h2 {...rest} className="text-2xl" ref={passedRef}>
         {children}
@@ -74,9 +80,13 @@ const ControlledDialog = React.forwardRef(
       open,
       setOpen,
       Root = <div className="fixed inset-0 flex items-center justify-center" />,
-      Backdrop = <div className="fixed inset-0 bg-black/30" aria-hidden="true" />,
+      Backdrop = (
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      ),
       Opener,
-      Container = <div className="h-full w-full rounded-sm bg-neutral-900 p-4" />,
+      Container = (
+        <div className="h-full w-full rounded-sm bg-neutral-900 p-4" />
+      ),
       TitleElement = DefaultTitle,
       DescriptionElement,
       title,
@@ -106,7 +116,9 @@ const ControlledDialog = React.forwardRef(
       <>
         <Transition appear {...transitionToProps(rootTransition)} show={open}>
           <HeadlessDialog {...rest} onClose={handleClose} ref={passedRef}>
-            <Transition.Child {...transitionToProps(backdropTransition)}>{Backdrop}</Transition.Child>
+            <Transition.Child {...transitionToProps(backdropTransition)}>
+              {Backdrop}
+            </Transition.Child>
             <Transition.Child {...transitionToProps(containerTransition)}>
               {React.cloneElement(Root, {
                 ...Root.props,
@@ -120,8 +132,12 @@ const ControlledDialog = React.forwardRef(
                       ...Container.props,
                       children: (
                         <>
-                          <HeadlessDialog.Title as={TitleElement}>{title}</HeadlessDialog.Title>
-                          <HeadlessDialog.Description as={DescriptionElement}>{description}</HeadlessDialog.Description>
+                          <HeadlessDialog.Title as={TitleElement}>
+                            {title}
+                          </HeadlessDialog.Title>
+                          <HeadlessDialog.Description as={DescriptionElement}>
+                            {description}
+                          </HeadlessDialog.Description>
                           {children}
                         </>
                       ),
@@ -136,7 +152,10 @@ const ControlledDialog = React.forwardRef(
           React.cloneElement(Opener, {
             ...Opener.props,
             onClick: (e: React.MouseEvent) => {
-              if (Opener.props?.onClick) {
+              if (
+                Opener.props?.onClick &&
+                typeof Opener.props.onClick == "function"
+              ) {
                 Opener.props.onClick(e);
               }
               handleOpen();
