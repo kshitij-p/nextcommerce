@@ -2,10 +2,14 @@ import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 
+import { Montserrat } from "@next/font/google";
+
 import { api } from "../utils/api";
 
 import "../styles/globals.css";
 import Layout from "../components/Layout";
+
+const inter = Montserrat({ subsets: ["latin"] });
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -13,9 +17,16 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <>
+        <style jsx global>{`
+          html {
+            font-family: ${inter.style.fontFamily};
+          }
+        `}</style>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </>
     </SessionProvider>
   );
 };
