@@ -10,6 +10,7 @@ https://img.fruugo.com/product/8/62/185698628_max.jpg
 const CreateProductPage = () => {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [price, setPrice] = useState("");
   const [imageKey, setImageKey] = useState("");
 
   const { mutate } = api.product.create.useMutation();
@@ -19,6 +20,7 @@ const CreateProductPage = () => {
       title: title,
       description: desc,
       imageKey: imageKey,
+      price: price,
     });
   };
 
@@ -36,6 +38,13 @@ const CreateProductPage = () => {
         name="description"
         value={desc}
         onChange={(e) => setDesc(e.currentTarget.value)}
+      />
+      <br />
+      Price
+      <input
+        name="price"
+        value={price}
+        onChange={(e) => setPrice(e.currentTarget.value)}
       />
       <br />
       Image Key

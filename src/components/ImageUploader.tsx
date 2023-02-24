@@ -1,5 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { api } from "../utils/api";
+import Button from "./Button";
 
 const ImageUploader = ({
   onSuccess,
@@ -8,20 +9,24 @@ const ImageUploader = ({
 }) => {
   const { mutateAsync } = api.image.getPresignedUrl.useMutation({});
 
+  const [file, setFile] = useState<File | undefined>(undefined);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let file = e.currentTarget?.files?.[0];
+    if (!file) {
+      return;
+    }
+    setFile(file);
+  };
+
   const handleUpload = async () => {
-    if (
-      !inputRef.current ||
-      !inputRef.current.files ||
-      !inputRef.current.files.length
-    ) {
+    if (!file) {
       return;
     }
 
-    const file = inputRef.current.files[0];
-
-    if (!file) {
+    if (!file.type.startsWith("image")) {
       return;
     }
 
@@ -41,8 +46,14 @@ const ImageUploader = ({
 
   return (
     <div>
-      <input type="file" ref={inputRef} />
-      <button onClick={handleUpload}>Upload</button>
+      <input type="file" onChange={handleChange} ref={inputRef} />
+      <Button
+        variants={{ type: "secondary" }}
+        disabled={!file?.type.startsWith("image")}
+        onClick={handleUpload}
+      >
+        Upload
+      </Button>
     </div>
   );
 };

@@ -28,46 +28,53 @@ const productRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         description: z.string().min(1),
-        imageKey: z.string().optional(),
+        imageKey: z.string(),
+        price: z.preprocess(
+          (val) => parseInt(val as string),
+          z.number().positive()
+        ),
       })
     )
-    .mutation(async ({ input: { title, description, imageKey }, ctx }) => {
-      const images = [];
+    .mutation(
+      async ({ input: { title, description, imageKey, price }, ctx }) => {
+        const images = [];
 
-      if (imageKey) {
-        images.push({
-          key: imageKey,
-          publicUrl: getPublicUrlFromKey(imageKey),
-        });
-      }
-
-      let product;
-
-      try {
-        product = await ctx.prisma.product.create({
-          data: {
-            description: description,
-            title: title,
-            userId: ctx.session.user.id,
-            images: {
-              create: images,
-            },
-          },
-        });
-      } catch (e) {
         if (imageKey) {
-          await deleteImageFromR2(imageKey);
+          images.push({
+            key: imageKey,
+            publicUrl: getPublicUrlFromKey(imageKey),
+          });
         }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-        });
-      }
 
-      return {
-        message: "Successfully created the requested product.",
-        product: product,
-      };
-    }),
+        let product;
+
+        try {
+          product = await ctx.prisma.product.create({
+            data: {
+              description: description,
+              title: title,
+              userId: ctx.session.user.id,
+              price: price,
+              images: {
+                create: images,
+              },
+            },
+          });
+        } catch (e) {
+          if (imageKey) {
+            await deleteImageFromR2(imageKey);
+          }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+          });
+        }
+
+        return {
+          message: "Successfully created the requested product.",
+          product: product,
+        };
+      }
+    ),
   update: protectedProcedure
     .input(
       z.object({

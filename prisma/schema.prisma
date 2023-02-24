@@ -69,5 +69,6 @@ model Product {
     userId      String
     title       String  @db.Text
     description String  @db.Text
+    price       Int
     images      Image[]
 }
