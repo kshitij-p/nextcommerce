@@ -61,7 +61,10 @@ const invalidateProducts = async (queryClient: QueryClient) => {
 
   await queryClient.cancelQueries(queryKey);
 
-  await queryClient.invalidateQueries(getQueryKey(api.product.getAll));
+  await queryClient.invalidateQueries(getQueryKey(api.product.getAll), {
+    exact: true,
+    refetchType: "all",
+  });
 };
 
 const ProductEditDialog = ({
