@@ -35,11 +35,9 @@ const productRouter = createTRPCRouter({
       },
     });
 
-    const images = await ctx.prisma.image.findMany();
-
     return {
-      products,
-      images,
+      message: "Successfully got all products.",
+      products: products,
     };
   }),
   create: protectedProcedure

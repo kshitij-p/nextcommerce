@@ -18,6 +18,8 @@ import { flushSync } from "react-dom";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { type ControlledDialogProps } from "../../../components/Dialog/ControlledDialog";
 import Textarea from "../../../components/Textarea";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { getQueryKey } from "@trpc/react-query";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -54,6 +56,14 @@ export const getStaticPaths: GetStaticPaths = () => {
   };
 };
 
+const invalidateProducts = async (queryClient: QueryClient) => {
+  const queryKey = getQueryKey(api.product.getAll);
+
+  await queryClient.cancelQueries(queryKey);
+
+  await queryClient.invalidateQueries(getQueryKey(api.product.getAll));
+};
+
 const ProductEditDialog = ({
   value,
   fieldToEdit,
@@ -71,6 +81,8 @@ const ProductEditDialog = ({
   onSettled: () => void;
   onDiscard: () => void;
 }) => {
+  const queryClient = useQueryClient();
+
   const { mutate, isLoading } = api.product.update.useMutation({
     onSettled: () => {
       onSettled();
@@ -78,6 +90,7 @@ const ProductEditDialog = ({
     onSuccess: () => {
       //To do throw a toast here
       console.log("Successfully edited");
+      void invalidateProducts(queryClient);
     },
   });
 
@@ -234,6 +247,8 @@ const EditableText = ({
 };
 
 const ProductDeleteDialog = ({ productId }: { productId: string }) => {
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
 
   const { mutate, isLoading } = api.product.delete.useMutation({
@@ -241,6 +256,7 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
       //To do throw a toast here
       console.log("Deleted");
       setOpen(false);
+      void invalidateProducts(queryClient);
     },
   });
 

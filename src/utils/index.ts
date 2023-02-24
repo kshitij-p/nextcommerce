@@ -9,7 +9,3 @@ export const s3Client = new S3Client({
     secretAccessKey: env.R2_SECRET_KEY,
   },
 });
-
-export const TIME_IN_MS = {
-  FIVE_MINUTES: 1000 * 60 * 5,
-} as const;
