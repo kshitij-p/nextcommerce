@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { type NextApiResponse } from "next";
 import { z } from "zod";
 import { env } from "../../../env.mjs";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
@@ -6,6 +7,24 @@ import { deleteImage, deleteImageFromR2 } from "./imageRouter/util";
 
 const getPublicUrlFromKey = (imageKey: string) => {
   return `${env.R2_PUBLIC_URL}/${imageKey}`;
+};
+
+const ProductPriceValidator = z.preprocess(
+  (val) => parseInt(val as string),
+  z.number().positive()
+);
+
+const revalidateProduct = async (res: NextApiResponse, productId: string) => {
+  let revalidated;
+
+  try {
+    await res.revalidate(`/products/${productId}`);
+    revalidated = true;
+  } catch (e) {
+    revalidated = false;
+  }
+
+  return revalidated;
 };
 
 const productRouter = createTRPCRouter({
@@ -29,10 +48,7 @@ const productRouter = createTRPCRouter({
         title: z.string().min(1),
         description: z.string().min(1),
         imageKey: z.string(),
-        price: z.preprocess(
-          (val) => parseInt(val as string),
-          z.number().positive()
-        ),
+        price: ProductPriceValidator,
       })
     )
     .mutation(
@@ -81,11 +97,10 @@ const productRouter = createTRPCRouter({
         id: z.string().min(1),
         title: z.string().optional(),
         description: z.string().optional(),
-        imageKey: z.string().optional(),
-        imagePublicUrl: z.string().optional(),
+        price: ProductPriceValidator.optional(),
       })
     )
-    .mutation(async ({ input: { id, title, description }, ctx }) => {
+    .mutation(async ({ input: { id, title, description, price }, ctx }) => {
       const product = await ctx.prisma.product.findUnique({
         where: {
           id: id,
@@ -114,12 +129,16 @@ const productRouter = createTRPCRouter({
         data: {
           description: description?.length ? description : undefined,
           title: title?.length ? title : undefined,
+          price: price,
         },
       });
+
+      let revalidated = await revalidateProduct(ctx.res, product.id);
 
       return {
         message: "Successfully updated the requested product.",
         updatedProduct: updatedProduct,
+        revalidated: revalidated,
       };
     }),
   delete: protectedProcedure
@@ -165,9 +184,12 @@ const productRouter = createTRPCRouter({
         },
       });
 
+      let revalidated = await revalidateProduct(ctx.res, product.id);
+
       return {
         message: "Successfully deleted the requested product.",
         deletedProduct: deletedProduct,
+        revalidated: revalidated,
       };
     }),
 });

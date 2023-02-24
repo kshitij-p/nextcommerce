@@ -3,15 +3,24 @@ import { type Session } from "next-auth";
 
 import { getServerAuthSession } from "../auth";
 import { prisma } from "../db";
+import { type NextApiRequest, type NextApiResponse } from "next";
 
 type CreateContextOptions = {
   session: Session | null;
+  req: NextApiRequest;
+  res: NextApiResponse;
 };
 
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+const createInnerTRPCContext = ({
+  session,
+  res,
+  req,
+}: CreateContextOptions) => {
   return {
-    session: opts.session,
+    session: session,
     prisma,
+    req: req,
+    res: res,
   };
 };
 
@@ -23,6 +32,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return createInnerTRPCContext({
     session,
+    res,
+    req,
   });
 };
 

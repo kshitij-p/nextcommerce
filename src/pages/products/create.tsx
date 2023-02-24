@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React, { useState } from "react";
 import ImageUploader from "../../components/ImageUploader";
 import { api } from "../../utils/api";
@@ -13,7 +14,13 @@ const CreateProductPage = () => {
   const [price, setPrice] = useState("");
   const [imageKey, setImageKey] = useState("");
 
-  const { mutate } = api.product.create.useMutation();
+  const [productLink, setProductLink] = useState("");
+
+  const { mutate } = api.product.create.useMutation({
+    onSuccess: (data) => {
+      setProductLink(data.product.id);
+    },
+  });
 
   const handleCreate = () => {
     mutate({
@@ -60,6 +67,11 @@ const CreateProductPage = () => {
         }}
       />
       <button onClick={handleCreate}>Create</button>
+      {productLink ? (
+        <Link href={`/products/${productLink}`}>
+          Success! Click to visit your product
+        </Link>
+      ) : null}
     </div>
   );
 };
