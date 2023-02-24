@@ -18,7 +18,7 @@ const Navbar = () => {
         <Link className="text-xl font-bold md:text-4xl" href="/">
           NEXT
         </Link>
-        <Link href="/search">Search</Link>
+        <Link href="/products">Products</Link>
         <div>Cart</div>
         <button onClick={handleAuthButtonClick}>
           {status !== "authenticated" ? "Login" : "Logout"}
