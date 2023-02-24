@@ -4,7 +4,7 @@ import React, { type ForwardedRef, Fragment } from "react";
 const DEFAULT_DIALOG_SIZE = {
   width: "50rem" as React.CSSProperties["width"],
   height: "50rem" as React.CSSProperties["height"],
-  maxWidth: "75vw" as React.CSSProperties["maxWidth"],
+  maxWidth: "90vw" as React.CSSProperties["maxWidth"],
   maxHeight: "75vh" as React.CSSProperties["maxHeight"],
 };
 
