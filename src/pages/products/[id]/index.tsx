@@ -4,7 +4,7 @@ import {
   type GetStaticProps,
 } from "next";
 import { prisma } from "../../../server/db";
-import { PrismaCuidSchema } from "../../../types";
+
 import { type Image as ProductImage, type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
 import Image from "../../../components/Image";
@@ -18,8 +18,9 @@ import { flushSync } from "react-dom";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { type ControlledDialogProps } from "../../../components/Dialog/ControlledDialog";
 import Textarea from "../../../components/Textarea";
-import { useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { getQueryKey } from "@trpc/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { invalidateProducts } from "../../../utils/client";
+import { z } from "zod";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -30,7 +31,7 @@ export const getStaticProps: GetStaticProps<{
       })
     | null;
 }> = async (ctx) => {
-  const id = PrismaCuidSchema.parse(ctx.params?.id);
+  const id = z.string().parse(ctx.params?.id);
 
   const product = await prisma.product.findUnique({
     where: {
@@ -56,17 +57,6 @@ export const getStaticPaths: GetStaticPaths = () => {
   };
 };
 
-const invalidateProducts = async (queryClient: QueryClient) => {
-  const queryKey = getQueryKey(api.product.getAll);
-
-  await queryClient.cancelQueries(queryKey);
-
-  await queryClient.invalidateQueries(getQueryKey(api.product.getAll), {
-    exact: true,
-    refetchType: "all",
-  });
-};
-
 const ProductEditDialog = ({
   value,
   fieldToEdit,
@@ -90,10 +80,10 @@ const ProductEditDialog = ({
     onSettled: () => {
       onSettled();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       //To do throw a toast here
+      await invalidateProducts(queryClient);
       console.log("Successfully edited");
-      void invalidateProducts(queryClient);
     },
   });
 
@@ -255,11 +245,11 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
   const [open, setOpen] = useState(false);
 
   const { mutate, isLoading } = api.product.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       //To do throw a toast here
+      await invalidateProducts(queryClient);
       console.log("Deleted");
       setOpen(false);
-      void invalidateProducts(queryClient);
     },
   });
 

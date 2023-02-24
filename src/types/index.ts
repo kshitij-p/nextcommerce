@@ -1,1 +1,0 @@
-export { PrismaCuidSchema } from "./types";

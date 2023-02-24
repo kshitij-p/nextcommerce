@@ -1,7 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useState } from "react";
 import ImageUploader from "../../components/ImageUploader";
 import { api } from "../../utils/api";
+import { invalidateProducts } from "../../utils/client";
 
 /* 
 Testing img
@@ -9,6 +11,8 @@ https://img.fruugo.com/product/8/62/185698628_max.jpg
 */
 
 const CreateProductPage = () => {
+  const queryClient = useQueryClient();
+
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
@@ -17,7 +21,8 @@ const CreateProductPage = () => {
   const [productLink, setProductLink] = useState("");
 
   const { mutate } = api.product.create.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await invalidateProducts(queryClient);
       setProductLink(data.product.id);
     },
   });
