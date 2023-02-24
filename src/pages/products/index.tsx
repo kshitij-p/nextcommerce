@@ -31,7 +31,7 @@ const AllProductsPage = () => {
           </Link>
         ) : null}
       </div>
-      <div className="flex flex-col items-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
+      <div className="flex w-full flex-col items-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
         {products.map((product) => {
           return (
             <Link
