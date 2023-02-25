@@ -14,15 +14,25 @@ const CreateProductPage = () => {
 
   const [productLink, setProductLink] = useState("");
 
+  const [progress, setProgress] = useState(0);
+
   const { mutate: createProduct } = api.product.create.useMutation({
     onSuccess: async (data) => {
       await invalidateProducts(queryClient);
       setProductLink(data.product.id);
+      setProgress(100);
+    },
+    onError: () => {
+      setProgress(0);
     },
   });
 
   const { mutateAsync: getPresignedUrl } =
-    api.image.getPresignedUrl.useMutation({});
+    api.image.getPresignedUrl.useMutation({
+      onSuccess: () => {
+        setProgress(25);
+      },
+    });
 
   const handleCreate = async () => {
     //To do add react-hook-form for validation
@@ -46,8 +56,7 @@ const CreateProductPage = () => {
       return;
     }
 
-    //To do show a progress bar for file upload
-    alert("Got key");
+    setProgress(50);
 
     createProduct({
       title: title,
@@ -88,6 +97,13 @@ const CreateProductPage = () => {
             return;
           }
           setFile(file);
+        }}
+      />
+      {/* Progressbar */}
+      <div
+        className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
+        style={{
+          width: `${progress}%`,
         }}
       />
       <button onClick={handleCreate}>Create</button>
