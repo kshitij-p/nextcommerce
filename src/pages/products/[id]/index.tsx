@@ -19,8 +19,9 @@ import { Pencil1Icon } from "@radix-ui/react-icons";
 import { type ControlledDialogProps } from "../../../components/Dialog/ControlledDialog";
 import Textarea from "../../../components/Textarea";
 import { useQueryClient } from "@tanstack/react-query";
-import { invalidateProducts } from "../../../utils/client";
+import { invalidateProducts, TIME_IN_MS } from "../../../utils/client";
 import { z } from "zod";
+import { getQueryKey } from "@trpc/react-query";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -62,7 +63,7 @@ const ProductEditDialog = ({
   fieldToEdit,
   open,
   setOpen,
-  productId,
+  product,
   onSettled,
   onDiscard,
 }: {
@@ -70,15 +71,43 @@ const ProductEditDialog = ({
   fieldToEdit: EditableProductFields;
   open: ControlledDialogProps["open"];
   setOpen: ControlledDialogProps["setOpen"];
-  productId: string;
+  product: Product & {
+    images?: ProductImage[] | undefined;
+  };
   onSettled: () => void;
   onDiscard: () => void;
 }) => {
   const queryClient = useQueryClient();
 
   const { mutate, isLoading } = api.product.update.useMutation({
-    onSettled: () => {
+    onSettled: async () => {
+      const queryKey = getQueryKey(api.product.get, { id: product.id });
+
+      await queryClient.invalidateQueries(queryKey);
       onSettled();
+    },
+    onMutate: async () => {
+      const queryKey = getQueryKey(api.product.get, {
+        id: product.id,
+      });
+
+      await queryClient.cancelQueries(queryKey);
+
+      queryClient.setQueryData(queryKey, {
+        ...product,
+        [fieldToEdit]: value,
+      } satisfies typeof product);
+
+      return { previousProduct: product };
+    },
+    onError: (err, newProduct, ctx) => {
+      if (!ctx) {
+        return;
+      }
+
+      const queryKey = getQueryKey(api.product.get, { id: product.id });
+
+      queryClient.setQueryData(queryKey, ctx.previousProduct);
     },
     onSuccess: async () => {
       //To do throw a toast here
@@ -88,7 +117,7 @@ const ProductEditDialog = ({
   });
 
   const handleEdit = () => {
-    mutate({ [fieldToEdit]: value, id: productId });
+    mutate({ [fieldToEdit]: value, id: product.id });
   };
 
   return (
@@ -133,7 +162,7 @@ const EditableText = ({
   as = <p />,
   inputElement = "textarea",
   fieldToEdit,
-  productId,
+  product,
   onChangeComplete,
   className = "",
   ...rest
@@ -143,7 +172,7 @@ const EditableText = ({
   as?: React.ReactElement<Record<string, unknown>>;
   inputElement?: "textarea" | "input";
   fieldToEdit: EditableProductFields;
-  productId: string;
+  product: React.ComponentProps<typeof ProductEditDialog>["product"];
   onChangeComplete?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -233,7 +262,7 @@ const EditableText = ({
         setOpen={setDiagOpen}
         fieldToEdit={fieldToEdit}
         value={text}
-        productId={productId}
+        product={product}
       />
     </div>
   );
@@ -286,20 +315,34 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
 };
 
 const ProductPage = ({
-  product,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
-  const { data } = useSession();
+  product: passedProduct,
+}: {
+  product: Exclude<
+    InferGetStaticPropsType<typeof getStaticProps>["product"],
+    null
+  >;
+}) => {
+  const { data: session } = useSession();
 
-  if (!product) {
-    //To do show error page here
-    return <div>Failed to get product</div>;
-  }
+  //This query is only for optimistically updating the ui
+  const {
+    data: { product },
+  } = api.product.get.useQuery(
+    { id: passedProduct.id },
+    {
+      staleTime: TIME_IN_MS.FIVE_MINUTES,
+      initialData: { message: "Initial data", product: passedProduct },
+    }
+  );
 
-  const canEdit = product.userId === data?.user?.id;
+  const canEdit = product.userId === session?.user?.id;
 
-  const editableTextProps = {
+  const editableTextProps: Omit<
+    React.ComponentProps<typeof EditableText>,
+    "children" | "fieldToEdit"
+  > = {
     canEdit: canEdit,
-    productId: product.id,
+    product: product,
   };
 
   return (
@@ -358,4 +401,15 @@ const ProductPage = ({
   );
 };
 
-export default PageWithFallback(ProductPage);
+const MainPage = ({
+  product,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
+  if (!product) {
+    //To do show error page here
+    return <div>Failed to get product</div>;
+  }
+
+  return <ProductPage product={product} />;
+};
+
+export default PageWithFallback(MainPage);

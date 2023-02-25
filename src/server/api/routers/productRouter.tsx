@@ -9,6 +9,8 @@ const getPublicUrlFromKey = (imageKey: string) => {
   return `${env.R2_PUBLIC_URL}/${imageKey}`;
 };
 
+const ProductIdValidator = z.string().min(1);
+
 const ProductPriceValidator = z.preprocess(
   (val) => parseInt(val as string),
   z.number().positive()
@@ -40,6 +42,30 @@ const productRouter = createTRPCRouter({
       products: products,
     };
   }),
+  get: publicProcedure
+    .input(z.object({ id: ProductIdValidator }))
+    .query(async ({ input: { id }, ctx }) => {
+      const product = await ctx.prisma.product.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          images: {},
+          user: {},
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      return {
+        message: "Successfully got the requested product.",
+        product: product,
+      };
+    }),
   create: protectedProcedure
     .input(
       z.object({
@@ -92,7 +118,7 @@ const productRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string().min(1),
+        id: ProductIdValidator,
         title: z.string().optional(),
         description: z.string().optional(),
         price: ProductPriceValidator.optional(),
@@ -142,7 +168,7 @@ const productRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(
       z.object({
-        id: z.string().min(1),
+        id: ProductIdValidator,
       })
     )
     .mutation(async ({ input: { id }, ctx }) => {

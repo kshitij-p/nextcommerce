@@ -25,6 +25,8 @@ const CreateProductPage = () => {
     api.image.getPresignedUrl.useMutation({});
 
   const handleCreate = async () => {
+    //To do add react-hook-form for validation
+
     if (!file) {
       return;
     }
