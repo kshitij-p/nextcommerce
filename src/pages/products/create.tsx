@@ -1,14 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useState } from "react";
-import ImageUploader from "../../components/ImageUploader";
 import { api } from "../../utils/api";
 import { invalidateProducts } from "../../utils/client";
-
-/* 
-Testing img
-https://img.fruugo.com/product/8/62/185698628_max.jpg
-*/
 
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
@@ -16,22 +10,47 @@ const CreateProductPage = () => {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
-  const [imageKey, setImageKey] = useState("");
+  const [file, setFile] = useState<File | undefined>(undefined);
 
   const [productLink, setProductLink] = useState("");
 
-  const { mutate } = api.product.create.useMutation({
+  const { mutate: createProduct } = api.product.create.useMutation({
     onSuccess: async (data) => {
       await invalidateProducts(queryClient);
       setProductLink(data.product.id);
     },
   });
 
-  const handleCreate = () => {
-    mutate({
+  const { mutateAsync: getPresignedUrl } =
+    api.image.getPresignedUrl.useMutation({});
+
+  const handleCreate = async () => {
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image")) {
+      return;
+    }
+
+    const { presignedUrl, key } = await getPresignedUrl();
+
+    try {
+      await fetch(presignedUrl, {
+        method: "PUT",
+        body: file,
+      });
+    } catch (e) {
+      return;
+    }
+
+    //To do show a progress bar for file upload
+    alert("Got key");
+
+    createProduct({
       title: title,
       description: desc,
-      imageKey: imageKey,
+      imageKey: key,
       price: price,
     });
   };
@@ -59,16 +78,14 @@ const CreateProductPage = () => {
         onChange={(e) => setPrice(e.currentTarget.value)}
       />
       <br />
-      Image Key
       <input
-        value={imageKey}
-        onChange={(e) => {
-          setImageKey(e.currentTarget.value);
-        }}
-      />
-      <ImageUploader
-        onSuccess={(key) => {
-          setImageKey(key);
+        type="file"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          let file = e.currentTarget?.files?.[0];
+          if (!file) {
+            return;
+          }
+          setFile(file);
         }}
       />
       <button onClick={handleCreate}>Create</button>
