@@ -1,11 +1,11 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
-import Button from "../../components/Button";
 import Image from "../../components/Image";
 import TruncatedText from "../../components/TruncatedText";
 import { TIME_IN_MS } from "../../utils/client";
 import { api } from "../../utils/api";
+import ButtonLink from "../../components/ButtonLink";
 
 const AllProductsPage = () => {
   const { status } = useSession();
@@ -23,12 +23,13 @@ const AllProductsPage = () => {
       <div className="ml-1 flex items-center gap-2 md:ml-2 xl:ml-3">
         <h2 className="text-3xl font-semibold md:text-5xl">Products</h2>
         {status === "authenticated" ? (
-          <Link
-            className="flex items-center gap-1 text-xl"
+          <ButtonLink
+            className="text-xl"
             href={`/products/create`}
+            variants={{ type: "secondary" }}
           >
-            <Button variants={{ type: "secondary" }}>Create</Button>
-          </Link>
+            Create
+          </ButtonLink>
         ) : null}
       </div>
       <div className="flex w-full flex-col items-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
