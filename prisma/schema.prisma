@@ -43,6 +43,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     Product       Product[]
+    Cart          Cart?
 }
 
 model VerificationToken {
@@ -63,12 +64,30 @@ model Image {
     publicUrl String  @db.Text
 }
 
+model CartItem {
+    id       String @id @default(cuid())
+    quantity Int
+
+    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    Cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+    cartId    String
+    productId String
+}
+
+model Cart {
+    id        String     @id @default(cuid())
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String     @unique
+    cartItems CartItem[]
+}
+
 model Product {
-    id          String  @id @default(cuid())
-    user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id          String     @id @default(cuid())
+    user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId      String
-    title       String  @db.Text
-    description String  @db.Text
+    title       String     @db.Text
+    description String     @db.Text
     price       Int
     images      Image[]
+    cartItems   CartItem[]
 }

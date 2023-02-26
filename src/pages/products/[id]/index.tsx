@@ -5,7 +5,11 @@ import {
 } from "next";
 import { prisma } from "../../../server/db";
 
-import { type Image as ProductImage, type Product } from "@prisma/client";
+import {
+  type User,
+  type Image as ProductImage,
+  type Product,
+} from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
 import Image from "../../../components/Image";
 import ExpandableText from "../../../components/ExpandableText";
@@ -25,13 +29,16 @@ import { getQueryKey } from "@trpc/react-query";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
-export const getStaticProps: GetStaticProps<{
+type ProductPageProps = {
   product:
     | (Product & {
         images?: ProductImage[];
+        user: User;
       })
     | null;
-}> = async (ctx) => {
+};
+
+export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
   const id = z.string().parse(ctx.params?.id);
 
   const product = await prisma.product.findUnique({
@@ -40,13 +47,14 @@ export const getStaticProps: GetStaticProps<{
     },
     include: {
       images: {},
+      user: {},
     },
   });
 
   return {
     props: {
       product: product,
-    },
+    } satisfies ProductPageProps,
     revalidate: 31536000,
   };
 };
@@ -335,6 +343,13 @@ const ProductPage = ({
     }
   );
 
+  const { mutateAsync, isLoading } = api.cart.addToCart.useMutation({
+    onSuccess: () => {
+      //To do throw a toast here
+      console.log("added to cart");
+    },
+  });
+
   const canEdit = product.userId === session?.user?.id;
 
   const editableTextProps: Omit<
@@ -390,7 +405,16 @@ const ProductPage = ({
           {product.description}
         </EditableText>
         <div className="flex gap-2">
-          <Button variants={{ type: "secondary" }}>Add to cart</Button>
+          <Button
+            variants={{ type: "secondary" }}
+            disabled={isLoading}
+            onClick={async () => {
+              //To do add a quantity picker here
+              await mutateAsync({ productId: product.id, quantity: 1 });
+            }}
+          >
+            Add to cart
+          </Button>
           <Button>Buy now</Button>
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>

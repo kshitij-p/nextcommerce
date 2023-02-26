@@ -33,7 +33,7 @@ const productRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const products = await ctx.prisma.product.findMany({
       include: {
-        images: {},
+        images: true,
       },
     });
 
@@ -50,8 +50,8 @@ const productRouter = createTRPCRouter({
           id: id,
         },
         include: {
-          images: {},
-          user: {},
+          images: true,
+          user: true,
         },
       });
 
@@ -130,7 +130,7 @@ const productRouter = createTRPCRouter({
           id: id,
         },
         include: {
-          user: {},
+          user: true,
         },
       });
 
@@ -177,8 +177,8 @@ const productRouter = createTRPCRouter({
           id: id,
         },
         include: {
-          user: {},
-          images: {},
+          user: true,
+          images: true,
         },
       });
 

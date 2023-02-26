@@ -19,7 +19,7 @@ const Navbar = () => {
           NEXT
         </Link>
         <Link href="/products">Products</Link>
-        <div>Cart</div>
+        <Link href="/cart">Cart</Link>
         <button onClick={handleAuthButtonClick}>
           {status !== "authenticated" ? "Login" : "Logout"}
         </button>
