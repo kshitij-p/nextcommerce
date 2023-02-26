@@ -90,12 +90,15 @@ const CartPage = () => {
 
   return (
     <div>
-      {cart.cartItems.map(({ product, id }) => {
+      {cart.cartItems.map(({ product, id, quantity }) => {
         return (
           <div key={product.id}>
             <p>{product.title}</p>
             <p>{product.description}</p>
             <p>{`$${product.price}`}</p>
+            <p>
+              Quantity <b>{quantity}</b>
+            </p>
             <RemoveFromCartButton cartItemId={id} />
           </div>
         );

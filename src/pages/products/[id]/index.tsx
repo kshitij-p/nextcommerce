@@ -38,6 +38,11 @@ type ProductPageProps = {
     | null;
 };
 
+type PageProduct = Exclude<
+  InferGetStaticPropsType<typeof getStaticProps>["product"],
+  null
+>;
+
 export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
   const id = z.string().parse(ctx.params?.id);
 
@@ -79,9 +84,7 @@ const ProductEditDialog = ({
   fieldToEdit: EditableProductFields;
   open: ControlledDialogProps["open"];
   setOpen: ControlledDialogProps["setOpen"];
-  product: Product & {
-    images?: ProductImage[] | undefined;
-  };
+  product: PageProduct;
   onSettled: () => void;
   onDiscard: () => void;
 }) => {
@@ -322,14 +325,68 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
   );
 };
 
-const ProductPage = ({
-  product: passedProduct,
-}: {
-  product: Exclude<
-    InferGetStaticPropsType<typeof getStaticProps>["product"],
-    null
-  >;
-}) => {
+const AddToCartButton = ({ product }: { product: PageProduct }) => {
+  const queryClient = useQueryClient();
+
+  const cancelCartItemQuery = async () => {
+    const queryKey = getQueryKey(api.cart.getProduct, {
+      productId: product.id,
+    });
+
+    await queryClient.cancelQueries(queryKey);
+  };
+
+  const invalidateCartItemQuery = async () => {
+    const queryKey = getQueryKey(api.cart.getProduct, {
+      productId: product.id,
+    });
+
+    await queryClient.invalidateQueries(queryKey);
+  };
+
+  const { mutateAsync: addToCart, isLoading: isAdding } =
+    api.cart.addToCart.useMutation({
+      onMutate: cancelCartItemQuery,
+      onSettled: invalidateCartItemQuery,
+      onSuccess: () => {
+        //To do throw a toast here
+        console.log("added to cart");
+      },
+    });
+
+  const { mutateAsync: updateQuantity, isLoading: isUpdatingQty } =
+    api.cart.updateQuantity.useMutation({
+      onMutate: cancelCartItemQuery,
+      onSettled: invalidateCartItemQuery,
+      onSuccess: () => {
+        console.log("updated product quantity");
+      },
+    });
+
+  const { data } = api.cart.getProduct.useQuery({ productId: product.id });
+
+  return (
+    <Button
+      variants={{ type: "secondary" }}
+      disabled={isAdding || isUpdatingQty}
+      onClick={async () => {
+        //To do add a quantity picker here for selecting quantity
+        if (!data) {
+          await addToCart({ productId: product.id, quantity: 1 });
+        } else {
+          await updateQuantity({
+            cartItemId: data.cartItem.id,
+            quantity: data.cartItem.quantity + 1,
+          });
+        }
+      }}
+    >
+      Add to cart
+    </Button>
+  );
+};
+
+const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
   const { data: session } = useSession();
 
   //This query is only for optimistically updating the ui
@@ -342,13 +399,6 @@ const ProductPage = ({
       initialData: { message: "Initial data", product: passedProduct },
     }
   );
-
-  const { mutateAsync, isLoading } = api.cart.addToCart.useMutation({
-    onSuccess: () => {
-      //To do throw a toast here
-      console.log("added to cart");
-    },
-  });
 
   const canEdit = product.userId === session?.user?.id;
 
@@ -405,16 +455,7 @@ const ProductPage = ({
           {product.description}
         </EditableText>
         <div className="flex gap-2">
-          <Button
-            variants={{ type: "secondary" }}
-            disabled={isLoading}
-            onClick={async () => {
-              //To do add a quantity picker here
-              await mutateAsync({ productId: product.id, quantity: 1 });
-            }}
-          >
-            Add to cart
-          </Button>
+          <AddToCartButton product={product} />
           <Button>Buy now</Button>
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>

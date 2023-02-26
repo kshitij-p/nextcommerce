@@ -33,6 +33,31 @@ const cartRouter = createTRPCRouter({
       cart: cart,
     };
   }),
+  getProduct: protectedProcedure
+    .input(z.object({ productId: z.string() }))
+    .query(async ({ ctx, input: { productId } }) => {
+      const cartItem = await ctx.prisma.cartItem.findFirst({
+        where: {
+          cart: {
+            userId: ctx.session.user.id,
+          },
+          AND: {
+            productId: productId,
+          },
+        },
+      });
+
+      if (!cartItem) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      return {
+        message: "Successfully got the requested product from the user's cart.",
+        cartItem: cartItem,
+      };
+    }),
   addToCart: protectedProcedure
     .input(
       z.object({ productId: z.string(), quantity: CartItemQuantityValidator })
@@ -58,7 +83,7 @@ const cartRouter = createTRPCRouter({
       oldCart.cartItems.forEach((cartItem) => {
         if (cartItem.productId === productId) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
+            code: "CONFLICT",
           });
         }
       });
@@ -76,9 +101,72 @@ const cartRouter = createTRPCRouter({
         cartItem: cartItem,
       };
     }),
+  updateQuantity: protectedProcedure
+    .input(
+      z.object({ cartItemId: z.string(), quantity: CartItemQuantityValidator })
+    )
+    .mutation(async ({ ctx, input: { cartItemId, quantity } }) => {
+      const cart = await ctx.prisma.cart.findFirst({
+        where: {
+          cartItems: {
+            some: {
+              id: cartItemId,
+            },
+          },
+        },
+      });
+
+      if (!cart) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      if (cart.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      const cartItem = await ctx.prisma.cartItem.update({
+        where: {
+          id: cartItemId,
+        },
+        data: {
+          quantity: quantity,
+        },
+      });
+
+      return {
+        message: "Successfully updated the request cart item's quantity.",
+        updatedCartItem: cartItem,
+      };
+    }),
   deleteFromCart: protectedProcedure
     .input(z.object({ cartItemId: z.string() }))
     .mutation(async ({ ctx, input: { cartItemId } }) => {
+      const cart = await ctx.prisma.cart.findFirst({
+        where: {
+          cartItems: {
+            some: {
+              id: cartItemId,
+            },
+          },
+        },
+      });
+
+      if (!cart) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      if (cart.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
       const deletedCartItem = await ctx.prisma.cartItem.delete({
         where: {
           id: cartItemId,

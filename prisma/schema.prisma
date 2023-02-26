@@ -56,7 +56,7 @@ model VerificationToken {
 
 model Image {
     id        String  @id @default(cuid())
-    Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
     productId String
     //This is the S3 key
     key       String  @db.Text
@@ -69,7 +69,7 @@ model CartItem {
     quantity Int
 
     product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-    Cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+    cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
     cartId    String
     productId String
 }
