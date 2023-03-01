@@ -93,6 +93,7 @@ const ProductEditDialog = ({
       );
 
       await queryClient.invalidateQueries(queryKey);
+      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
     },
     onMutate: async () => {
       const queryKey = getQueryKey(
@@ -104,6 +105,7 @@ const ProductEditDialog = ({
       );
 
       await queryClient.cancelQueries(queryKey);
+      await queryClient.cancelQueries(CART_GET_QUERY_KEY);
 
       queryClient.setQueryData<RouterOutputs["product"]["get"]>(queryKey, {
         message: "Optimistic update data",
@@ -296,6 +298,7 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
     onSuccess: async () => {
       //To do throw a toast here
       await invalidateProducts(queryClient);
+      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
       console.log("Deleted");
       setOpen(false);
     },
