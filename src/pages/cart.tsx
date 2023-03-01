@@ -3,21 +3,24 @@ import { getQueryKey } from "@trpc/react-query";
 import React from "react";
 import Button from "../components/Button";
 import { api, type RouterOutputs } from "../utils/api";
+import { TIME_IN_MS } from "../utils/client";
+
+export const CART_GET_QUERY_KEY = getQueryKey(api.cart.get, undefined, "query");
 
 const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = api.cart.deleteFromCart.useMutation({
     onMutate: async () => {
-      const queryKey = getQueryKey(api.cart.get, undefined, "query");
-
-      await queryClient.cancelQueries(queryKey);
+      await queryClient.cancelQueries(CART_GET_QUERY_KEY);
 
       const previousCart =
-        queryClient.getQueryData<RouterOutputs["cart"]["get"]>(queryKey);
+        queryClient.getQueryData<RouterOutputs["cart"]["get"]>(
+          CART_GET_QUERY_KEY
+        );
 
       queryClient.setQueryData<RouterOutputs["cart"]["get"]>(
-        queryKey,
+        CART_GET_QUERY_KEY,
         (data) => {
           if (!data) {
             return;
@@ -41,24 +44,29 @@ const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
     },
 
     onSettled: async () => {
-      const queryKey = getQueryKey(api.cart.get, undefined, "query");
-
-      await queryClient.invalidateQueries(queryKey);
+      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
     },
     onError: (err, deletedItem, ctx) => {
       if (!ctx) {
         return;
       }
 
-      const queryKey = getQueryKey(api.cart.get, undefined, "query");
-
       queryClient.setQueryData<RouterOutputs["cart"]["get"]>(
-        queryKey,
+        CART_GET_QUERY_KEY,
         ctx.previousCart
       );
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       //To do throw a toast here
+      await queryClient.invalidateQueries(
+        getQueryKey(
+          api.cart.getProduct,
+          {
+            productId: data.deletedCartItem.productId,
+          },
+          "query"
+        )
+      );
       console.log("successfully removed from cart");
     },
   });
@@ -79,6 +87,7 @@ const CartPage = () => {
   const {
     data: { cart },
   } = api.cart.get.useQuery(undefined, {
+    staleTime: TIME_IN_MS.FIVE_MINUTES,
     initialData: {
       message: "Initial data",
       cart: {
@@ -87,6 +96,7 @@ const CartPage = () => {
         id: "",
       },
     },
+    initialDataUpdatedAt: 0,
   });
 
   return (

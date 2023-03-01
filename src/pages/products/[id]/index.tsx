@@ -22,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { invalidateProducts, TIME_IN_MS } from "../../../utils/client";
 import { z } from "zod";
 import { getQueryKey } from "@trpc/react-query";
+import { CART_GET_QUERY_KEY } from "../../cart";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -338,19 +339,29 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
   const [quantity, setQuantity] = useState("1");
 
   const cancelCartItemQuery = async () => {
-    const queryKey = getQueryKey(api.cart.getProduct, {
-      productId: product.id,
-    });
+    const queryKey = getQueryKey(
+      api.cart.getProduct,
+      {
+        productId: product.id,
+      },
+      "query"
+    );
 
     await queryClient.cancelQueries(queryKey);
+    await queryClient.cancelQueries(CART_GET_QUERY_KEY);
   };
 
   const invalidateCartItemQuery = async () => {
-    const queryKey = getQueryKey(api.cart.getProduct, {
-      productId: product.id,
-    });
+    const queryKey = getQueryKey(
+      api.cart.getProduct,
+      {
+        productId: product.id,
+      },
+      "query"
+    );
 
     await queryClient.invalidateQueries(queryKey);
+    await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
   };
 
   const { mutateAsync: addToCart, isLoading: isAdding } =
@@ -368,6 +379,7 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
       onMutate: cancelCartItemQuery,
       onSettled: invalidateCartItemQuery,
       onSuccess: () => {
+        //To do throw a toast here
         console.log("updated product quantity");
       },
     });
