@@ -1,45 +1,47 @@
-import { type Cart, type CartItem, type Product } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import React from "react";
 import Button from "../components/Button";
-import { api } from "../utils/api";
-
-type PopulatedCart = Cart & {
-  cartItems: (CartItem & {
-    product: Product;
-  })[];
-};
+import { api, type RouterOutputs } from "../utils/api";
 
 const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = api.cart.deleteFromCart.useMutation({
     onMutate: async () => {
-      const queryKey = getQueryKey(api.cart.get);
+      const queryKey = getQueryKey(api.cart.get, undefined, "query");
 
       await queryClient.cancelQueries(queryKey);
 
-      const previousCart = queryClient.getQueryData<PopulatedCart>(queryKey);
+      const previousCart =
+        queryClient.getQueryData<RouterOutputs["cart"]["get"]>(queryKey);
 
-      queryClient.setQueryData<PopulatedCart>(queryKey, (currCart) => {
-        if (!currCart) {
-          return;
+      queryClient.setQueryData<RouterOutputs["cart"]["get"]>(
+        queryKey,
+        (data) => {
+          if (!data) {
+            return;
+          }
+
+          const { cart: currCart } = data;
+
+          return {
+            message: "Optimistic update",
+            cart: {
+              ...currCart,
+              currItems: currCart.cartItems.filter(
+                (cartItem) => cartItem.id !== cartItemId
+              ),
+            },
+          };
         }
-
-        return {
-          ...currCart,
-          currItems: currCart.cartItems.filter(
-            (cartItem) => cartItem.id !== cartItemId
-          ),
-        };
-      });
+      );
 
       return { previousCart: previousCart };
     },
 
     onSettled: async () => {
-      const queryKey = getQueryKey(api.cart.get);
+      const queryKey = getQueryKey(api.cart.get, undefined, "query");
 
       await queryClient.invalidateQueries(queryKey);
     },
@@ -48,9 +50,12 @@ const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
         return;
       }
 
-      const queryKey = getQueryKey(api.cart.get);
+      const queryKey = getQueryKey(api.cart.get, undefined, "query");
 
-      queryClient.setQueryData<PopulatedCart>(queryKey, ctx.previousCart);
+      queryClient.setQueryData<RouterOutputs["cart"]["get"]>(
+        queryKey,
+        ctx.previousCart
+      );
     },
     onSuccess: () => {
       //To do throw a toast here
@@ -71,7 +76,9 @@ const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
 };
 
 const CartPage = () => {
-  const { data } = api.cart.get.useQuery(undefined, {
+  const {
+    data: { cart },
+  } = api.cart.get.useQuery(undefined, {
     initialData: {
       message: "Initial data",
       cart: {
@@ -81,12 +88,6 @@ const CartPage = () => {
       },
     },
   });
-
-  const {
-    cart,
-  }: {
-    cart: PopulatedCart;
-  } = data;
 
   return (
     <div>

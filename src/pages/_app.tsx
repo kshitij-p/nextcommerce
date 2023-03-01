@@ -8,6 +8,7 @@ import { api } from "../utils/api";
 
 import "../styles/globals.css";
 import Layout from "../components/Layout";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const inter = Montserrat({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           }
         `}</style>
         <Layout>
+          <ReactQueryDevtools initialIsOpen={false} />
           <Component {...pageProps} />
         </Layout>
       </>

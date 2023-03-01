@@ -5,11 +5,7 @@ import {
 } from "next";
 import { prisma } from "../../../server/db";
 
-import {
-  type User,
-  type Image as ProductImage,
-  type Product,
-} from "@prisma/client";
+import { type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
 import Image from "../../../components/Image";
 import ExpandableText from "../../../components/ExpandableText";
@@ -17,7 +13,7 @@ import Button from "../../../components/Button";
 import { useSession } from "next-auth/react";
 import StyledDialog from "../../../components/StyledDialog";
 import React, { useRef, useState } from "react";
-import { api } from "../../../utils/api";
+import { api, type RouterOutputs } from "../../../utils/api";
 import { flushSync } from "react-dom";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { type ControlledDialogProps } from "../../../components/Dialog/ControlledDialog";
@@ -30,12 +26,7 @@ import { getQueryKey } from "@trpc/react-query";
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
 type ProductPageProps = {
-  product:
-    | (Product & {
-        images?: ProductImage[];
-        user: User;
-      })
-    | null;
+  product: RouterOutputs["product"]["get"]["product"] | null;
 };
 
 type PageProduct = Exclude<
@@ -77,37 +68,51 @@ const ProductEditDialog = ({
   open,
   setOpen,
   product,
-  onSettled,
   onDiscard,
+  onConfirmEdit,
 }: {
   value: string;
   fieldToEdit: EditableProductFields;
   open: ControlledDialogProps["open"];
   setOpen: ControlledDialogProps["setOpen"];
   product: PageProduct;
-  onSettled: () => void;
   onDiscard: () => void;
+  onConfirmEdit: () => void;
 }) => {
   const queryClient = useQueryClient();
 
   const { mutate, isLoading } = api.product.update.useMutation({
     onSettled: async () => {
-      const queryKey = getQueryKey(api.product.get, { id: product.id });
+      const queryKey = getQueryKey(
+        api.product.get,
+        {
+          id: product.id,
+        },
+        "query"
+      );
 
       await queryClient.invalidateQueries(queryKey);
-      onSettled();
     },
     onMutate: async () => {
-      const queryKey = getQueryKey(api.product.get, {
-        id: product.id,
-      });
+      const queryKey = getQueryKey(
+        api.product.get,
+        {
+          id: product.id,
+        },
+        "query"
+      );
 
       await queryClient.cancelQueries(queryKey);
 
-      queryClient.setQueryData(queryKey, {
-        ...product,
-        [fieldToEdit]: value,
-      } satisfies typeof product);
+      queryClient.setQueryData<RouterOutputs["product"]["get"]>(queryKey, {
+        message: "Optimistic update data",
+        product: {
+          ...product,
+          [fieldToEdit]: value,
+        } satisfies typeof product,
+      });
+
+      onConfirmEdit();
 
       return { previousProduct: product };
     },
@@ -116,7 +121,11 @@ const ProductEditDialog = ({
         return;
       }
 
-      const queryKey = getQueryKey(api.product.get, { id: product.id });
+      const queryKey = getQueryKey(
+        api.product.get,
+        { id: product.id },
+        "query"
+      );
 
       queryClient.setQueryData(queryKey, ctx.previousProduct);
     },
@@ -148,9 +157,7 @@ const ProductEditDialog = ({
         </Button>
         <Button
           variants={{ type: "secondary", size: "sm" }}
-          onClick={() => {
-            onDiscard();
-          }}
+          onClick={onDiscard}
           disabled={isLoading}
         >
           Discard Changes
@@ -267,7 +274,7 @@ const EditableText = ({
         </>
       )}
       <ProductEditDialog
-        onSettled={handleStopEditing}
+        onConfirmEdit={handleStopEditing}
         onDiscard={handleStopEditing}
         open={diagOpen}
         setOpen={setDiagOpen}
