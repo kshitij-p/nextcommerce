@@ -332,8 +332,10 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
   );
 };
 
-const AddToCartButton = ({ product }: { product: PageProduct }) => {
+const AddToCart = ({ product }: { product: PageProduct }) => {
   const queryClient = useQueryClient();
+
+  const [quantity, setQuantity] = useState("1");
 
   const cancelCartItemQuery = async () => {
     const queryKey = getQueryKey(api.cart.getProduct, {
@@ -373,23 +375,35 @@ const AddToCartButton = ({ product }: { product: PageProduct }) => {
   const { data } = api.cart.getProduct.useQuery({ productId: product.id });
 
   return (
-    <Button
-      variants={{ type: "secondary" }}
-      disabled={isAdding || isUpdatingQty}
-      onClick={async () => {
-        //To do add a quantity picker here for selecting quantity
-        if (!data) {
-          await addToCart({ productId: product.id, quantity: 1 });
-        } else {
-          await updateQuantity({
-            cartItemId: data.cartItem.id,
-            quantity: data.cartItem.quantity + 1,
-          });
-        }
-      }}
-    >
-      Add to cart
-    </Button>
+    <>
+      <input
+        value={quantity}
+        onChange={(e) => {
+          setQuantity(e.currentTarget.value);
+        }}
+      />
+      <Button
+        variants={{ type: "secondary" }}
+        disabled={isAdding || isUpdatingQty}
+        onClick={async () => {
+          //To do add a quantity picker here for selecting quantity
+          //To do add react hook form here for validation
+          if (!data) {
+            await addToCart({
+              productId: product.id,
+              quantity: parseInt(quantity),
+            });
+          } else {
+            await updateQuantity({
+              cartItemId: data.cartItem.id,
+              quantity: data.cartItem.quantity + parseInt(quantity),
+            });
+          }
+        }}
+      >
+        Add to cart
+      </Button>
+    </>
   );
 };
 
@@ -462,7 +476,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           {product.description}
         </EditableText>
         <div className="flex gap-2">
-          <AddToCartButton product={product} />
+          <AddToCart product={product} />
           <Button>Buy now</Button>
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>

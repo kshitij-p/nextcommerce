@@ -48,9 +48,7 @@ const cartRouter = createTRPCRouter({
       });
 
       if (!cartItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
+        return null;
       }
 
       return {
