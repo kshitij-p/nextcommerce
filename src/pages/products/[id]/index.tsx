@@ -5,7 +5,7 @@ import {
 } from "next";
 import { prisma } from "../../../server/db";
 
-import { type Product } from "@prisma/client";
+import { type Review, type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
 import Image from "../../../components/Image";
 import ExpandableText from "../../../components/ExpandableText";
@@ -23,8 +23,14 @@ import { CART_GET_QUERY_KEY } from "../../cart";
 import EditableText, {
   useEditableText,
 } from "../../../components/EditableText";
+import EditableTextDialog from "../../../components/EditableText/EditableTextDialog";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
+
+type EditableReviewFields = keyof Omit<
+  Review,
+  "userId" | "id" | "productId" | "rating"
+>;
 
 type ProductPageProps = {
   product: RouterOutputs["product"]["get"]["product"] | null;
@@ -139,41 +145,19 @@ const ProductEditDialog = ({
     },
   });
 
-  const handleEdit = () => {
+  const handleSaveChanges = () => {
     mutate({ [fieldToEdit]: value, id: product.id });
   };
 
   return (
-    <StyledDialog
+    <EditableTextDialog
       open={open}
       setOpen={setOpen}
       title={`Edit this product's ${fieldToEdit}`}
-      description="Are you sure you want to do this ?"
-    >
-      <div className="mt-1 flex flex-wrap items-center gap-2 md:mt-2 md:gap-4">
-        <Button
-          variants={{ type: "secondary", size: "sm" }}
-          onClick={() => setOpen(false)}
-          disabled={isLoading}
-        >
-          Keep editing
-        </Button>
-        <Button
-          variants={{ type: "secondary", size: "sm" }}
-          onClick={onDiscard}
-          disabled={isLoading}
-        >
-          Discard Changes
-        </Button>
-        <Button
-          variants={{ size: "sm" }}
-          onClick={handleEdit}
-          disabled={isLoading}
-        >
-          Save changes
-        </Button>
-      </div>
-    </StyledDialog>
+      isLoading={isLoading}
+      onSaveChanges={handleSaveChanges}
+      onDiscard={onDiscard}
+    />
   );
 };
 
@@ -360,7 +344,62 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
     </>
   );
 };
+/* 
+const ReviewEditDialog = ()=>{
 
+}
+
+const EditableReviewText = ({
+  children,
+  canEdit,
+  fieldToEdit,
+  product,
+  ...rest
+}: Omit<React.ComponentProps<"p">, "children"> & {
+  children: string;
+  canEdit: boolean;
+  as?: React.ReactElement<Record<string, unknown>>;
+  inputElement?: "textarea" | "input";
+  fieldToEdit: EditableReviewFields;
+  review: React.ComponentProps<typeof ProductEditDialog>["product"];
+  onChangeComplete?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+}) => {
+  const {
+    diagOpen,
+    setDiagOpen,
+    editing,
+    setEditing,
+    text,
+    setText,
+    onStopEditing,
+  } = useEditableText();
+
+  return (
+    <EditableText
+      {...rest}
+      value={children}
+      canEdit={canEdit}
+      text={text}
+      setText={setText}
+      setDiagOpen={setDiagOpen}
+      editing={editing}
+      setEditing={setEditing}
+    >
+      <ProductEditDialog
+        onConfirmEdit={onStopEditing}
+        onDiscard={onStopEditing}
+        open={diagOpen}
+        setOpen={setDiagOpen}
+        fieldToEdit={fieldToEdit}
+        value={text}
+        product={product}
+      />
+    </EditableText>
+  );
+};
+ */
 const DeleteReviewDialog = ({
   review,
 }: {
@@ -429,6 +468,7 @@ const Reviews = ({ product }: { product: PageProduct }) => {
         return (
           <div key={review.id}>
             <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
+            <b>{`Rated ${review.rating}`}</b>
             {review.body}
             <DeleteReviewDialog review={review} />
           </div>
