@@ -251,6 +251,9 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
 const AddToCart = ({ product }: { product: PageProduct }) => {
   const queryClient = useQueryClient();
 
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
+
   const [quantity, setQuantity] = useState("1");
 
   const cancelCartItemQuery = async () => {
@@ -299,7 +302,34 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
       },
     });
 
-  const { data } = api.cart.getProduct.useQuery({ productId: product.id });
+  const { data } = api.cart.getProduct.useQuery(
+    { productId: product.id },
+    {
+      enabled: isLoggedIn,
+    }
+  );
+
+  const handleAddToCart = async () => {
+    if (!isLoggedIn) {
+      return;
+    }
+
+    //TO DO IMP! make middlewares for authed only and guest only routes and use them for cart, product/create, login and register
+
+    //To do add a quantity picker here for selecting quantity
+    //To do add react hook form here for validation
+    if (!data) {
+      await addToCart({
+        productId: product.id,
+        quantity: parseInt(quantity),
+      });
+    } else {
+      await updateQuantity({
+        cartItemId: data.cartItem.id,
+        quantity: data.cartItem.quantity + parseInt(quantity),
+      });
+    }
+  };
 
   return (
     <>
@@ -312,21 +342,7 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
       <Button
         variants={{ type: "secondary" }}
         disabled={isAdding || isUpdatingQty}
-        onClick={async () => {
-          //To do add a quantity picker here for selecting quantity
-          //To do add react hook form here for validation
-          if (!data) {
-            await addToCart({
-              productId: product.id,
-              quantity: parseInt(quantity),
-            });
-          } else {
-            await updateQuantity({
-              cartItemId: data.cartItem.id,
-              quantity: data.cartItem.quantity + parseInt(quantity),
-            });
-          }
-        }}
+        onClick={handleAddToCart}
       >
         Add to cart
       </Button>
