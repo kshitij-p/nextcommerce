@@ -4,7 +4,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 const ReviewRatingValidator = z.preprocess(
   (val) => parseInt(val as string),
-  z.number().positive()
+  z.number().positive().min(1).max(5)
 );
 
 const reviewRouter = createTRPCRouter({

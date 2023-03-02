@@ -1,7 +1,7 @@
-import { Pencil1Icon } from "@radix-ui/react-icons";
 import React, { useRef } from "react";
 import { flushSync } from "react-dom";
 import Textarea from "../Textarea";
+import EditableHoverButton from "./EditableHoverButton";
 import type useEditableText from "./useEditableText";
 
 type UseEditableTextState = ReturnType<typeof useEditableText>;
@@ -91,15 +91,12 @@ const EditableText = ({
             children: value,
           })}
           {canEdit ? (
-            <button
-              className="visible ml-2 align-baseline opacity-50 transition-all duration-300 group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 xl:invisible xl:opacity-0"
+            <EditableHoverButton
               onClick={() => {
                 flushSync(() => setText(value));
                 setEditing(true);
               }}
-            >
-              <Pencil1Icon className="h-full w-6 md:w-8" />
-            </button>
+            />
           ) : null}
         </>
       )}

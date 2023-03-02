@@ -24,13 +24,13 @@ import EditableText, {
 import { EditableTextDialog } from "../../../components/EditableText";
 import { type EditableTextProps } from "../../../components/EditableText/EditableTextDialog";
 import DangerDialog from "../../../components/DangerDialog";
+import EditableHoverButton from "../../../components/EditableText/EditableHoverButton";
+import { flushSync } from "react-dom";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
-type EditableReviewFields = keyof Omit<
-  Review,
-  "userId" | "id" | "productId" | "rating"
->;
+type EditableReviewFields = keyof Omit<Review, "userId" | "id" | "productId">;
 
 type ProductPageProps = {
   product: RouterOutputs["product"]["get"]["product"] | null;
@@ -352,26 +352,20 @@ const invalidateReviewsQuery = async ({
   await queryClient.invalidateQueries(getReviewsQueryKey(productId));
 };
 
-const ReviewEditDialog = ({
-  open,
-  setOpen,
-  onDiscard,
-  review,
+const useEditReview = ({
   fieldToEdit,
   value,
+  review,
   onMutationComplete,
 }: {
-  open: EditableTextProps["open"];
-  setOpen: EditableTextProps["setOpen"];
-  onDiscard: EditableTextProps["onDiscard"];
-  review: ProductReview;
   fieldToEdit: EditableReviewFields;
   value: string;
+  review: ProductReview;
   onMutationComplete: () => void;
 }) => {
   const queryClient = useQueryClient();
 
-  const { mutate: updateReview, isLoading } = api.review.update.useMutation({
+  return api.review.update.useMutation({
     onMutate: async () => {
       const queryKey = getReviewsQueryKey(review.productId);
 
@@ -422,6 +416,31 @@ const ReviewEditDialog = ({
         productId: review.productId,
       });
     },
+  });
+};
+
+const ReviewEditDialog = ({
+  open,
+  setOpen,
+  onDiscard,
+  review,
+  fieldToEdit,
+  value,
+  onMutationComplete,
+}: {
+  open: EditableTextProps["open"];
+  setOpen: EditableTextProps["setOpen"];
+  onDiscard: EditableTextProps["onDiscard"];
+  review: ProductReview;
+  fieldToEdit: EditableReviewFields;
+  value: string;
+  onMutationComplete: () => void;
+}) => {
+  const { mutate: updateReview, isLoading } = useEditReview({
+    fieldToEdit,
+    review,
+    value,
+    onMutationComplete,
   });
 
   const handleSaveEditChanges = () => {
@@ -569,6 +588,83 @@ const CreateReview = ({ productId }: { productId: string }) => {
   );
 };
 
+const ReviewRating = ({
+  review,
+  canEdit,
+}: {
+  review: ProductReview;
+  canEdit: boolean;
+}) => {
+  const {
+    text,
+    setText,
+    diagOpen,
+    setDiagOpen,
+    editing,
+    setEditing,
+    onStopEditing,
+  } = useEditableText();
+
+  const { mutate: updateReview, isLoading } = useEditReview({
+    fieldToEdit: "rating",
+    value: text,
+    onMutationComplete: onStopEditing,
+    review: review,
+  });
+
+  const rating = `${review.rating}`;
+
+  const handleBlur = () => {
+    if (rating.trim() === text.trim()) {
+      setEditing(false);
+      return;
+    }
+    setDiagOpen(true);
+  };
+
+  const handleConfirm = () => {
+    updateReview({ id: review.id, rating: text });
+  };
+
+  //To do replace rating with a star rating component
+
+  return (
+    <div className="group relative">
+      {editing ? (
+        <input
+          autoFocus
+          value={text}
+          onChange={(e) => setText(e.currentTarget.value)}
+          onBlur={handleBlur}
+        />
+      ) : (
+        <>
+          <b>{`Rated ${review.rating}`}</b>
+          {canEdit ? (
+            <EditableHoverButton
+              onClick={() => {
+                flushSync(() => {
+                  setText(rating);
+                });
+                setEditing(true);
+              }}
+            />
+          ) : null}
+        </>
+      )}
+
+      <ConfirmDialog
+        open={diagOpen}
+        setOpen={setDiagOpen}
+        title={`Edit this review's rating`}
+        isLoading={isLoading}
+        onConfirm={handleConfirm}
+        handleDiscard={onStopEditing}
+      />
+    </div>
+  );
+};
+
 const Review = ({ review }: { review: ProductReview }) => {
   const { data: session } = useSession();
 
@@ -577,7 +673,7 @@ const Review = ({ review }: { review: ProductReview }) => {
   return (
     <div key={review.id}>
       <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
-      <b>{`Rated ${review.rating}`}</b>
+      <ReviewRating review={review} canEdit={canEdit} />
       <EditableReviewText
         className="flex"
         canEdit={canEdit}

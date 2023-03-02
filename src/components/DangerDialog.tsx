@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./Button";
+import ConfirmDialog from "./ConfirmDialog";
 import { type ControlledDialogProps } from "./Dialog/ControlledDialog";
-import StyledDialog from "./StyledDialog";
 
 const DangerDialog = ({
   openerChildren,
@@ -11,8 +11,8 @@ const DangerDialog = ({
   setOpen,
   title,
   description = "Are you sure you want to do this ?",
-  isLoading = false,
   onConfirmDelete,
+  ...rest
 }: {
   openerChildren: React.ReactNode;
   backButtonChildren?: React.ReactNode;
@@ -24,38 +24,22 @@ const DangerDialog = ({
   isLoading?: boolean;
   onConfirmDelete: () => void;
 }) => {
-  const handleConfirmDelete = () => {
-    if (isLoading) {
-      return;
-    }
-    onConfirmDelete();
-  };
-
   return (
-    <StyledDialog
+    <ConfirmDialog
+      {...rest}
       open={open}
       setOpen={setOpen}
-      Opener={<Button variants={{ type: "danger" }}>{openerChildren}</Button>}
       title={title}
       description={description}
-    >
-      <div className="mt-4 flex items-center gap-2 md:gap-4">
-        <Button
-          disabled={isLoading}
-          variants={{ type: "secondary" }}
-          onClick={() => setOpen(false)}
-        >
-          {backButtonChildren}
-        </Button>
-        <Button
-          onClick={handleConfirmDelete}
-          disabled={isLoading}
-          variants={{ type: "danger" }}
-        >
-          {confirmButtonChildren}
-        </Button>
-      </div>
-    </StyledDialog>
+      Opener={<Button variants={{ type: "danger" }}>{openerChildren}</Button>}
+      BackButton={
+        <Button variants={{ type: "secondary" }}>{backButtonChildren}</Button>
+      }
+      ConfirmButton={
+        <Button variants={{ type: "danger" }}>{confirmButtonChildren}</Button>
+      }
+      onConfirm={onConfirmDelete}
+    />
   );
 };
 
