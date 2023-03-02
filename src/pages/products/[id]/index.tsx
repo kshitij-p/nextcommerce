@@ -491,7 +491,7 @@ const EditableReviewText = ({
   );
 };
 
-const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {
+const ReviewDeleteDialog = ({ review }: { review: ProductReview }) => {
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
@@ -584,7 +584,7 @@ const Review = ({ review }: { review: ProductReview }) => {
       >
         {review.body}
       </EditableReviewText>
-      {canEdit ? <DeleteReviewDialog review={review} /> : null}
+      {canEdit ? <ReviewDeleteDialog review={review} /> : null}
     </div>
   );
 };
