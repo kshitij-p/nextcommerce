@@ -48,14 +48,16 @@ const reviewRouter = createTRPCRouter({
       z.object({
         productId: z.string(),
         body: z.string(),
+        rating: ReviewRatingValidator,
       })
     )
-    .mutation(async ({ ctx, input: { productId, body } }) => {
+    .mutation(async ({ ctx, input: { productId, body, rating } }) => {
       const review = await ctx.prisma.review.create({
         data: {
           productId: productId,
           userId: ctx.session.user.id,
           body: body,
+          rating: rating,
         },
       });
 

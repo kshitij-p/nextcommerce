@@ -531,6 +531,7 @@ const CreateReview = ({ productId }: { productId: string }) => {
   const queryClient = useQueryClient();
 
   const [body, setBody] = useState("");
+  const [rating, setRating] = useState("1");
 
   const { mutate: postReview, isLoading } = api.review.create.useMutation({
     onSuccess: async () => {
@@ -541,6 +542,8 @@ const CreateReview = ({ productId }: { productId: string }) => {
     },
   });
 
+  //To do use rhf here for validation
+
   return (
     <div>
       <b>Write a review</b>
@@ -550,9 +553,14 @@ const CreateReview = ({ productId }: { productId: string }) => {
         onChange={(e) => setBody(e.currentTarget.value)}
         placeholder="Leave your thoughts about this product..."
       />
+      Rating
+      <input
+        value={rating}
+        onChange={(e) => setRating(e.currentTarget.value)}
+      />
       <Button
         onClick={() => {
-          postReview({ productId: productId, body: body });
+          postReview({ productId: productId, body: body, rating: rating });
         }}
       >
         Create
