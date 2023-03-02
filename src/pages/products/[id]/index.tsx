@@ -11,7 +11,6 @@ import Image from "../../../components/Image";
 import ExpandableText from "../../../components/ExpandableText";
 import Button from "../../../components/Button";
 import { useSession } from "next-auth/react";
-import StyledDialog from "../../../components/StyledDialog";
 import React, { useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +23,7 @@ import EditableText, {
 } from "../../../components/EditableText";
 import { EditableTextDialog } from "../../../components/EditableText";
 import { type EditableTextProps } from "../../../components/EditableText/EditableTextDialog";
+import DangerDialog from "../../../components/DangerDialog";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -225,39 +225,26 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
       await invalidateProducts(queryClient);
       await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
       console.log("Deleted");
+    },
+    onSettled: () => {
       setOpen(false);
     },
   });
 
   const handleDeleteClick = () => {
-    if (isLoading) {
-      return;
-    }
-
     mutate({ id: productId });
   };
 
   return (
-    <StyledDialog
+    <DangerDialog
       open={open}
       setOpen={setOpen}
-      Opener={<Button variants={{ type: "danger" }}>Delete this</Button>}
       title="Delete this product"
-      description="Are you sure you want to do this ?"
-    >
-      <div className="mt-4 flex items-center gap-2 md:gap-4">
-        <Button variants={{ type: "secondary" }} onClick={() => setOpen(false)}>
-          No go back
-        </Button>
-        <Button
-          onClick={handleDeleteClick}
-          disabled={isLoading}
-          variants={{ type: "danger" }}
-        >
-          Yes delete this
-        </Button>
-      </div>
-    </StyledDialog>
+      openerChildren="Delete"
+      confirmButtonChildren="Yes delete this"
+      onConfirmDelete={handleDeleteClick}
+      isLoading={isLoading}
+    />
   );
 };
 
@@ -507,6 +494,8 @@ const EditableReviewText = ({
 const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {
   const queryClient = useQueryClient();
 
+  const [open, setOpen] = useState(false);
+
   const { mutate: deleteReview, isLoading } = api.review.delete.useMutation({
     onSuccess: async () => {
       await invalidateReviewsQuery({
@@ -516,19 +505,25 @@ const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {
       //To do throw a toast here
       console.log("deleted review");
     },
+    onSettled: () => {
+      setOpen(false);
+    },
   });
 
-  //To do make a common dangerdialog component and use it here and in delete product
+  const handleConfirmDelete = () => {
+    deleteReview({ id: review.id });
+  };
+
   return (
-    <Button
-      disabled={isLoading}
-      onClick={() => {
-        deleteReview({ id: review.id });
-      }}
-      variants={{ type: "danger" }}
-    >
-      Delete
-    </Button>
+    <DangerDialog
+      open={open}
+      setOpen={setOpen}
+      title={"Delete this review"}
+      openerChildren={"Delete"}
+      confirmButtonChildren={"Yes delete this"}
+      onConfirmDelete={handleConfirmDelete}
+      isLoading={isLoading}
+    />
   );
 };
 
@@ -566,11 +561,39 @@ const CreateReview = ({ productId }: { productId: string }) => {
   );
 };
 
+const Review = ({ review }: { review: ProductReview }) => {
+  const { data: session } = useSession();
+
+  const canEdit = review.userId === session?.user?.id;
+
+  return (
+    <div key={review.id}>
+      <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
+      <b>{`Rated ${review.rating}`}</b>
+      <EditableReviewText
+        className="flex"
+        canEdit={canEdit}
+        review={review}
+        fieldToEdit={"body"}
+        as={
+          <ExpandableText
+            className="mt-2 text-zinc-400 md:mt-3 xl:max-w-[80%]"
+            maxLines={10}
+          />
+        }
+      >
+        {review.body}
+      </EditableReviewText>
+      {canEdit ? <DeleteReviewDialog review={review} /> : null}
+    </div>
+  );
+};
+
 const Reviews = ({ product }: { product: PageProduct }) => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const {
-    data: { reviews },
+    data: { reviews, userReview },
   } = api.review.getForProduct.useQuery(
     { productId: product.id },
     {
@@ -583,30 +606,15 @@ const Reviews = ({ product }: { product: PageProduct }) => {
   return (
     <div>
       {status === "authenticated" ? (
-        <CreateReview productId={product.id} />
+        userReview ? (
+          <Review review={userReview} />
+        ) : (
+          <CreateReview productId={product.id} />
+        )
       ) : null}
+
       {reviews.map((review) => {
-        return (
-          <div key={review.id}>
-            <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
-            <b>{`Rated ${review.rating}`}</b>
-            <EditableReviewText
-              className="flex"
-              canEdit={review.userId === session?.user?.id}
-              review={review}
-              fieldToEdit={"body"}
-              as={
-                <ExpandableText
-                  className="mt-2 text-zinc-400 md:mt-3 xl:max-w-[80%]"
-                  maxLines={10}
-                />
-              }
-            >
-              {review.body}
-            </EditableReviewText>
-            <DeleteReviewDialog review={review} />
-          </div>
-        );
+        return <Review key={review.id} review={review} />;
       })}
     </div>
   );
@@ -680,7 +688,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
         >
           {product.description}
         </EditableProductText>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <AddToCart product={product} />
           <Button>Buy now</Button>
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}

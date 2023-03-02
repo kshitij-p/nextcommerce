@@ -14,15 +14,33 @@ const reviewRouter = createTRPCRouter({
       const reviews = await ctx.prisma.review.findMany({
         where: {
           productId: productId,
+          userId: {
+            not: ctx.session?.user.id,
+          },
         },
         include: {
           user: true,
         },
       });
 
+      const userReview = ctx.session
+        ? await ctx.prisma.review.findUnique({
+            where: {
+              userId_productId: {
+                productId: productId,
+                userId: ctx.session.user.id,
+              },
+            },
+            include: {
+              user: true,
+            },
+          })
+        : null;
+
       return {
         message: "Successfully got reviews for the requested product.",
         reviews: reviews,
+        userReview: userReview,
       };
     }),
   create: protectedProcedure
