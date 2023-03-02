@@ -2,6 +2,15 @@ import Button from "../Button";
 import { type ControlledDialogProps } from "../Dialog/ControlledDialog";
 import StyledDialog from "../StyledDialog";
 
+export type EditableTextProps = {
+  open: ControlledDialogProps["open"];
+  setOpen: ControlledDialogProps["setOpen"];
+  title: string;
+  isLoading: boolean;
+  onDiscard: () => void;
+  onSaveChanges: () => void;
+};
+
 const EditableTextDialog = ({
   open,
   setOpen,
@@ -9,14 +18,7 @@ const EditableTextDialog = ({
   isLoading,
   onDiscard,
   onSaveChanges,
-}: {
-  open: ControlledDialogProps["open"];
-  setOpen: ControlledDialogProps["setOpen"];
-  title: string;
-  isLoading: boolean;
-  onDiscard: () => void;
-  onSaveChanges: () => void;
-}) => {
+}: EditableTextProps) => {
   return (
     <StyledDialog
       open={open}
