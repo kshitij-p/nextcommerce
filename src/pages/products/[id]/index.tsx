@@ -12,17 +12,17 @@ import ExpandableText from "../../../components/ExpandableText";
 import Button from "../../../components/Button";
 import { useSession } from "next-auth/react";
 import StyledDialog from "../../../components/StyledDialog";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
-import { flushSync } from "react-dom";
-import { Pencil1Icon } from "@radix-ui/react-icons";
 import { type ControlledDialogProps } from "../../../components/Dialog/ControlledDialog";
-import Textarea from "../../../components/Textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import { invalidateProducts, TIME_IN_MS } from "../../../utils/client";
 import { z } from "zod";
 import { getQueryKey } from "@trpc/react-query";
 import { CART_GET_QUERY_KEY } from "../../cart";
+import EditableText, {
+  useEditableText,
+} from "../../../components/EditableText";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -177,15 +177,11 @@ const ProductEditDialog = ({
   );
 };
 
-const EditableText = ({
+const EditableProductText = ({
   children,
   canEdit,
-  as = <p />,
-  inputElement = "textarea",
   fieldToEdit,
   product,
-  onChangeComplete,
-  className = "",
   ...rest
 }: Omit<React.ComponentProps<"p">, "children"> & {
   children: string;
@@ -198,94 +194,37 @@ const EditableText = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
 }) => {
-  const [text, setText] = useState("");
-  const [editing, setEditing] = useState(false);
-
-  const [diagOpen, setDiagOpen] = useState(false);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      e.currentTarget.blur();
-    }
-  };
-
-  const handleStopEditing = () => {
-    setEditing(false);
-    setDiagOpen(false);
-  };
-
-  const handleBlur = () => {
-    if (children.trim() === text.trim()) {
-      setEditing(false);
-      return;
-    }
-    setDiagOpen(true);
-  };
-
-  const textElProps = {
-    className:
-      "w-full resize-none rounded-sm bg-transparent p-2 focus:outline-blue-500 outline outline-2 outline-blue-200",
-    autoFocus: true,
-    value: text,
-    onChange: (
-      e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-    ) => {
-      setText(e.currentTarget.value);
-      if (onChangeComplete) {
-        onChangeComplete(e);
-      }
-    },
-    onKeyDown: handleKeyDown,
-    onBlur: handleBlur,
-  };
+  const {
+    diagOpen,
+    setDiagOpen,
+    editing,
+    setEditing,
+    text,
+    setText,
+    onStopEditing,
+  } = useEditableText();
 
   return (
-    <div {...rest} className={`group relative ${className}`} ref={containerRef}>
-      {editing ? (
-        inputElement === "textarea" ? (
-          <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
-        ) : (
-          <input {...textElProps} />
-        )
-      ) : (
-        <>
-          {React.cloneElement(as, {
-            ...as.props,
-            className: `inline ${
-              as.props.className && typeof as.props.className === "string"
-                ? as.props.className
-                : ""
-            }`,
-            children: children,
-          })}
-          {canEdit ? (
-            <button
-              className="visible ml-2 align-baseline opacity-50 transition-all duration-300 group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 xl:invisible xl:opacity-0"
-              onClick={() => {
-                flushSync(() => setText(children));
-                setEditing(true);
-              }}
-            >
-              <Pencil1Icon className="h-full w-6 md:w-8" />
-            </button>
-          ) : null}
-        </>
-      )}
+    <EditableText
+      {...rest}
+      value={children}
+      canEdit={canEdit}
+      text={text}
+      setText={setText}
+      setDiagOpen={setDiagOpen}
+      editing={editing}
+      setEditing={setEditing}
+    >
       <ProductEditDialog
-        onConfirmEdit={handleStopEditing}
-        onDiscard={handleStopEditing}
+        onConfirmEdit={onStopEditing}
+        onDiscard={onStopEditing}
         open={diagOpen}
         setOpen={setDiagOpen}
         fieldToEdit={fieldToEdit}
         value={text}
         product={product}
       />
-    </div>
+    </EditableText>
   );
 };
 
@@ -515,8 +454,8 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
 
   const canEdit = product.userId === session?.user?.id;
 
-  const editableTextProps: Omit<
-    React.ComponentProps<typeof EditableText>,
+  const editableProductTextProps: Omit<
+    React.ComponentProps<typeof EditableProductText>,
     "children" | "fieldToEdit"
   > = {
     canEdit: canEdit,
@@ -535,28 +474,28 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
         }
       />
       <div className="flex w-full flex-col gap-2 text-lg md:gap-3 md:text-3xl xl:mt-2 xl:text-2xl">
-        <EditableText
+        <EditableProductText
           className="text-3xl font-bold text-zinc-200 md:text-5xl xl:max-w-[80%]"
-          {...editableTextProps}
+          {...editableProductTextProps}
           fieldToEdit={"title"}
           as={<h2 />}
         >
           {product.title}
-        </EditableText>
+        </EditableProductText>
         <div className="flex items-center text-2xl md:text-4xl">
           <p>$</p>
-          <EditableText
-            {...editableTextProps}
+          <EditableProductText
+            {...editableProductTextProps}
             fieldToEdit={"price"}
             inputElement={"input"}
           >
             {`${product.price}`}
-          </EditableText>
+          </EditableProductText>
         </div>
         {/* Font size for this is defined in the parent div */}
-        <EditableText
+        <EditableProductText
           className="flex"
-          {...editableTextProps}
+          {...editableProductTextProps}
           fieldToEdit={"description"}
           as={
             <ExpandableText
@@ -566,7 +505,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           }
         >
           {product.description}
-        </EditableText>
+        </EditableProductText>
         <div className="flex gap-2">
           <AddToCart product={product} />
           <Button>Buy now</Button>
