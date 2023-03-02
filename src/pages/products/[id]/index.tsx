@@ -43,8 +43,8 @@ export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
       id: id,
     },
     include: {
-      images: {},
-      user: {},
+      images: true,
+      user: true,
     },
   });
 
@@ -422,6 +422,83 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
   );
 };
 
+const DeleteReviewDialog = ({
+  review,
+}: {
+  review: RouterOutputs["review"]["getForProduct"]["reviews"][0];
+}) => {
+  const { mutate: deleteReview, isLoading } = api.review.delete.useMutation();
+
+  //To do make a common dangerdialog component and use it here and in delete product
+  return (
+    <Button
+      disabled={isLoading}
+      onClick={() => {
+        deleteReview({ id: review.id });
+      }}
+      variants={{ type: "danger" }}
+    >
+      Delete
+    </Button>
+  );
+};
+
+const CreateReview = ({ productId }: { productId: string }) => {
+  const [body, setBody] = useState("");
+
+  const { mutate: postReview, isLoading } = api.review.create.useMutation();
+
+  return (
+    <div>
+      <b>Write a review</b>
+      <textarea
+        disabled={isLoading}
+        value={body}
+        onChange={(e) => setBody(e.currentTarget.value)}
+        placeholder="Leave your thoughts about this product..."
+      />
+      <Button
+        onClick={() => {
+          postReview({ productId: productId, body: body });
+        }}
+      >
+        Create
+      </Button>
+    </div>
+  );
+};
+
+const Reviews = ({ product }: { product: PageProduct }) => {
+  const { status } = useSession();
+
+  const {
+    data: { reviews },
+  } = api.review.getForProduct.useQuery(
+    { productId: product.id },
+    {
+      initialData: { message: "Initial data", reviews: [] },
+      initialDataUpdatedAt: 0,
+    }
+  );
+
+  return (
+    <div>
+      {status === "authenticated" ? (
+        <CreateReview productId={product.id} />
+      ) : null}
+      {reviews.map((review) => {
+        return (
+          <div key={review.id}>
+            <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
+            {review.body}
+            <DeleteReviewDialog review={review} />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
   const { data: session } = useSession();
 
@@ -495,6 +572,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           <Button>Buy now</Button>
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>
+        <Reviews product={product} />
       </div>
 
       {/* To do add image fall back here */}

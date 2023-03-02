@@ -44,6 +44,7 @@ model User {
     sessions      Session[]
     Product       Product[]
     Cart          Cart?
+    reviews       Review[]
 }
 
 model VerificationToken {
@@ -81,6 +82,18 @@ model Cart {
     cartItems CartItem[]
 }
 
+model Review {
+    id        String  @id @default(cuid())
+    user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId String
+    body      String  @db.Text
+    rating    Int     @default(1) @db.SmallInt
+
+    @@unique([userId, productId])
+}
+
 model Product {
     id          String     @id @default(cuid())
     user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -90,4 +103,5 @@ model Product {
     price       Int
     images      Image[]
     cartItems   CartItem[]
+    reviews     Review[]
 }
