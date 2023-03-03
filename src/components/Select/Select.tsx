@@ -2,59 +2,58 @@ import React, { Fragment } from "react";
 import { Listbox } from "@headlessui/react";
 import Button from "../Button";
 
-interface SelectGenericProps<
-  T extends Record<string, unknown> | Array<Record<string, unknown>>
-> {
-  renderOpener: React.ReactElement;
+interface SelectGenericProps<T> {
   value: T;
   setValue: (value: T) => void;
-  textField: T extends Array<Record<string, unknown>> ? keyof T[0] : keyof T;
-  valueField: T extends Array<Record<string, unknown>> ? keyof T[0] : keyof T;
-  options: T extends Array<Record<string, unknown>> ? Array<T[0]> : Array<T>;
+  /* textField: T extends Array<T> ? keyof T[keyof T] : keyof T;
+  options: T extends Array<T> ? Array<T[keyof T]> : Array<T>; */
+  textField: keyof T;
+  options: Array<T>;
 }
 
-interface SingleSelectProps
-  extends SelectGenericProps<Record<string, unknown>> {
+interface SingleSelectProps<T> extends SelectGenericProps<T> {
   multiple: false;
 }
-
-interface MultipleSelectProps
-  extends SelectGenericProps<Array<Record<string, unknown>>> {
+/* 
+interface MultipleSelectProps<T> extends SelectGenericProps<Array<T>> {
   multiple: true;
-}
+} */
 
-export type SelectProps = SingleSelectProps | MultipleSelectProps;
+export type SelectProps<T> =
+  SingleSelectProps<T> /* | MultipleSelectProps<T> */;
 
-const Select = ({
+const Select = <T extends Record<string, unknown>>({
   value,
   setValue,
   options,
   textField,
-  valueField,
   multiple,
-}: SelectProps) => {
+}: SelectProps<T>) => {
   return (
     <Listbox value={value} onChange={setValue} multiple={multiple}>
-      <Listbox.Button as={Fragment}>
-        <Button>
-          {multiple
-            ? value.map((val) => val[textField]).join(",")
-            : (value[textField] as string)}
-        </Button>
-      </Listbox.Button>
+      <div className="relative flex flex-col">
+        <Listbox.Button as={Fragment}>
+          <Button>{value[textField] as string}</Button>
+        </Listbox.Button>
 
-      <Listbox.Options>
-        {options.map((x) => {
-          return (
-            <Listbox.Option
-              key={x[valueField] as string}
-              value={x[valueField] as string}
-            >
-              {x[textField] as string}
-            </Listbox.Option>
-          );
-        })}
-      </Listbox.Options>
+        <Listbox.Options className="absolute top-full z-[1500] mt-2 flex flex-col gap-2 rounded bg-zinc-800 p-2">
+          {options.map((x) => {
+            return (
+              <Listbox.Option
+                key={x[textField] as string}
+                value={x}
+                as={Fragment}
+              >
+                <li
+                  className={`items-center justify-center rounded-sm p-2 ui-selected:bg-red-500 ui-active:bg-red-500`}
+                >
+                  {x[textField] as string}
+                </li>
+              </Listbox.Option>
+            );
+          })}
+        </Listbox.Options>
+      </div>
     </Listbox>
   );
 };

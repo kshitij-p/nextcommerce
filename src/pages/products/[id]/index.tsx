@@ -27,6 +27,7 @@ import DangerDialog from "../../../components/DangerDialog";
 import EditableHoverButton from "../../../components/EditableText/EditableHoverButton";
 import { flushSync } from "react-dom";
 import ConfirmDialog from "../../../components/ConfirmDialog";
+import Select from "../../../components/Select";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -254,7 +255,17 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
   const { status } = useSession();
   const isLoggedIn = status === "authenticated";
 
-  const [quantity, setQuantity] = useState("1");
+  const [quantityOptions] = useState(() => {
+    let options: Array<{ value: number }> = [];
+    for (let i = 0; i < 5; i++) {
+      options.push({ value: i + 1 });
+    }
+    return options;
+  });
+
+  const [quantity, setQuantity] = useState<(typeof quantityOptions)[0]>(
+    quantityOptions[0] as (typeof quantityOptions)[0]
+  );
 
   const cancelCartItemQuery = async () => {
     const queryKey = getQueryKey(
@@ -319,23 +330,30 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
     if (!data) {
       await addToCart({
         productId: product.id,
-        quantity: parseInt(quantity),
+        quantity: quantity.value,
       });
     } else {
       await updateQuantity({
         cartItemId: data.cartItem.id,
-        quantity: data.cartItem.quantity + parseInt(quantity),
+        quantity: data.cartItem.quantity + quantity.value,
       });
     }
   };
 
   return (
     <>
-      <input
+      {/*  <input
         value={quantity}
         onChange={(e) => {
           setQuantity(e.currentTarget.value);
         }}
+      /> */}
+      <Select
+        options={quantityOptions}
+        value={quantity}
+        setValue={setQuantity}
+        textField={"value"}
+        multiple={false}
       />
       <Button
         variants={{ type: "secondary" }}
