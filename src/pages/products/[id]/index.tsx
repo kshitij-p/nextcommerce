@@ -314,8 +314,6 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
       return;
     }
 
-    //TO DO IMP! make middlewares for authed only and guest only routes and use them for cart, product/create, login and register
-
     //To do add a quantity picker here for selecting quantity
     //To do add react hook form here for validation
     if (!data) {

@@ -8,8 +8,6 @@ import { invalidateProducts } from "../../utils/client";
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
 
-  //To do create middleware to redirect to login page if not logged in and tryin to open this page
-
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
