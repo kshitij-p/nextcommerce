@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import React from "react";
 import Button from "../components/Button";
+import ProtectedPage from "../components/ProtectedPage";
 import { api, type RouterOutputs } from "../utils/api";
 import { TIME_IN_MS } from "../utils/client";
 
@@ -118,4 +119,4 @@ const CartPage = () => {
   );
 };
 
-export default CartPage;
+export default ProtectedPage(CartPage);

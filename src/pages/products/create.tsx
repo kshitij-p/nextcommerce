@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useState } from "react";
+import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
 import { invalidateProducts } from "../../utils/client";
 
@@ -93,6 +94,7 @@ const CreateProductPage = () => {
       <br />
       <input
         type="file"
+        accept="image/*"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           let file = e.currentTarget?.files?.[0];
           if (!file) {
@@ -118,4 +120,4 @@ const CreateProductPage = () => {
   );
 };
 
-export default CreateProductPage;
+export default ProtectedPage(CreateProductPage);

@@ -8,6 +8,7 @@ const PageWithFallback = (Page: NextPage<any>) => {
   const NewPage = (props: React.PropsWithChildren) => {
     const router = useRouter();
 
+    //To do throw a spinner here
     if (router.isFallback) {
       return <div>Loading ...</div>;
     }
