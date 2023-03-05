@@ -1,17 +1,65 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { type ForwardedRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
 import { invalidateProducts } from "../../utils/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const CreateProductFormSchema = z.object({
+  title: z.string().min(1, "Must have atleast 1 character"),
+  description: z.string().min(1, "Must have atleast 1 character"),
+  price: z
+    .number({ invalid_type_error: "Must be a positive number" })
+    .positive("Must be a positive number"),
+  files:
+    typeof window === "undefined"
+      ? z.undefined()
+      : z.preprocess(
+          (val: unknown) => [...(val as FileList)],
+          z
+            .array(z.instanceof(File))
+            .min(1, { message: "Atleast 1 image is required" })
+        ),
+  /* : z.array(z.instanceof(File)).min(1), */
+});
+
+type CreateProductForm = z.infer<typeof CreateProductFormSchema>;
+
+const Input = React.forwardRef(
+  (
+    {
+      errorMessage,
+      ...rest
+    }: React.ComponentProps<"input"> & {
+      errorMessage?: string;
+    },
+    passedRef: ForwardedRef<HTMLInputElement>
+  ) => {
+    return (
+      <>
+        <input {...rest} ref={passedRef} />
+        {errorMessage ? <b className="text-red-500">{errorMessage}</b> : null}
+      </>
+    );
+  }
+);
+
+Input.displayName = "Input";
 
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
 
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [price, setPrice] = useState("");
-  const [file, setFile] = useState<File | undefined>(undefined);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<CreateProductForm>({
+    resolver: zodResolver(CreateProductFormSchema),
+  });
 
   const [productLink, setProductLink] = useState("");
 
@@ -35,14 +83,23 @@ const CreateProductPage = () => {
       },
     });
 
-  const handleCreate = async () => {
+  const handleCreate = async ({
+    title,
+    description,
+    price,
+    files,
+  }: CreateProductForm) => {
     //To do add react-hook-form for validation
 
+    const file = files?.[0];
+
     if (!file) {
+      setError("files", { message: "Atleast 1 image is required" });
       return;
     }
 
     if (!file.type.startsWith("image")) {
+      setError("files", { message: "Only images are allowed" });
       return;
     }
 
@@ -61,7 +118,7 @@ const CreateProductPage = () => {
 
     createProduct({
       title: title,
-      description: desc,
+      description: description,
       imageKey: key,
       price: price,
     });
@@ -69,51 +126,42 @@ const CreateProductPage = () => {
 
   return (
     <div>
-      Title
-      <input
-        name="title"
-        value={title}
-        onChange={(e) => setTitle(e.currentTarget.value)}
-      />
-      <br />
-      Description
-      <input
-        name="description"
-        value={desc}
-        onChange={(e) => setDesc(e.currentTarget.value)}
-      />
-      <br />
-      Price
-      <input
-        name="price"
-        value={price}
-        onChange={(e) => setPrice(e.currentTarget.value)}
-      />
-      <br />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          let file = e.currentTarget?.files?.[0];
-          if (!file) {
-            return;
-          }
-          setFile(file);
-        }}
-      />
-      {/* Progressbar */}
-      <div
-        className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
-        style={{
-          width: `${progress}%`,
-        }}
-      />
-      <button onClick={handleCreate}>Create</button>
-      {productLink ? (
-        <Link href={`/products/${productLink}`}>
-          Success! Click to visit your product
-        </Link>
-      ) : null}
+      <form onSubmit={handleSubmit(handleCreate)}>
+        Title
+        <Input {...register("title")} errorMessage={errors.title?.message} />
+        <br />
+        Description
+        <Input
+          {...register("description")}
+          errorMessage={errors.description?.message}
+        />
+        <br />
+        Price
+        <Input
+          {...register("price", { valueAsNumber: true })}
+          errorMessage={errors.price?.message}
+        />
+        <br />
+        <Input
+          type="file"
+          accept="image/*"
+          {...register("files")}
+          errorMessage={errors.files?.message}
+        />
+        {/* Progressbar */}
+        <div
+          className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
+          style={{
+            width: `${progress}%`,
+          }}
+        />
+        <button type="submit">Create</button>
+        {productLink ? (
+          <Link href={`/products/${productLink}`}>
+            Success! Click to visit your product
+          </Link>
+        ) : null}
+      </form>
     </div>
   );
 };
