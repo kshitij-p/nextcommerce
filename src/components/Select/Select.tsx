@@ -19,7 +19,7 @@ interface MultipleSelectProps<T> extends SelectGenericProps<Array<T>> {
   multiple: true;
 } */
 
-export type SelectProps<T> =
+export type SelectProps<T> = React.ComponentProps<"div"> &
   SingleSelectProps<T> /* | MultipleSelectProps<T> */;
 
 const Select = <T extends Record<string, unknown>>({
@@ -28,10 +28,12 @@ const Select = <T extends Record<string, unknown>>({
   options,
   textField,
   multiple,
+  className = "",
+  ...rest
 }: SelectProps<T>) => {
   return (
     <Listbox value={value} onChange={setValue} multiple={multiple}>
-      <div className="relative flex flex-col">
+      <div {...rest} className={`relative ${className}`}>
         <Listbox.Button as={Fragment}>
           <Button>{value[textField] as string}</Button>
         </Listbox.Button>

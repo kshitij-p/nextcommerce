@@ -5,8 +5,11 @@ import { type ControlledDialogProps } from "./Dialog/ControlledDialog";
 
 const DangerDialog = ({
   openerChildren,
+  openerProps,
   backButtonChildren = "No go back",
+  backButtonProps,
   confirmButtonChildren,
+  confirmButtonProps,
   open,
   setOpen,
   title,
@@ -15,8 +18,11 @@ const DangerDialog = ({
   ...rest
 }: {
   openerChildren: React.ReactNode;
+  openerProps?: React.ComponentProps<typeof Button>;
   backButtonChildren?: React.ReactNode;
+  backButtonProps?: React.ComponentProps<typeof Button>;
   confirmButtonChildren?: React.ReactNode;
+  confirmButtonProps?: React.ComponentProps<typeof Button>;
   open: ControlledDialogProps["open"];
   setOpen: ControlledDialogProps["setOpen"];
   title: string;
@@ -31,12 +37,20 @@ const DangerDialog = ({
       setOpen={setOpen}
       title={title}
       description={description}
-      Opener={<Button variants={{ type: "danger" }}>{openerChildren}</Button>}
+      Opener={
+        <Button {...openerProps} variants={{ type: "danger" }}>
+          {openerChildren}
+        </Button>
+      }
       BackButton={
-        <Button variants={{ type: "secondary" }}>{backButtonChildren}</Button>
+        <Button {...backButtonProps} variants={{ type: "secondary" }}>
+          {backButtonChildren}
+        </Button>
       }
       ConfirmButton={
-        <Button variants={{ type: "danger" }}>{confirmButtonChildren}</Button>
+        <Button {...confirmButtonProps} variants={{ type: "danger" }}>
+          {confirmButtonChildren}
+        </Button>
       }
       onConfirm={onConfirmDelete}
     />

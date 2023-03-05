@@ -238,6 +238,7 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
 
   return (
     <DangerDialog
+      openerProps={{ className: "order-last" }}
       open={open}
       setOpen={setOpen}
       title="Delete this product"
@@ -342,13 +343,8 @@ const AddToCart = ({ product }: { product: PageProduct }) => {
 
   return (
     <>
-      {/*  <input
-        value={quantity}
-        onChange={(e) => {
-          setQuantity(e.currentTarget.value);
-        }}
-      /> */}
       <Select
+        className="order-2"
         options={quantityOptions}
         value={quantity}
         setValue={setQuantity}
