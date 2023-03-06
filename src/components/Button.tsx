@@ -65,6 +65,7 @@ const Button = ({
   children,
   className = "",
   variants: passedVariants = DEFAULT_BUTTON_VARIANTS,
+  type = "button",
   ...rest
 }: React.ComponentProps<"button"> & {
   variants?: Partial<ButtonVariantsProp>;
@@ -72,7 +73,11 @@ const Button = ({
   const variants = { ...DEFAULT_BUTTON_VARIANTS, ...passedVariants };
 
   return (
-    <button {...rest} className={`${buttonClasses(variants)} ${className}`}>
+    <button
+      {...rest}
+      type={type}
+      className={`${buttonClasses(variants)} ${className}`}
+    >
       {children}
     </button>
   );

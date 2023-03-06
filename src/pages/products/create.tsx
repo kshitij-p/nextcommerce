@@ -1,11 +1,15 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import React, { type ForwardedRef, useState } from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
 import { invalidateProducts } from "../../utils/client";
 import useForm from "../../hooks/useForm";
+import LabelledInput from "../../components/LabelledInput";
+import Form from "../../components/Form";
+import FileInput from "../../components/FileInput";
+import Button from "../../components/Button";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -26,36 +30,10 @@ const CreateProductFormSchema = z.object({
 
 type CreateProductForm = z.infer<typeof CreateProductFormSchema>;
 
-const Input = React.forwardRef(
-  (
-    {
-      errorMessage,
-      ...rest
-    }: React.ComponentProps<"input"> & {
-      errorMessage?: string;
-    },
-    passedRef: ForwardedRef<HTMLInputElement>
-  ) => {
-    return (
-      <>
-        <input {...rest} ref={passedRef} />
-        {errorMessage ? <b className="text-red-500">{errorMessage}</b> : null}
-      </>
-    );
-  }
-);
-
-Input.displayName = "Input";
-
 const CreateProductPage = () => {
   const queryClient = useQueryClient();
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm({ schema: CreateProductFormSchema });
+  const form = useForm({ schema: CreateProductFormSchema });
 
   const [productLink, setProductLink] = useState("");
 
@@ -88,12 +66,12 @@ const CreateProductPage = () => {
     const file = files?.[0];
 
     if (!file) {
-      setError("files", { message: "Atleast 1 image is required" });
+      form.setError("files", { message: "Atleast 1 image is required" });
       return;
     }
 
     if (!file.type.startsWith("image")) {
-      setError("files", { message: "Only images are allowed" });
+      form.setError("files", { message: "Only images are allowed" });
       return;
     }
 
@@ -120,28 +98,11 @@ const CreateProductPage = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(handleCreate)}>
-        Title
-        <Input {...register("title")} errorMessage={errors.title?.message} />
-        <br />
-        Description
-        <Input
-          {...register("description")}
-          errorMessage={errors.description?.message}
-        />
-        <br />
-        Price
-        <Input
-          {...register("price", { valueAsNumber: true })}
-          errorMessage={errors.price?.message}
-        />
-        <br />
-        <Input
-          type="file"
-          accept="image/*"
-          {...register("files")}
-          errorMessage={errors.files?.message}
-        />
+      <Form form={form} onSubmit={handleCreate}>
+        <LabelledInput {...form.register("title")} />
+        <LabelledInput {...form.register("description")} />
+        <LabelledInput {...form.register("price", { valueAsNumber: true })} />
+        <FileInput accept="image/*" {...form.register("files")} />
         {/* Progressbar */}
         <div
           className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
@@ -149,13 +110,13 @@ const CreateProductPage = () => {
             width: `${progress}%`,
           }}
         />
-        <button type="submit">Create</button>
+        <Button type="submit">Create</Button>
         {productLink ? (
           <Link href={`/products/${productLink}`}>
             Success! Click to visit your product
           </Link>
         ) : null}
-      </form>
+      </Form>
     </div>
   );
 };

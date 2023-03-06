@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { useFormContext } from "react-hook-form";
 import useMultipleRefs from "../hooks/useMultipleRefs";
 
 const Textarea = React.forwardRef(
@@ -13,6 +14,7 @@ const Textarea = React.forwardRef(
       cursorToTextEndOnFocus = false,
       onChange,
       onFocus,
+      name,
       ...rest
     }: React.ComponentProps<"textarea"> & {
       autoResize?: boolean;
@@ -21,6 +23,10 @@ const Textarea = React.forwardRef(
     passedRef: ForwardedRef<HTMLTextAreaElement>
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const form = useFormContext();
+    const state = name ? form.getFieldState(name) : undefined;
+    const errorMessage = state?.error?.message;
 
     const resizeToFit = useCallback(
       (el?: HTMLTextAreaElement | null) => {
@@ -73,12 +79,17 @@ const Textarea = React.forwardRef(
     }, [resizeToFit]);
 
     return (
-      <textarea
-        {...rest}
-        onChange={autoResize ? handleChange : onChange}
-        onFocus={cursorToTextEndOnFocus ? handleFocus : onFocus}
-        ref={handleRef}
-      />
+      <>
+        <textarea
+          {...rest}
+          name={name}
+          aria-invalid={errorMessage ? "true" : "false"}
+          onChange={autoResize ? handleChange : onChange}
+          onFocus={cursorToTextEndOnFocus ? handleFocus : onFocus}
+          ref={handleRef}
+        />
+        {errorMessage ? <b className="text-red-500">{errorMessage}</b> : null}
+      </>
     );
   }
 );

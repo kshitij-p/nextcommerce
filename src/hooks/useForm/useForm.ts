@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm as useRHFForm, type UseFormProps } from "react-hook-form";
-import { type z } from "zod";
+import { type TypeOf } from "zod";
 
 const useForm = <Z extends Zod.Schema>({
   schema,
-}: UseFormProps<Z> & {
+  ...rest
+}: Exclude<UseFormProps<TypeOf<Z>>, "resolver"> & {
   schema: Z;
 }) => {
-  return useRHFForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
+  return useRHFForm({ ...rest, resolver: zodResolver(schema) });
 };
 
 export default useForm;
