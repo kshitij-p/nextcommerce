@@ -1,12 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { type ForwardedRef, useState } from "react";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
 import { invalidateProducts } from "../../utils/client";
-import { zodResolver } from "@hookform/resolvers/zod";
+import useForm from "../../hooks/useForm";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -23,7 +22,6 @@ const CreateProductFormSchema = z.object({
             .array(z.instanceof(File))
             .min(1, { message: "Atleast 1 image is required" })
         ),
-  /* : z.array(z.instanceof(File)).min(1), */
 });
 
 type CreateProductForm = z.infer<typeof CreateProductFormSchema>;
@@ -57,9 +55,7 @@ const CreateProductPage = () => {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<CreateProductForm>({
-    resolver: zodResolver(CreateProductFormSchema),
-  });
+  } = useForm({ schema: CreateProductFormSchema });
 
   const [productLink, setProductLink] = useState("");
 
@@ -89,8 +85,6 @@ const CreateProductPage = () => {
     price,
     files,
   }: CreateProductForm) => {
-    //To do add react-hook-form for validation
-
     const file = files?.[0];
 
     if (!file) {
