@@ -11,10 +11,15 @@ import Image from "../../../components/Image";
 import ExpandableText from "../../../components/ExpandableText";
 import Button from "../../../components/Button";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import React, { type ForwardedRef, useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
-import { type QueryClient, useQueryClient } from "@tanstack/react-query";
-import { invalidateProducts, TIME_IN_MS } from "../../../utils/client";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  getReviewsQueryKey,
+  invalidateProducts,
+  invalidateReviewsQuery,
+  TIME_IN_MS,
+} from "../../../utils/client";
 import { z } from "zod";
 import { getQueryKey } from "@trpc/react-query";
 import { CART_GET_QUERY_KEY } from "../../cart";
@@ -28,6 +33,7 @@ import EditableHoverButton from "../../../components/EditableText/EditableHoverB
 import { flushSync } from "react-dom";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import Select from "../../../components/Select";
+import CreateReview from "../../../components/CreateProduct/CreateReview";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -250,135 +256,125 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
   );
 };
 
-const AddToCart = ({ product }: { product: PageProduct }) => {
-  const queryClient = useQueryClient();
+const AddToCart = React.forwardRef(
+  (
+    { product }: { product: PageProduct },
+    passedRef: ForwardedRef<HTMLDivElement>
+  ) => {
+    const queryClient = useQueryClient();
 
-  const { status } = useSession();
-  const isLoggedIn = status === "authenticated";
+    const { status } = useSession();
+    const isLoggedIn = status === "authenticated";
 
-  const [quantityOptions] = useState(() => {
-    let options: Array<{ value: number }> = [];
-    for (let i = 0; i < 5; i++) {
-      options.push({ value: i + 1 });
-    }
-    return options;
-  });
-
-  const [quantity, setQuantity] = useState<(typeof quantityOptions)[0]>(
-    quantityOptions[0] as (typeof quantityOptions)[0]
-  );
-
-  const cancelCartItemQuery = async () => {
-    const queryKey = getQueryKey(
-      api.cart.getProduct,
-      {
-        productId: product.id,
-      },
-      "query"
-    );
-
-    await queryClient.cancelQueries(queryKey);
-    await queryClient.cancelQueries(CART_GET_QUERY_KEY);
-  };
-
-  const invalidateCartItemQuery = async () => {
-    const queryKey = getQueryKey(
-      api.cart.getProduct,
-      {
-        productId: product.id,
-      },
-      "query"
-    );
-
-    await queryClient.invalidateQueries(queryKey);
-    await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
-  };
-
-  const { mutateAsync: addToCart, isLoading: isAdding } =
-    api.cart.addToCart.useMutation({
-      onMutate: cancelCartItemQuery,
-      onSettled: invalidateCartItemQuery,
-      onSuccess: () => {
-        //To do throw a toast here
-        console.log("added to cart");
-      },
+    const [quantityOptions] = useState(() => {
+      let options: Array<{ value: number }> = [];
+      for (let i = 0; i < 5; i++) {
+        options.push({ value: i + 1 });
+      }
+      return options;
     });
 
-  const { mutateAsync: updateQuantity, isLoading: isUpdatingQty } =
-    api.cart.updateQuantity.useMutation({
-      onMutate: cancelCartItemQuery,
-      onSettled: invalidateCartItemQuery,
-      onSuccess: () => {
-        //To do throw a toast here
-        console.log("updated product quantity");
-      },
-    });
+    const [quantity, setQuantity] = useState<(typeof quantityOptions)[0]>(
+      quantityOptions[0] as (typeof quantityOptions)[0]
+    );
 
-  const { data } = api.cart.getProduct.useQuery(
-    { productId: product.id },
-    {
-      enabled: isLoggedIn,
-    }
-  );
+    const cancelCartItemQuery = async () => {
+      const queryKey = getQueryKey(
+        api.cart.getProduct,
+        {
+          productId: product.id,
+        },
+        "query"
+      );
 
-  const handleAddToCart = async () => {
-    if (!isLoggedIn) {
-      return;
-    }
+      await queryClient.cancelQueries(queryKey);
+      await queryClient.cancelQueries(CART_GET_QUERY_KEY);
+    };
 
-    //To do add a quantity picker here for selecting quantity
-    //To do add react hook form here for validation
-    if (!data) {
-      await addToCart({
-        productId: product.id,
-        quantity: quantity.value,
+    const invalidateCartItemQuery = async () => {
+      const queryKey = getQueryKey(
+        api.cart.getProduct,
+        {
+          productId: product.id,
+        },
+        "query"
+      );
+
+      await queryClient.invalidateQueries(queryKey);
+      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
+    };
+
+    const { mutateAsync: addToCart, isLoading: isAdding } =
+      api.cart.addToCart.useMutation({
+        onMutate: cancelCartItemQuery,
+        onSettled: invalidateCartItemQuery,
+        onSuccess: () => {
+          //To do throw a toast here
+          console.log("added to cart");
+        },
       });
-    } else {
-      await updateQuantity({
-        cartItemId: data.cartItem.id,
-        quantity: data.cartItem.quantity + quantity.value,
+
+    const { mutateAsync: updateQuantity, isLoading: isUpdatingQty } =
+      api.cart.updateQuantity.useMutation({
+        onMutate: cancelCartItemQuery,
+        onSettled: invalidateCartItemQuery,
+        onSuccess: () => {
+          //To do throw a toast here
+          console.log("updated product quantity");
+        },
       });
-    }
-  };
 
-  return (
-    <>
-      <Select
-        className="order-2"
-        options={quantityOptions}
-        value={quantity}
-        setValue={setQuantity}
-        textField={"value"}
-        multiple={false}
-      />
-      <Button
-        variants={{ type: "secondary" }}
-        disabled={isAdding || isUpdatingQty}
-        onClick={handleAddToCart}
-      >
-        Add to cart
-      </Button>
-    </>
-  );
-};
+    const { data } = api.cart.getProduct.useQuery(
+      { productId: product.id },
+      {
+        enabled: isLoggedIn,
+      }
+    );
 
-const getReviewsQueryKey = (productId: PageProduct["id"]) => {
-  return getQueryKey(
-    api.review.getForProduct,
-    { productId: productId },
-    "query"
-  );
-};
+    const handleAddToCart = async () => {
+      if (!isLoggedIn) {
+        return;
+      }
 
-const invalidateReviewsQuery = async ({
-  queryClient,
-  productId,
-}: {
-  queryClient: QueryClient;
-  productId: PageProduct["id"];
-}) => {
-  await queryClient.invalidateQueries(getReviewsQueryKey(productId));
-};
+      //To do add a quantity picker here for selecting quantity
+      //To do add react hook form here for validation
+      if (!data) {
+        await addToCart({
+          productId: product.id,
+          quantity: quantity.value,
+        });
+      } else {
+        await updateQuantity({
+          cartItemId: data.cartItem.id,
+          quantity: data.cartItem.quantity + quantity.value,
+        });
+      }
+    };
+
+    return (
+      <>
+        <Select
+          className="order-2"
+          options={quantityOptions}
+          value={quantity}
+          setValue={setQuantity}
+          textField={"value"}
+          multiple={false}
+          ref={passedRef}
+        />
+        <Button
+          variants={{ type: "secondary" }}
+          disabled={isAdding || isUpdatingQty}
+          onClick={handleAddToCart}
+        >
+          Add to cart
+        </Button>
+      </>
+    );
+  }
+);
+
+AddToCart.displayName = "AddToCart";
 
 const useEditReview = ({
   fieldToEdit,
@@ -571,48 +567,6 @@ const ReviewDeleteDialog = ({ review }: { review: ProductReview }) => {
       onConfirmDelete={handleConfirmDelete}
       isLoading={isLoading}
     />
-  );
-};
-
-const CreateReview = ({ productId }: { productId: string }) => {
-  const queryClient = useQueryClient();
-
-  const [body, setBody] = useState("");
-  const [rating, setRating] = useState("1");
-
-  const { mutate: postReview, isLoading } = api.review.create.useMutation({
-    onSuccess: async () => {
-      await invalidateReviewsQuery({
-        queryClient: queryClient,
-        productId: productId,
-      });
-    },
-  });
-
-  //To do use rhf here for validation
-
-  return (
-    <div>
-      <b>Write a review</b>
-      <textarea
-        disabled={isLoading}
-        value={body}
-        onChange={(e) => setBody(e.currentTarget.value)}
-        placeholder="Leave your thoughts about this product..."
-      />
-      Rating
-      <input
-        value={rating}
-        onChange={(e) => setRating(e.currentTarget.value)}
-      />
-      <Button
-        onClick={() => {
-          postReview({ productId: productId, body: body, rating: rating });
-        }}
-      >
-        Create
-      </Button>
-    </div>
   );
 };
 

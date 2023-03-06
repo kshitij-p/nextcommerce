@@ -1,3 +1,4 @@
+import { type Product } from "@prisma/client";
 import { type QueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import { api } from "./api";
@@ -14,4 +15,22 @@ export const invalidateProducts = async (queryClient: QueryClient) => {
   await queryClient.invalidateQueries(getQueryKey(api.product.getAll), {
     refetchType: "all",
   });
+};
+
+export const getReviewsQueryKey = (productId: Product["id"]) => {
+  return getQueryKey(
+    api.review.getForProduct,
+    { productId: productId },
+    "query"
+  );
+};
+
+export const invalidateReviewsQuery = async ({
+  queryClient,
+  productId,
+}: {
+  queryClient: QueryClient;
+  productId: Product["id"];
+}) => {
+  await queryClient.invalidateQueries(getReviewsQueryKey(productId));
 };
