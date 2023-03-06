@@ -11,7 +11,7 @@ const Image = ({
   Container = <div />,
   containerProps: passedContainerProps = DEFAULT_CONTAINER_PROPS,
   aspectRatio = "1 / 1",
-  size,
+  width,
   ...rest
 }: React.ComponentProps<typeof NextImage> & {
   Container?: React.ReactElement<
@@ -19,7 +19,7 @@ const Image = ({
   >;
   containerProps?: Partial<typeof DEFAULT_CONTAINER_PROPS>;
   aspectRatio?: string;
-  size?: string;
+  width?: string;
 }) => {
   const { position: containerPosition, height: containerHeight } = {
     ...DEFAULT_CONTAINER_PROPS,
@@ -37,7 +37,7 @@ const Image = ({
         style: {
           ...Container.props?.style,
           aspectRatio: aspectRatio,
-          width: size,
+          width: width,
           height: containerHeight,
           position: containerPosition,
         },

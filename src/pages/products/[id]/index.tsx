@@ -779,7 +779,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
   return (
     <div className="flex w-full flex-col gap-4 p-5 text-zinc-300 md:p-8 xl:flex-row xl:gap-8">
       <Image
-        className="rounded-sm"
+        className="rounded-sm object-cover"
         src={product.images?.[0]?.publicUrl ?? ""}
         alt={`Image of ${product.title}`}
         fill
