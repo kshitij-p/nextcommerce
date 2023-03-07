@@ -5,7 +5,7 @@ import {
 } from "next";
 import { prisma } from "../../../server/db";
 
-import { type Review, type Product } from "@prisma/client";
+import { type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
 import Image from "../../../components/Image";
 import ExpandableText from "../../../components/ExpandableText";
@@ -14,12 +14,7 @@ import { useSession } from "next-auth/react";
 import React, { type ForwardedRef, useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  getReviewsQueryKey,
-  invalidateProducts,
-  invalidateReviewsQuery,
-  TIME_IN_MS,
-} from "../../../utils/client";
+import { invalidateProducts, TIME_IN_MS } from "../../../utils/client";
 import { z } from "zod";
 import { getQueryKey } from "@trpc/react-query";
 import { CART_GET_QUERY_KEY } from "../../cart";
@@ -29,26 +24,19 @@ import EditableText, {
 import { EditableTextDialog } from "../../../components/EditableText";
 import { type EditableTextProps } from "../../../components/EditableText/EditableTextDialog";
 import DangerDialog from "../../../components/DangerDialog";
-import EditableHoverButton from "../../../components/EditableText/EditableHoverButton";
-import { flushSync } from "react-dom";
-import ConfirmDialog from "../../../components/ConfirmDialog";
 import Select from "../../../components/Select";
-import CreateReview from "../../../components/CreateProduct/CreateReview";
+import Reviews from "../../../components/ProductPage/Reviews";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
-
-type EditableReviewFields = keyof Omit<Review, "userId" | "id" | "productId">;
 
 type ProductPageProps = {
   product: RouterOutputs["product"]["get"]["product"] | null;
 };
 
-type PageProduct = Exclude<
+export type PageProduct = Exclude<
   InferGetStaticPropsType<typeof getStaticProps>["product"],
   null
 >;
-
-type ProductReview = RouterOutputs["review"]["getForProduct"]["reviews"][0];
 
 export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
   const id = z.string().parse(ctx.params?.id);
@@ -86,6 +74,7 @@ const ProductEditDialog = ({
   product,
   onDiscard,
   onMutationComplete,
+  canSave,
 }: {
   value: string;
   fieldToEdit: EditableProductFields;
@@ -94,6 +83,7 @@ const ProductEditDialog = ({
   product: PageProduct;
   onDiscard: EditableTextProps["onDiscard"];
   onMutationComplete: () => void;
+  canSave: boolean;
 }) => {
   const queryClient = useQueryClient();
 
@@ -166,8 +156,19 @@ const ProductEditDialog = ({
       isLoading={isLoading}
       onSaveChanges={handleSaveChanges}
       onDiscard={onDiscard}
+      canSave={canSave}
     />
   );
+};
+
+const productValidators: {
+  [k in EditableProductFields]: Zod.Schema;
+} = {
+  title: z.string().min(1, "Must contain atleast 1 character"),
+  description: z.string().min(1, "Must contain atleast 1 character"),
+  price: z.coerce
+    .number({ invalid_type_error: "Must be a number" })
+    .positive("Must be a positive number"),
 };
 
 const EditableProductText = ({
@@ -194,6 +195,8 @@ const EditableProductText = ({
     setEditing,
     text,
     setText,
+    errorMsg,
+    setErrorMsg,
     onStopEditing,
   } = useEditableText();
 
@@ -205,8 +208,11 @@ const EditableProductText = ({
       text={text}
       setText={setText}
       setDiagOpen={setDiagOpen}
+      errorMsg={errorMsg}
+      setErrorMsg={setErrorMsg}
       editing={editing}
       setEditing={setEditing}
+      validatorSchema={productValidators[fieldToEdit]}
     >
       <ProductEditDialog
         onMutationComplete={onStopEditing}
@@ -216,6 +222,7 @@ const EditableProductText = ({
         fieldToEdit={fieldToEdit}
         value={text}
         product={product}
+        canSave={errorMsg ? false : true}
       />
     </EditableText>
   );
@@ -375,336 +382,6 @@ const AddToCart = React.forwardRef(
 );
 
 AddToCart.displayName = "AddToCart";
-
-const useEditReview = ({
-  fieldToEdit,
-  value,
-  review,
-  onMutationComplete,
-}: {
-  fieldToEdit: EditableReviewFields;
-  value: string;
-  review: ProductReview;
-  onMutationComplete: () => void;
-}) => {
-  const queryClient = useQueryClient();
-
-  return api.review.update.useMutation({
-    onMutate: async () => {
-      const queryKey = getReviewsQueryKey(review.productId);
-
-      await queryClient.cancelQueries(queryKey);
-
-      const previousReviews =
-        queryClient.getQueryData<RouterOutputs["review"]["getForProduct"]>(
-          queryKey
-        );
-
-      queryClient.setQueryData<RouterOutputs["review"]["getForProduct"]>(
-        queryKey,
-        (data) => {
-          if (!data) {
-            return data;
-          }
-
-          return {
-            ...data,
-            reviews: data.reviews.map((currReview) => {
-              if (currReview.id !== review.id) {
-                return currReview;
-              }
-
-              return { ...review, [fieldToEdit]: value };
-            }),
-          };
-        }
-      );
-
-      onMutationComplete();
-
-      return { previousReviews: previousReviews };
-    },
-    onError: (err, _, ctx) => {
-      if (!ctx) {
-        return;
-      }
-
-      queryClient.setQueryData<RouterOutputs["review"]["getForProduct"]>(
-        getReviewsQueryKey(review.productId),
-        ctx.previousReviews
-      );
-    },
-    onSettled: async () => {
-      await invalidateReviewsQuery({
-        queryClient: queryClient,
-        productId: review.productId,
-      });
-    },
-  });
-};
-
-const ReviewEditDialog = ({
-  open,
-  setOpen,
-  onDiscard,
-  review,
-  fieldToEdit,
-  value,
-  onMutationComplete,
-}: {
-  open: EditableTextProps["open"];
-  setOpen: EditableTextProps["setOpen"];
-  onDiscard: EditableTextProps["onDiscard"];
-  review: ProductReview;
-  fieldToEdit: EditableReviewFields;
-  value: string;
-  onMutationComplete: () => void;
-}) => {
-  const { mutate: updateReview, isLoading } = useEditReview({
-    fieldToEdit,
-    review,
-    value,
-    onMutationComplete,
-  });
-
-  const handleSaveEditChanges = () => {
-    updateReview({ id: review.id, [fieldToEdit]: value });
-  };
-
-  return (
-    <EditableTextDialog
-      title={`Edit this review's ${fieldToEdit as string}`}
-      open={open}
-      setOpen={setOpen}
-      isLoading={isLoading}
-      onDiscard={onDiscard}
-      onSaveChanges={handleSaveEditChanges}
-    />
-  );
-};
-
-const EditableReviewText = ({
-  children,
-  canEdit,
-  fieldToEdit,
-  review,
-  ...rest
-}: Omit<React.ComponentProps<"p">, "children"> & {
-  children: string;
-  canEdit: boolean;
-  as?: React.ReactElement<Record<string, unknown>>;
-  inputElement?: "textarea" | "input";
-  fieldToEdit: EditableReviewFields;
-  review: ProductReview;
-  onChangeComplete?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-}) => {
-  const {
-    diagOpen,
-    setDiagOpen,
-    editing,
-    setEditing,
-    text,
-    setText,
-    onStopEditing,
-  } = useEditableText();
-
-  return (
-    <EditableText
-      {...rest}
-      value={children}
-      canEdit={canEdit}
-      text={text}
-      setText={setText}
-      setDiagOpen={setDiagOpen}
-      editing={editing}
-      setEditing={setEditing}
-    >
-      <ReviewEditDialog
-        onMutationComplete={onStopEditing}
-        onDiscard={onStopEditing}
-        open={diagOpen}
-        setOpen={setDiagOpen}
-        fieldToEdit={fieldToEdit}
-        value={text}
-        review={review}
-      />
-    </EditableText>
-  );
-};
-
-const ReviewDeleteDialog = ({ review }: { review: ProductReview }) => {
-  const queryClient = useQueryClient();
-
-  const [open, setOpen] = useState(false);
-
-  const { mutate: deleteReview, isLoading } = api.review.delete.useMutation({
-    onSuccess: async () => {
-      await invalidateReviewsQuery({
-        queryClient,
-        productId: review.productId,
-      });
-      //To do throw a toast here
-      console.log("deleted review");
-    },
-    onSettled: () => {
-      setOpen(false);
-    },
-  });
-
-  const handleConfirmDelete = () => {
-    deleteReview({ id: review.id });
-  };
-
-  return (
-    <DangerDialog
-      open={open}
-      setOpen={setOpen}
-      title={"Delete this review"}
-      openerChildren={"Delete"}
-      confirmButtonChildren={"Yes delete this"}
-      onConfirmDelete={handleConfirmDelete}
-      isLoading={isLoading}
-    />
-  );
-};
-
-const ReviewRating = ({
-  review,
-  canEdit,
-}: {
-  review: ProductReview;
-  canEdit: boolean;
-}) => {
-  const {
-    text,
-    setText,
-    diagOpen,
-    setDiagOpen,
-    editing,
-    setEditing,
-    onStopEditing,
-  } = useEditableText();
-
-  const { mutate: updateReview, isLoading } = useEditReview({
-    fieldToEdit: "rating",
-    value: text,
-    onMutationComplete: onStopEditing,
-    review: review,
-  });
-
-  const rating = `${review.rating}`;
-
-  const handleBlur = () => {
-    if (rating.trim() === text.trim()) {
-      setEditing(false);
-      return;
-    }
-    setDiagOpen(true);
-  };
-
-  const handleConfirm = () => {
-    updateReview({ id: review.id, rating: text });
-  };
-
-  //To do replace rating with a star rating component
-
-  return (
-    <div className="group relative">
-      {editing ? (
-        <input
-          autoFocus
-          value={text}
-          onChange={(e) => setText(e.currentTarget.value)}
-          onBlur={handleBlur}
-        />
-      ) : (
-        <>
-          <b>{`Rated ${review.rating}`}</b>
-          {canEdit ? (
-            <EditableHoverButton
-              onClick={() => {
-                flushSync(() => {
-                  setText(rating);
-                });
-                setEditing(true);
-              }}
-            />
-          ) : null}
-        </>
-      )}
-
-      <ConfirmDialog
-        open={diagOpen}
-        setOpen={setDiagOpen}
-        title={`Edit this review's rating`}
-        isLoading={isLoading}
-        onConfirm={handleConfirm}
-        handleDiscard={onStopEditing}
-      />
-    </div>
-  );
-};
-
-const Review = ({ review }: { review: ProductReview }) => {
-  const { data: session } = useSession();
-
-  const canEdit = review.userId === session?.user?.id;
-
-  return (
-    <div key={review.id}>
-      <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
-      <ReviewRating review={review} canEdit={canEdit} />
-      <EditableReviewText
-        className="flex"
-        canEdit={canEdit}
-        review={review}
-        fieldToEdit={"body"}
-        as={
-          <ExpandableText
-            className="mt-2 text-zinc-400 md:mt-3 xl:max-w-[80%]"
-            maxLines={10}
-          />
-        }
-      >
-        {review.body}
-      </EditableReviewText>
-      {canEdit ? <ReviewDeleteDialog review={review} /> : null}
-    </div>
-  );
-};
-
-const Reviews = ({ product }: { product: PageProduct }) => {
-  const { status } = useSession();
-
-  const {
-    data: { reviews, userReview },
-  } = api.review.getForProduct.useQuery(
-    { productId: product.id },
-    {
-      staleTime: TIME_IN_MS.FIVE_MINUTES,
-      initialData: { message: "Initial data", reviews: [] },
-      initialDataUpdatedAt: 0,
-    }
-  );
-
-  return (
-    <div>
-      {status === "authenticated" ? (
-        userReview ? (
-          <Review review={userReview} />
-        ) : (
-          <CreateReview productId={product.id} />
-        )
-      ) : null}
-
-      {reviews.map((review) => {
-        return <Review key={review.id} review={review} />;
-      })}
-    </div>
-  );
-};
 
 const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
   const { data: session } = useSession();

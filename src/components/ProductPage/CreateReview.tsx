@@ -8,15 +8,20 @@ import Form from "../Form";
 import LabelledInput from "../LabelledInput";
 import Textarea from "../Textarea";
 
+export const ReviewBodyValidator = z
+  .string()
+  .min(1, "Must have atleast 1 character");
+export const ReviewRatingValidtor = z.coerce
+  .number({
+    required_error: "Must be a number between 1-5",
+    invalid_type_error: "Must be a number between 1-5",
+  })
+  .min(1, "Can't be less than 1")
+  .max(5, "Can't be more than 5");
+
 const CreateReviewFormSchema = z.object({
-  body: z.string().min(1, "Must have atleast 1 character"),
-  rating: z.coerce
-    .number({
-      required_error: "Must be a number between 1-5",
-      invalid_type_error: "Must be a number between 1-5",
-    })
-    .min(1, "Can't be less than 1")
-    .max(5, "Can't be more than 5"),
+  body: ReviewBodyValidator,
+  rating: ReviewRatingValidtor,
 });
 
 type CreateReviewForm = z.infer<typeof CreateReviewFormSchema>;

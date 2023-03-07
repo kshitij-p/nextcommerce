@@ -9,6 +9,7 @@ export type EditableTextProps = {
   isLoading: boolean;
   onDiscard: () => void;
   onSaveChanges: () => void;
+  canSave: boolean;
 };
 
 const EditableTextDialog = ({
@@ -18,6 +19,7 @@ const EditableTextDialog = ({
   isLoading,
   onDiscard,
   onSaveChanges,
+  canSave,
 }: EditableTextProps) => {
   return (
     <StyledDialog
@@ -44,7 +46,7 @@ const EditableTextDialog = ({
         <Button
           variants={{ size: "sm" }}
           onClick={onSaveChanges}
-          disabled={isLoading}
+          disabled={!canSave || isLoading}
         >
           Save changes
         </Button>

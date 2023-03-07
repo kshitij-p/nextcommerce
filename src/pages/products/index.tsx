@@ -50,6 +50,7 @@ const AllProductsPage = () => {
           return (
             <Link
               className="flex w-full items-start gap-2 rounded-sm p-4 text-base text-zinc-200 hover:bg-zinc-800 md:gap-4 md:text-2xl xl:max-w-[30%]"
+              prefetch={false}
               key={product.id}
               href={`/products/${product.id}`}
             >

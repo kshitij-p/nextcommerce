@@ -5,10 +5,12 @@ const useEditableText = () => {
   const [editing, setEditing] = useState(false);
 
   const [diagOpen, setDiagOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleStopEditing = () => {
     setEditing(false);
     setDiagOpen(false);
+    setErrorMsg("");
   };
 
   return {
@@ -18,6 +20,8 @@ const useEditableText = () => {
     setEditing,
     diagOpen,
     setDiagOpen,
+    errorMsg,
+    setErrorMsg,
     onStopEditing: handleStopEditing,
   };
 };

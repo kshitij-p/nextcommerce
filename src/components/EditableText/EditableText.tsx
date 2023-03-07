@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { flushSync } from "react-dom";
+import Input from "../Input";
 import Textarea from "../Textarea";
 import EditableHoverButton from "./EditableHoverButton";
 import type useEditableText from "./useEditableText";
@@ -14,6 +15,9 @@ const EditableText = ({
   editing,
   setEditing,
   setDiagOpen,
+  errorMsg,
+  setErrorMsg,
+  validatorSchema,
   canEdit,
   as = <p />,
   inputElement = "textarea",
@@ -28,6 +32,9 @@ const EditableText = ({
   editing: UseEditableTextState["editing"];
   setEditing: UseEditableTextState["setEditing"];
   setDiagOpen: UseEditableTextState["setDiagOpen"];
+  errorMsg: UseEditableTextState["errorMsg"];
+  setErrorMsg: UseEditableTextState["setErrorMsg"];
+  validatorSchema: Zod.Schema;
   canEdit: boolean;
   as?: React.ReactElement<Record<string, unknown>>;
   inputElement?: "textarea" | "input";
@@ -62,6 +69,14 @@ const EditableText = ({
     onChange: (
       e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
     ) => {
+      const result = validatorSchema.safeParse(e.currentTarget.value);
+
+      if (!result.success) {
+        setErrorMsg(result.error.format()._errors[0] as string);
+      } else {
+        setErrorMsg("");
+      }
+
       setText(e.currentTarget.value);
       if (onChangeComplete) {
         onChangeComplete(e);
@@ -74,11 +89,14 @@ const EditableText = ({
   return (
     <div {...rest} className={`group relative ${className}`} ref={containerRef}>
       {editing ? (
-        inputElement === "textarea" ? (
-          <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
-        ) : (
-          <input {...textElProps} />
-        )
+        <div className="flex flex-col">
+          {inputElement === "textarea" ? (
+            <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
+          ) : (
+            <Input {...textElProps} />
+          )}
+          {errorMsg ? <p className="text-lg text-red-500">{errorMsg}</p> : null}
+        </div>
       ) : (
         <>
           {React.cloneElement(as, {
