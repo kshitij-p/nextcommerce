@@ -19,6 +19,7 @@ const EditableText = ({
   setErrorMsg,
   validatorSchema,
   canEdit,
+  labelText,
   as = <p />,
   inputElement = "textarea",
   onChangeComplete,
@@ -36,6 +37,7 @@ const EditableText = ({
   setErrorMsg: UseEditableTextState["setErrorMsg"];
   validatorSchema: Zod.Schema;
   canEdit: boolean;
+  labelText?: string;
   as?: React.ReactElement<Record<string, unknown>>;
   inputElement?: "textarea" | "input";
   onChangeComplete?: (
@@ -92,15 +94,19 @@ const EditableText = ({
     <div {...rest} className={`group relative ${className}`} ref={containerRef}>
       {editing ? (
         <div className="flex flex-col">
-          {inputElement === "textarea" ? (
-            <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
-          ) : (
-            <Input {...textElProps} />
-          )}
+          <div className="flex items-center gap-1">
+            {labelText ? <p>{labelText}</p> : null}
+            {inputElement === "textarea" ? (
+              <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
+            ) : (
+              <Input {...textElProps} />
+            )}
+          </div>
           {errorMsg ? <p className="text-lg text-red-500">{errorMsg}</p> : null}
         </div>
       ) : (
-        <>
+        <div className="flex">
+          {labelText ? <p>{labelText}</p> : null}
           {React.cloneElement(as, {
             ...as.props,
             className: `inline ${
@@ -118,7 +124,7 @@ const EditableText = ({
               }}
             />
           ) : null}
-        </>
+        </div>
       )}
       {children}
     </div>

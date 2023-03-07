@@ -174,12 +174,14 @@ const productValidators: {
 const EditableProductText = ({
   children,
   canEdit,
+  labelText,
   fieldToEdit,
   product,
   ...rest
 }: Omit<React.ComponentProps<"p">, "children"> & {
   children: string;
   canEdit: boolean;
+  labelText?: string;
   as?: React.ReactElement<Record<string, unknown>>;
   inputElement?: "textarea" | "input";
   fieldToEdit: EditableProductFields;
@@ -213,6 +215,7 @@ const EditableProductText = ({
       editing={editing}
       setEditing={setEditing}
       validatorSchema={productValidators[fieldToEdit]}
+      labelText={labelText}
     >
       <ProductEditDialog
         onMutationComplete={onStopEditing}
@@ -428,11 +431,11 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           {product.title}
         </EditableProductText>
         <div className="flex items-center text-2xl md:text-4xl">
-          <p>$</p>
           <EditableProductText
             {...editableProductTextProps}
             fieldToEdit={"price"}
             inputElement={"input"}
+            labelText={"$"}
           >
             {`${product.price}`}
           </EditableProductText>
