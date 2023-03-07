@@ -65,8 +65,8 @@ const EditableText = ({
 
   const textElProps = {
     className: `w-full resize-none rounded-sm bg-transparent p-2 focus:${
-      errorMsg ? "outline-red-500" : "outline-blue-500"
-    } outline outline-2 ${errorMsg ? "outline-red-200" : "outline-blue-200"}`,
+      errorMsg ? "outline-red-500" : "outline-teal-500"
+    } outline outline-2 ${errorMsg ? "outline-red-200" : "outline-teal-200"}`,
     autoFocus: true,
     value: text,
     onChange: (

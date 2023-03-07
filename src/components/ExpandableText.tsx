@@ -24,7 +24,7 @@ const DefaultOpener: React.FC<OpenerProps> = ({
   return (
     <button
       onClick={handleOnClick}
-      className="text-md text-[0.75em] font-semibold tracking-wider transition hover:text-blue-200 focus:text-blue-200"
+      className="text-md text-[0.75em] font-semibold tracking-wider transition hover:text-teal-200 focus:text-teal-200"
       style={{
         appearance: "none",
         WebkitAppearance: "none",
