@@ -48,13 +48,13 @@ const CreateReview = ({ productId }: { productId: string }) => {
     <div>
       <Form form={form} onSubmit={handleSubmit}>
         <div className="flex flex-col">
-          <b>Write a review</b>
+          <LabelledInput {...form.register("rating")} disabled={isLoading} />
           <Textarea
             {...form.register("body")}
             disabled={isLoading}
             placeholder="Leave your thoughts about this product..."
           />
-          <LabelledInput {...form.register("rating")} disabled={isLoading} />
+
           <Button type="submit">Create</Button>
         </div>
       </Form>

@@ -47,7 +47,7 @@ const Select = <T extends Record<string, unknown>>({
                 as={Fragment}
               >
                 <li
-                  className={`items-center justify-center rounded border-2 border-transparent p-2 text-center ui-selected:border-teal-700 ui-selected:bg-teal-700/40 ui-active:border-teal-500`}
+                  className={`items-center justify-center rounded border-2 border-transparent p-2 text-center transition ui-selected:border-teal-700 ui-selected:bg-teal-700/40 ui-active:border-teal-500`}
                 >
                   {x[textField] as string}
                 </li>

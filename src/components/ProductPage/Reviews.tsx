@@ -134,7 +134,8 @@ const Reviews = ({ product }: { product: PageProduct }) => {
   );
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
+      <b className="text-2xl md:text-4xl">Reviews</b>
       {status === "authenticated" ? (
         userReview ? (
           <Review review={userReview} />
@@ -143,9 +144,11 @@ const Reviews = ({ product }: { product: PageProduct }) => {
         )
       ) : null}
 
-      {reviews.map((review) => {
-        return <Review key={review.id} review={review} />;
-      })}
+      <div className="flex flex-col">
+        {reviews.map((review) => {
+          return <Review key={review.id} review={review} />;
+        })}
+      </div>
     </div>
   );
 };

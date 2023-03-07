@@ -458,7 +458,9 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           <ProductBuyArea product={product} />
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>
-        <Reviews product={product} />
+        <div className="mt-8 md:mt-16">
+          <Reviews product={product} />
+        </div>
       </div>
 
       {/* To do add image fall back here */}
