@@ -15,10 +15,12 @@ const Textarea = React.forwardRef(
       onChange,
       onFocus,
       name,
+      isInvalid = false,
       ...rest
     }: React.ComponentProps<"textarea"> & {
       autoResize?: boolean;
       cursorToTextEndOnFocus?: boolean;
+      isInvalid?: boolean;
     },
     passedRef: ForwardedRef<HTMLTextAreaElement>
   ) => {
@@ -83,7 +85,7 @@ const Textarea = React.forwardRef(
         <textarea
           {...rest}
           name={name}
-          aria-invalid={errorMessage ? "true" : "false"}
+          aria-invalid={isInvalid || errorMessage ? "true" : "false"}
           onChange={autoResize ? handleChange : onChange}
           onFocus={cursorToTextEndOnFocus ? handleFocus : onFocus}
           ref={handleRef}

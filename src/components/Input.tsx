@@ -8,11 +8,13 @@ const Input = React.forwardRef(
       showErrors = true,
       ErrorText = <b className="text-red-500" />,
       orientation = "vertical",
+      isInvalid = false,
       ...rest
     }: React.ComponentProps<"input"> & {
       showErrors?: boolean;
       ErrorText?: React.ReactElement<React.HTMLProps<HTMLElement>>;
       orientation?: "vertical" | "horizontal";
+      isInvalid?: boolean;
     },
     passedRef: ForwardedRef<HTMLInputElement>
   ) => {
@@ -28,7 +30,7 @@ const Input = React.forwardRef(
       >
         <input
           {...rest}
-          aria-invalid={errorMessage ? "true" : "false"}
+          aria-invalid={isInvalid || errorMessage ? "true" : "false"}
           name={name}
           ref={passedRef}
         />
