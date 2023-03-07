@@ -33,12 +33,12 @@ const Select = <T extends Record<string, unknown>>({
 }: SelectProps<T>) => {
   return (
     <Listbox value={value} onChange={setValue} multiple={multiple}>
-      <div {...rest} className={`relative ${className}`}>
+      <div {...rest} className={`relative flex ${className}`}>
         <Listbox.Button as={Fragment}>
           <Button>{value[textField] as string}</Button>
         </Listbox.Button>
 
-        <Listbox.Options className="absolute top-full z-[1500] mt-2 flex flex-col gap-2 rounded bg-zinc-800 p-2">
+        <Listbox.Options className="absolute top-full z-[1500] mt-2 flex flex-col gap-2 rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0">
           {options.map((x) => {
             return (
               <Listbox.Option
@@ -47,7 +47,7 @@ const Select = <T extends Record<string, unknown>>({
                 as={Fragment}
               >
                 <li
-                  className={`items-center justify-center rounded-sm p-2 ui-selected:bg-red-500 ui-active:bg-red-500`}
+                  className={`items-center justify-center rounded border-2 border-transparent p-2 text-center ui-selected:border-teal-700 ui-selected:bg-teal-700/40 ui-active:border-teal-500`}
                 >
                   {x[textField] as string}
                 </li>

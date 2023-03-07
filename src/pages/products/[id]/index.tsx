@@ -254,10 +254,10 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
 
   return (
     <DangerDialog
-      openerProps={{ className: "order-last" }}
       open={open}
       setOpen={setOpen}
       title="Delete this product"
+      openerProps={{ className: "ml-1 md:ml-2" }}
       openerChildren="Delete"
       confirmButtonChildren="Yes delete this"
       onConfirmDelete={handleDeleteClick}
@@ -266,7 +266,7 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
   );
 };
 
-const AddToCart = React.forwardRef(
+const ProductBuyArea = React.forwardRef(
   (
     { product }: { product: PageProduct },
     passedRef: ForwardedRef<HTMLDivElement>
@@ -363,15 +363,6 @@ const AddToCart = React.forwardRef(
 
     return (
       <>
-        <Select
-          className="order-2"
-          options={quantityOptions}
-          value={quantity}
-          setValue={setQuantity}
-          textField={"value"}
-          multiple={false}
-          ref={passedRef}
-        />
         <Button
           variants={{ type: "secondary" }}
           disabled={isAdding || isUpdatingQty}
@@ -379,12 +370,21 @@ const AddToCart = React.forwardRef(
         >
           Add to cart
         </Button>
+        <Button>Buy now</Button>
+        <Select
+          options={quantityOptions}
+          value={quantity}
+          setValue={setQuantity}
+          textField={"value"}
+          multiple={false}
+          ref={passedRef}
+        />
       </>
     );
   }
 );
 
-AddToCart.displayName = "AddToCart";
+ProductBuyArea.displayName = "ProductBuyArea";
 
 const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
   const { data: session } = useSession();
@@ -455,8 +455,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           {product.description}
         </EditableProductText>
         <div className="flex flex-wrap gap-2">
-          <AddToCart product={product} />
-          <Button>Buy now</Button>
+          <ProductBuyArea product={product} />
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>
         <Reviews product={product} />
