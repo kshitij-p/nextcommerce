@@ -94,14 +94,14 @@ const EditableText = ({
     <div {...rest} className={`group relative ${className}`} ref={containerRef}>
       {editing ? (
         <div className="flex flex-col">
-          <div className="flex items-center gap-1">
+          <label className="flex items-center gap-1">
             {labelText ? <p>{labelText}</p> : null}
             {inputElement === "textarea" ? (
               <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
             ) : (
               <Input {...textElProps} />
             )}
-          </div>
+          </label>
           {errorMsg ? <p className="text-lg text-red-500">{errorMsg}</p> : null}
         </div>
       ) : (
