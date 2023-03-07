@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import React from "react";
+import PageSpinner from "./PageSpinner";
 
 //This is HOC whose props we will never use in this component so any here is fine.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,9 +9,8 @@ const PageWithFallback = (Page: NextPage<any>) => {
   const NewPage = (props: React.PropsWithChildren) => {
     const router = useRouter();
 
-    //To do throw a spinner here
     if (router.isFallback) {
-      return <div>Loading ...</div>;
+      return <PageSpinner />;
     }
 
     return <Page {...props} />;
