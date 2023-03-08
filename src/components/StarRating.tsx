@@ -6,13 +6,11 @@ const INDEX_ATTRIBUTE = "data-index";
 
 const Star = ({
   filled = false,
-  size = "2rem",
   highlightedIndex,
   index,
   ...rest
 }: Omit<React.ComponentProps<"svg">, "children" | "ref"> & {
   filled?: boolean;
-  size?: string;
   hovered?: boolean;
   index: number;
   highlightedIndex: number;
@@ -23,7 +21,7 @@ const Star = ({
   return (
     <StarFilledIcon
       {...rest}
-      className={`h-auto group-focus:outline-0
+      className={`h-auto w-4 group-focus:outline-0 md:w-8
       ${
         isHighlighted
           ? "stroke-teal-500 text-white"
@@ -32,7 +30,6 @@ const Star = ({
           : "stroke-white text-transparent"
       }
   `}
-      style={{ width: size }}
     />
   );
 };
