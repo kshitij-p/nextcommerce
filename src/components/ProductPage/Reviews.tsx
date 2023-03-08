@@ -7,6 +7,7 @@ import ConfirmDialog from "../ConfirmDialog";
 import { useEditableText } from "../EditableText";
 import EditableHoverButton from "../EditableText/EditableHoverButton";
 import ExpandableText from "../ExpandableText";
+import StarRating from "../StarRating";
 import CreateReview from "./CreateReview";
 import DeleteReviewDialog from "./DeleteReviewDialog";
 import { EditableReviewText, useEditReview } from "./EditReview";
@@ -40,7 +41,10 @@ const ReviewRating = ({
 
   const rating = `${review.rating}`;
 
-  const handleBlur = () => {
+  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (e.currentTarget.contains(e.relatedTarget)) {
+      return;
+    }
     if (rating.trim() === text.trim()) {
       setEditing(false);
       return;
@@ -57,15 +61,27 @@ const ReviewRating = ({
   return (
     <div className="group relative">
       {editing ? (
-        <input
-          autoFocus
-          value={text}
-          onChange={(e) => setText(e.currentTarget.value)}
+        <StarRating
+          autoFocusActive
           onBlur={handleBlur}
+          asInput={true}
+          inputProps={{
+            onClick: (e) => {
+              if (e.currentTarget.value === text) {
+                setEditing(false);
+                return;
+              }
+              setDiagOpen(true);
+            },
+          }}
+          onRatingChange={(e) => {
+            setText(e.currentTarget.value);
+          }}
+          value={text}
         />
       ) : (
         <>
-          <b>{`Rated ${review.rating}`}</b>
+          <StarRating value={rating} />
           {canEdit ? (
             <EditableHoverButton
               onClick={() => {

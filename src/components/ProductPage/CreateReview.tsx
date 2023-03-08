@@ -5,7 +5,7 @@ import { api } from "../../utils/api";
 import { invalidateReviewsQuery } from "../../utils/client";
 import Button from "../Button";
 import Form from "../Form";
-import LabelledInput from "../LabelledInput";
+import StarRating from "../StarRating";
 import Textarea from "../Textarea";
 
 export const ReviewBodyValidator = z
@@ -29,7 +29,12 @@ type CreateReviewForm = z.infer<typeof CreateReviewFormSchema>;
 const CreateReview = ({ productId }: { productId: string }) => {
   const queryClient = useQueryClient();
 
-  const form = useForm({ schema: CreateReviewFormSchema });
+  const form = useForm({
+    schema: CreateReviewFormSchema,
+    defaultValues: {
+      rating: 1,
+    },
+  });
 
   const { mutate: postReview, isLoading } = api.review.create.useMutation({
     onSuccess: async () => {
@@ -44,11 +49,18 @@ const CreateReview = ({ productId }: { productId: string }) => {
     postReview({ productId: productId, body: body, rating: rating });
   };
 
+  const { onChange, ...inputProps } = form.register("rating");
+
   return (
     <div>
       <Form form={form} onSubmit={handleSubmit}>
         <div className="flex flex-col">
-          <LabelledInput {...form.register("rating")} disabled={isLoading} />
+          <StarRating
+            asInput
+            inputProps={inputProps}
+            onRatingChange={onChange}
+            value={form.getValues("rating").toString()}
+          />
           <Textarea
             {...form.register("body")}
             disabled={isLoading}
