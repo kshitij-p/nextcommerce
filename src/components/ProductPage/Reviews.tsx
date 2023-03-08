@@ -56,8 +56,6 @@ const ReviewRating = ({
     updateReview({ id: review.id, rating: text });
   };
 
-  //To do replace rating with a star rating component
-
   return (
     <div className="group relative">
       {editing ? (

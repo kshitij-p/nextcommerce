@@ -346,8 +346,6 @@ const ProductBuyArea = React.forwardRef(
         return;
       }
 
-      //To do add a quantity picker here for selecting quantity
-      //To do add react hook form here for validation
       if (!data) {
         await addToCart({
           productId: product.id,
