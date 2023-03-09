@@ -26,6 +26,7 @@ import { type EditableTextProps } from "../../../components/EditableText/Editabl
 import DangerDialog from "../../../components/DangerDialog";
 import Select from "../../../components/Select";
 import Reviews from "../../../components/ProductPage/Reviews";
+import useTRPCUtils from "../../../hooks/useTRPCUtils";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -85,61 +86,45 @@ const ProductEditDialog = ({
   onMutationComplete: () => void;
   canSave: boolean;
 }) => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   const { mutate, isLoading } = api.product.update.useMutation({
     onSettled: async () => {
-      const queryKey = getQueryKey(
-        api.product.get,
-        {
-          id: product.id,
-        },
-        "query"
-      );
-
-      await queryClient.invalidateQueries(queryKey);
-      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
+      await utils.product.get.invalidate({ id: product.id });
+      await utils.cart.get.invalidate();
     },
     onMutate: async () => {
-      const queryKey = getQueryKey(
-        api.product.get,
+      await utils.product.get.cancel({ id: product.id });
+      await utils.cart.get.cancel();
+
+      const previousProduct = utils.product.get.getData({ id: product.id });
+
+      utils.product.get.setData(
+        { id: product.id },
         {
-          id: product.id,
-        },
-        "query"
+          message: "Optimistic update data",
+          product: {
+            ...product,
+            [fieldToEdit]: value,
+          } satisfies typeof product,
+        }
       );
-
-      await queryClient.cancelQueries(queryKey);
-      await queryClient.cancelQueries(CART_GET_QUERY_KEY);
-
-      queryClient.setQueryData<RouterOutputs["product"]["get"]>(queryKey, {
-        message: "Optimistic update data",
-        product: {
-          ...product,
-          [fieldToEdit]: value,
-        } satisfies typeof product,
-      });
 
       onMutationComplete();
 
-      return { previousProduct: product };
+      return { previousProduct: previousProduct };
     },
     onError: (err, newProduct, ctx) => {
       if (!ctx) {
         return;
       }
 
-      const queryKey = getQueryKey(
-        api.product.get,
-        { id: product.id },
-        "query"
-      );
-
-      queryClient.setQueryData(queryKey, ctx.previousProduct);
+      utils.product.get.setData({ id: product.id }, ctx.previousProduct);
     },
     onSuccess: async () => {
       //To do throw a toast here
-      await invalidateProducts(queryClient);
+      await utils.product.getAll.cancel();
+      await utils.product.getAll.invalidate();
       console.log("Successfully edited");
     },
   });
@@ -275,6 +260,8 @@ const ProductBuyArea = React.forwardRef(
 
     const { status } = useSession();
     const isLoggedIn = status === "authenticated";
+
+    const utils = api.useContext();
 
     const [quantityOptions] = useState(() => {
       let options: Array<{ value: number }> = [];
