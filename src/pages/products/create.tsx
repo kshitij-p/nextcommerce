@@ -1,15 +1,14 @@
-import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useState } from "react";
 import { z } from "zod";
 import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
-import { invalidateProducts } from "../../utils/client";
 import useForm from "../../hooks/useForm";
 import LabelledInput from "../../components/LabelledInput";
 import Form from "../../components/Form";
 import FileInput from "../../components/FileInput";
 import Button from "../../components/Button";
+import useTRPCUtils from "../../hooks/useTRPCUtils";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -31,7 +30,7 @@ const CreateProductFormSchema = z.object({
 type CreateProductForm = z.infer<typeof CreateProductFormSchema>;
 
 const CreateProductPage = () => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   const form = useForm({ schema: CreateProductFormSchema });
 
@@ -41,7 +40,7 @@ const CreateProductPage = () => {
 
   const { mutate: createProduct } = api.product.create.useMutation({
     onSuccess: async (data) => {
-      await invalidateProducts(queryClient);
+      await utils.product.getAll.invalidate();
       setProductLink(data.product.id);
       setProgress(100);
     },

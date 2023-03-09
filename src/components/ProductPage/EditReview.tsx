@@ -1,7 +1,6 @@
 import { type Review } from "@prisma/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { api, type RouterOutputs } from "../../utils/api";
-import { getReviewsQueryKey, invalidateReviewsQuery } from "../../utils/client";
+import useTRPCUtils from "../../hooks/useTRPCUtils";
+import { api } from "../../utils/api";
 import EditableText, { useEditableText } from "../EditableText";
 import EditableTextDialog, {
   type EditableTextProps,
@@ -32,21 +31,18 @@ export const useEditReview = ({
   review: ProductReview;
   onMutationComplete: () => void;
 }) => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   return api.review.update.useMutation({
     onMutate: async () => {
-      const queryKey = getReviewsQueryKey(review.productId);
+      await utils.review.getForProduct.cancel({ productId: review.productId });
 
-      await queryClient.cancelQueries(queryKey);
+      const previousReviews = utils.review.getForProduct.getData({
+        productId: review.productId,
+      });
 
-      const previousReviews =
-        queryClient.getQueryData<RouterOutputs["review"]["getForProduct"]>(
-          queryKey
-        );
-
-      queryClient.setQueryData<RouterOutputs["review"]["getForProduct"]>(
-        queryKey,
+      utils.review.getForProduct.setData(
+        { productId: review.productId },
         (data) => {
           if (!data) {
             return data;
@@ -74,14 +70,13 @@ export const useEditReview = ({
         return;
       }
 
-      queryClient.setQueryData<RouterOutputs["review"]["getForProduct"]>(
-        getReviewsQueryKey(review.productId),
+      utils.review.getForProduct.setData(
+        { productId: review.productId },
         ctx.previousReviews
       );
     },
     onSettled: async () => {
-      await invalidateReviewsQuery({
-        queryClient: queryClient,
+      await utils.review.getForProduct.invalidate({
         productId: review.productId,
       });
     },

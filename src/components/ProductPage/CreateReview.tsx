@@ -1,8 +1,7 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import useForm from "../../hooks/useForm";
+import useTRPCUtils from "../../hooks/useTRPCUtils";
 import { api } from "../../utils/api";
-import { invalidateReviewsQuery } from "../../utils/client";
 import Button from "../Button";
 import Form from "../Form";
 import StarRating from "../StarRating";
@@ -27,7 +26,7 @@ const CreateReviewFormSchema = z.object({
 type CreateReviewForm = z.infer<typeof CreateReviewFormSchema>;
 
 const CreateReview = ({ productId }: { productId: string }) => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   const form = useForm({
     schema: CreateReviewFormSchema,
@@ -38,10 +37,7 @@ const CreateReview = ({ productId }: { productId: string }) => {
 
   const { mutate: postReview, isLoading } = api.review.create.useMutation({
     onSuccess: async () => {
-      await invalidateReviewsQuery({
-        queryClient: queryClient,
-        productId: productId,
-      });
+      await utils.review.getForProduct.invalidate({ productId: productId });
     },
   });
 

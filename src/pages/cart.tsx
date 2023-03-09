@@ -1,73 +1,58 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import React from "react";
 import Button from "../components/Button";
 import ProtectedPage from "../components/ProtectedPage";
-import { api, type RouterOutputs } from "../utils/api";
+import useTRPCUtils from "../hooks/useTRPCUtils";
+import { api } from "../utils/api";
 import { TIME_IN_MS } from "../utils/client";
 
 export const CART_GET_QUERY_KEY = getQueryKey(api.cart.get, undefined, "query");
 
 const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   const { mutateAsync, isLoading } = api.cart.deleteFromCart.useMutation({
     onMutate: async () => {
-      await queryClient.cancelQueries(CART_GET_QUERY_KEY);
+      await utils.cart.get.cancel();
 
-      const previousCart =
-        queryClient.getQueryData<RouterOutputs["cart"]["get"]>(
-          CART_GET_QUERY_KEY
-        );
+      const previousCart = utils.cart.get.getData();
 
-      queryClient.setQueryData<RouterOutputs["cart"]["get"]>(
-        CART_GET_QUERY_KEY,
-        (data) => {
-          if (!data) {
-            return;
-          }
-
-          const { cart: currCart } = data;
-
-          return {
-            message: "Optimistic update",
-            cart: {
-              ...currCart,
-              currItems: currCart.cartItems.filter(
-                (cartItem) => cartItem.id !== cartItemId
-              ),
-            },
-          };
+      utils.cart.get.setData(undefined, (data) => {
+        if (!data) {
+          return;
         }
-      );
+
+        const { cart: currCart } = data;
+
+        return {
+          message: "Optimistic update",
+          cart: {
+            ...currCart,
+            currItems: currCart.cartItems.filter(
+              (cartItem) => cartItem.id !== cartItemId
+            ),
+          },
+        };
+      });
 
       return { previousCart: previousCart };
     },
 
     onSettled: async () => {
-      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
+      await utils.cart.get.invalidate();
     },
     onError: (err, deletedItem, ctx) => {
       if (!ctx) {
         return;
       }
 
-      queryClient.setQueryData<RouterOutputs["cart"]["get"]>(
-        CART_GET_QUERY_KEY,
-        ctx.previousCart
-      );
+      utils.cart.get.setData(undefined, ctx.previousCart);
     },
     onSuccess: async (data) => {
       //To do throw a toast here
-      await queryClient.invalidateQueries(
-        getQueryKey(
-          api.cart.getProduct,
-          {
-            productId: data.deletedCartItem.productId,
-          },
-          "query"
-        )
-      );
+      await utils.cart.getProduct.invalidate({
+        productId: data.deletedCartItem.productId,
+      });
       console.log("successfully removed from cart");
     },
   });

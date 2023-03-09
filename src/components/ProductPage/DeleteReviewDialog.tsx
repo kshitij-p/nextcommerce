@@ -1,21 +1,17 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import useTRPCUtils from "../../hooks/useTRPCUtils";
 import { api } from "../../utils/api";
-import { invalidateReviewsQuery } from "../../utils/client";
 import DangerDialog from "../DangerDialog";
 import { type ProductReview } from "./Reviews";
 
 const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   const [open, setOpen] = useState(false);
 
   const { mutate: deleteReview, isLoading } = api.review.delete.useMutation({
     onSuccess: async () => {
-      await invalidateReviewsQuery({
-        queryClient,
-        productId: review.productId,
-      });
+      await utils.review.getForProduct.invalidate();
       //To do throw a toast here
       console.log("deleted review");
     },

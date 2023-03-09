@@ -13,11 +13,8 @@ import Button from "../../../components/Button";
 import { useSession } from "next-auth/react";
 import React, { type ForwardedRef, useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
-import { useQueryClient } from "@tanstack/react-query";
-import { invalidateProducts, TIME_IN_MS } from "../../../utils/client";
+import { TIME_IN_MS } from "../../../utils/client";
 import { z } from "zod";
-import { getQueryKey } from "@trpc/react-query";
-import { CART_GET_QUERY_KEY } from "../../cart";
 import EditableText, {
   useEditableText,
 } from "../../../components/EditableText";
@@ -217,15 +214,15 @@ const EditableProductText = ({
 };
 
 const ProductDeleteDialog = ({ productId }: { productId: string }) => {
-  const queryClient = useQueryClient();
+  const utils = useTRPCUtils();
 
   const [open, setOpen] = useState(false);
 
   const { mutate, isLoading } = api.product.delete.useMutation({
     onSuccess: async () => {
       //To do throw a toast here
-      await invalidateProducts(queryClient);
-      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
+      await utils.product.getAll.invalidate();
+      await utils.cart.get.invalidate();
       console.log("Deleted");
     },
     onSettled: () => {
@@ -256,8 +253,6 @@ const ProductBuyArea = React.forwardRef(
     { product }: { product: PageProduct },
     passedRef: ForwardedRef<HTMLDivElement>
   ) => {
-    const queryClient = useQueryClient();
-
     const { status } = useSession();
     const isLoggedIn = status === "authenticated";
 
@@ -276,29 +271,13 @@ const ProductBuyArea = React.forwardRef(
     );
 
     const cancelCartItemQuery = async () => {
-      const queryKey = getQueryKey(
-        api.cart.getProduct,
-        {
-          productId: product.id,
-        },
-        "query"
-      );
-
-      await queryClient.cancelQueries(queryKey);
-      await queryClient.cancelQueries(CART_GET_QUERY_KEY);
+      await utils.cart.getProduct.cancel({ productId: product.id });
+      await utils.cart.get.cancel();
     };
 
     const invalidateCartItemQuery = async () => {
-      const queryKey = getQueryKey(
-        api.cart.getProduct,
-        {
-          productId: product.id,
-        },
-        "query"
-      );
-
-      await queryClient.invalidateQueries(queryKey);
-      await queryClient.invalidateQueries(CART_GET_QUERY_KEY);
+      await utils.cart.getProduct.invalidate({ productId: product.id });
+      await utils.cart.get.invalidate();
     };
 
     const { mutateAsync: addToCart, isLoading: isAdding } =
