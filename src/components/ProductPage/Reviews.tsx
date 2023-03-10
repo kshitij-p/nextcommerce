@@ -1,11 +1,12 @@
+import { Pencil1Icon } from "@radix-ui/react-icons";
 import { useSession } from "next-auth/react";
 import { flushSync } from "react-dom";
 import { type PageProduct } from "../../pages/products/[id]";
 import { api, type RouterOutputs } from "../../utils/api";
 import { TIME_IN_MS } from "../../utils/client";
+import Avatar from "../Avatar";
 import ConfirmDialog from "../ConfirmDialog";
 import { useEditableText } from "../EditableText";
-import EditableHoverButton from "../EditableText/EditableHoverButton";
 import ExpandableText from "../ExpandableText";
 import StarRating from "../StarRating";
 import CreateReview from "./CreateReview";
@@ -18,9 +19,11 @@ export type ProductReview =
 const ReviewRating = ({
   review,
   canEdit,
+  starProps,
 }: {
   review: ProductReview;
   canEdit: boolean;
+  starProps?: React.ComponentProps<typeof StarRating>["starProps"];
 }) => {
   const {
     text,
@@ -57,7 +60,7 @@ const ReviewRating = ({
   };
 
   return (
-    <div className="group relative">
+    <div className="group relative flex">
       {editing ? (
         <StarRating
           autoFocusActive
@@ -79,16 +82,19 @@ const ReviewRating = ({
         />
       ) : (
         <>
-          <StarRating value={rating} />
+          <StarRating value={rating} starProps={starProps} />
           {canEdit ? (
-            <EditableHoverButton
+            <button
+              className={`visible ml-2 align-baseline opacity-25 transition-all duration-300 group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 xl:invisible xl:opacity-0`}
               onClick={() => {
                 flushSync(() => {
                   setText(rating);
                 });
                 setEditing(true);
               }}
-            />
+            >
+              <Pencil1Icon className="h-full w-4 md:w-6" />
+            </button>
           ) : null}
         </>
       )}
@@ -111,23 +117,40 @@ const Review = ({ review }: { review: ProductReview }) => {
   const canEdit = review.userId === session?.user?.id;
 
   return (
-    <div key={review.id}>
-      <p>{`Posted by: ${review.user.name ?? "Unknown Name"}`}</p>
-      <ReviewRating review={review} canEdit={canEdit} />
-      <EditableReviewText
-        className="flex"
-        canEdit={canEdit}
-        review={review}
-        fieldToEdit={"body"}
-        as={
-          <ExpandableText
-            className="mt-2 text-zinc-400 md:mt-3 xl:max-w-[80%]"
-            maxLines={10}
+    <div className="flex flex-col gap-2" key={review.id}>
+      <div className="flex gap-2 md:gap-3">
+        <Avatar
+          src={review.user.image}
+          Container={<div className="relative w-[40px] md:w-[50px]" />}
+          alt={`${review.user.name ?? "Unknown user"}'s profile picture`}
+        />
+        <div className="flex flex-col">
+          <b className="text-base md:text-xl">{`${
+            review.user.name ?? "Unknown Name"
+          }`}</b>
+          <ReviewRating
+            review={review}
+            canEdit={canEdit}
+            starProps={{ size: "w-4 md:w-5" }}
           />
-        }
-      >
-        {review.body}
-      </EditableReviewText>
+        </div>
+      </div>
+      <div>
+        <EditableReviewText
+          className="flex"
+          canEdit={canEdit}
+          review={review}
+          fieldToEdit={"body"}
+          as={
+            <ExpandableText
+              className="text-zinc-400 xl:max-w-[80%]"
+              maxLines={10}
+            />
+          }
+        >
+          {review.body}
+        </EditableReviewText>
+      </div>
       {canEdit ? <DeleteReviewDialog review={review} /> : null}
     </div>
   );
@@ -150,15 +173,15 @@ const Reviews = ({ product }: { product: PageProduct }) => {
   return (
     <div className="flex flex-col gap-2">
       <b className="text-2xl md:text-4xl">Reviews</b>
-      {status === "authenticated" ? (
-        userReview ? (
-          <Review review={userReview} />
-        ) : (
-          <CreateReview productId={product.id} />
-        )
-      ) : null}
+      <div className="mt-1 flex flex-col gap-6 md:mt-2 md:gap-8">
+        {status === "authenticated" ? (
+          userReview ? (
+            <Review review={userReview} />
+          ) : (
+            <CreateReview productId={product.id} />
+          )
+        ) : null}
 
-      <div className="flex flex-col">
         {reviews.map((review) => {
           return <Review key={review.id} review={review} />;
         })}

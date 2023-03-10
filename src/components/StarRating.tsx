@@ -8,12 +8,15 @@ const Star = ({
   filled = false,
   highlightedIndex,
   index,
+  size = "w-4 md:w-8",
+  className = "",
   ...rest
 }: Omit<React.ComponentProps<"svg">, "children" | "ref"> & {
   filled?: boolean;
   hovered?: boolean;
   index: number;
   highlightedIndex: number;
+  size?: string;
 }) => {
   const hovered = index <= highlightedIndex;
   const isHighlighted = index === highlightedIndex;
@@ -21,14 +24,13 @@ const Star = ({
   return (
     <StarFilledIcon
       {...rest}
-      className={`h-auto w-4 group-focus:outline-0 md:w-8
-      ${
+      className={`h-auto ${size} group-focus:outline-0 ${
         isHighlighted
           ? "stroke-teal-500 text-white"
           : hovered || filled
           ? "stroke-transparent text-white group-focus:stroke-teal-500"
           : "stroke-white text-transparent"
-      }
+      } ${className}
   `}
     />
   );
@@ -41,6 +43,10 @@ interface ViewOnlyStarRatingProps {
   inputProps?: undefined;
   autoFocusActive?: false;
   onRatingChange?: undefined;
+  starProps?: Omit<
+    React.ComponentProps<typeof Star>,
+    "filled" | "index" | "highlightedIndex" | "hovered"
+  >;
 }
 
 interface EditableStarRatingProps
@@ -66,6 +72,7 @@ const StarRating = React.forwardRef(
       className = "",
       autoFocusActive = false,
       onRatingChange,
+      starProps: passedStarProps,
       ...rest
     }: Exclude<React.ComponentProps<"div">, "value" | "onChange"> &
       StarRatingProps,
@@ -101,6 +108,7 @@ const StarRating = React.forwardRef(
             };
 
             const starProps: React.ComponentProps<typeof Star> = {
+              ...passedStarProps,
               index: idx,
               highlightedIndex: highlighted,
             };
