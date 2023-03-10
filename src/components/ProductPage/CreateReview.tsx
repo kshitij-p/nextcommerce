@@ -50,7 +50,7 @@ const CreateReview = ({ productId }: { productId: string }) => {
   return (
     <div>
       <Form form={form} onSubmit={handleSubmit}>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-2">
           <StarRating
             asInput
             inputProps={inputProps}
@@ -59,11 +59,21 @@ const CreateReview = ({ productId }: { productId: string }) => {
           />
           <Textarea
             {...form.register("body")}
+            autoResize
+            className="resize-none rounded-sm bg-neutral-800 p-1 ring-0
+            transition-all focus:outline-0 focus:ring-2 focus:ring-teal-500/40 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-500/60 xl:max-w-[75%]"
             disabled={isLoading}
             placeholder="Leave your thoughts about this product..."
           />
 
-          <Button type="submit">Create</Button>
+          <Button
+            className="mt-2"
+            variants={{ type: "secondary" }}
+            disabled={isLoading}
+            type="submit"
+          >
+            Post review
+          </Button>
         </div>
       </Form>
     </div>

@@ -390,7 +390,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
           className="text-3xl font-bold text-zinc-200 md:text-5xl xl:max-w-[80%]"
           {...editableProductTextProps}
           fieldToEdit={"title"}
-          as={<h2 />}
+          as={<h2 className="max-w-full text-ellipsis break-words" />}
         >
           {product.title}
         </EditableProductText>
@@ -418,11 +418,11 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
         >
           {product.description}
         </EditableProductText>
-        <div className="flex flex-wrap gap-2">
+        <div className="mt-1 flex flex-wrap gap-2">
           <ProductBuyArea product={product} />
           {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
         </div>
-        <div className="mt-8 md:mt-16">
+        <div className="mt-8 md:mt-12">
           <Reviews product={product} />
         </div>
       </div>

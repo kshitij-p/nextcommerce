@@ -16,6 +16,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  //To do add route transitions
+
   return (
     <SessionProvider session={session}>
       <>

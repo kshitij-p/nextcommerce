@@ -29,13 +29,17 @@ const Textarea = React.forwardRef(
     const form = useFormContext();
     const state = name ? form.getFieldState(name) : undefined;
     const errorMessage = state?.error?.message;
+    const initHeightRef = useRef<number | null>(null);
 
     const resizeToFit = useCallback(
       (el?: HTMLTextAreaElement | null) => {
         if (!autoResize || !el) {
           return;
         }
-
+        if (initHeightRef.current === null) {
+          initHeightRef.current = el.clientHeight;
+        }
+        el.style.height = `${initHeightRef.current ?? 0}px`;
         el.style.height = `${el.scrollHeight}px`;
       },
       [autoResize]
