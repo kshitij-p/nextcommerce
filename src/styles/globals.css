@@ -9,6 +9,31 @@
   }
 }
 
+@layer components {
+  .mobile-scrollbar {
+    scrollbar-width: thin;
+  }
+
+  .mobile-scrollbar::-webkit-scrollbar {
+    width: 3px;
+    height: 5px;
+  }
+
+  .mobile-scrollbar::-webkit-scrollbar:hover {
+    width: 10px;
+  }
+
+  .mobile-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .mobile-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsla(0, 0%, 91%, 0.5);
+    border-radius: 20px;
+    border: transparent;
+    width: 10px;
+  }
+}
+
 :root {
   color-scheme: dark;
 }

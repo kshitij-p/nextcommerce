@@ -27,7 +27,7 @@ const AllProductsPage = () => {
   }, [allProducts, searchQuery]);
 
   return (
-    <div className="flex flex-col items-center gap-2 p-4 md:gap-8 md:p-8">
+    <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
       <div className="flex flex-col gap-2">
         <div className="ml-1 flex items-center gap-2 md:ml-2 xl:ml-3">
           <h2 className="text-3xl font-semibold md:text-5xl">Products</h2>

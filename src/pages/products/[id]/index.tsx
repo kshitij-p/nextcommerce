@@ -374,6 +374,8 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
     product: product,
   };
 
+  //To do add sizes to every image
+
   return (
     <div className="flex w-full flex-col gap-4 p-5 text-zinc-300 md:p-8 xl:flex-row xl:gap-8">
       <Image

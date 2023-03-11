@@ -45,6 +45,10 @@ const cvaVariants = {
     md: ["px-2", "py-1", "text-base", "md:px-3", "md:py-2", "md:text-xl"],
     lg: ["px-2", "py-1", "text-lg", "md:px-3", "md:py-2", "md:text-2xl"],
   },
+  borderRadius: {
+    sm: "rounded-sm",
+    base: "rounded",
+  },
 };
 
 type ButtonVariantsProp = {
@@ -54,7 +58,6 @@ type ButtonVariantsProp = {
 const buttonClasses = cva(
   [
     "font-semibold",
-    "rounded",
     "max-w-max",
     "shadow",
     "shadow-black/50",
@@ -71,6 +74,7 @@ const buttonClasses = cva(
 const DEFAULT_BUTTON_VARIANTS: ButtonVariantsProp = {
   type: "primary",
   size: "md",
+  borderRadius: "base",
 };
 
 const Button = React.forwardRef(

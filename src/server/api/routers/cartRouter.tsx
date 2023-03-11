@@ -16,7 +16,11 @@ const cartRouter = createTRPCRouter({
       include: {
         cartItems: {
           include: {
-            product: true,
+            product: {
+              include: {
+                images: true,
+              },
+            },
           },
         },
       },
