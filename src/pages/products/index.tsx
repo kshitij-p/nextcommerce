@@ -84,7 +84,7 @@ const AllProductsPage = () => {
                   </TruncatedText>
                   <p className="text-zinc-300 md:text-3xl">{`$${product.price}`}</p>
 
-                  <TruncatedText className="mt-2 text-zinc-400" maxLines={3}>
+                  <TruncatedText className="mt-1 text-zinc-400" maxLines={3}>
                     {product.description}
                   </TruncatedText>
                 </div>

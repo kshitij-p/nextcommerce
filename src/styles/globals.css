@@ -32,6 +32,41 @@
     border: transparent;
     width: 10px;
   }
+
+  .underline-teal-anim {
+    position: relative;
+    padding: 0.25rem;
+    border-radius: 2px;
+  }
+
+  .underline-teal-anim:focus {
+    position: relative;
+    outline: 2px solid theme("colors.teal.400");
+  }
+
+  .underline-teal-anim::after {
+    position: absolute;
+    content: "";
+
+    width: 100%;
+    height: 2px;
+
+    left: 0px;
+    bottom: -1px;
+
+    background-color: theme("colors.teal.400");
+
+    transform: scaleX(0);
+    transform-origin: bottom right;
+
+    transition: transform 0.25s ease-out;
+  }
+
+  .underline-teal-anim:hover::after,
+  .underline-teal-anim:focus::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+  }
 }
 
 :root {
