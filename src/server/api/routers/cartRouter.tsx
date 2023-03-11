@@ -2,10 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-const CartItemQuantityValidator = z.preprocess(
-  (val) => parseInt(val as string),
-  z.number().positive()
-);
+const CartItemQuantityValidator = z.coerce.number().positive();
 
 const cartRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {

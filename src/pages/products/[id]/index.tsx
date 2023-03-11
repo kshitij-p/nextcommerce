@@ -24,6 +24,11 @@ import DangerDialog from "../../../components/DangerDialog";
 import Select from "../../../components/Select";
 import Reviews from "../../../components/ProductPage/Reviews";
 import useTRPCUtils from "../../../hooks/useTRPCUtils";
+import useEditCartQuantity from "../../../hooks/cart/useEditCartQuantity";
+import {
+  cancelCartItemQuery,
+  invalidateCartItemQuery,
+} from "../../../hooks/cart/utils";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id">;
 
@@ -270,20 +275,14 @@ const ProductBuyArea = React.forwardRef(
       quantityOptions[0] as (typeof quantityOptions)[0]
     );
 
-    const cancelCartItemQuery = async () => {
-      await utils.cart.getProduct.cancel({ productId: product.id });
-      await utils.cart.get.cancel();
-    };
-
-    const invalidateCartItemQuery = async () => {
-      await utils.cart.getProduct.invalidate({ productId: product.id });
-      await utils.cart.get.invalidate();
-    };
-
     const { mutateAsync: addToCart, isLoading: isAdding } =
       api.cart.addToCart.useMutation({
-        onMutate: cancelCartItemQuery,
-        onSettled: invalidateCartItemQuery,
+        onMutate: async () => {
+          await cancelCartItemQuery({ utils, productId: product.id });
+        },
+        onSettled: async () => {
+          await invalidateCartItemQuery({ utils, productId: product.id });
+        },
         onSuccess: () => {
           //To do throw a toast here
           console.log("added to cart");
@@ -291,14 +290,7 @@ const ProductBuyArea = React.forwardRef(
       });
 
     const { mutateAsync: updateQuantity, isLoading: isUpdatingQty } =
-      api.cart.updateQuantity.useMutation({
-        onMutate: cancelCartItemQuery,
-        onSettled: invalidateCartItemQuery,
-        onSuccess: () => {
-          //To do throw a toast here
-          console.log("updated product quantity");
-        },
-      });
+      useEditCartQuantity({ productId: product.id });
 
     const { data } = api.cart.getProduct.useQuery(
       { productId: product.id },
