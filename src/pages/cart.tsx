@@ -5,11 +5,18 @@ import Divider from "../components/Divider";
 import Image from "../components/Image";
 import ProtectedPage from "../components/ProtectedPage";
 import TruncatedText from "../components/TruncatedText";
+import useEditCartQuantity from "../hooks/cart/useEditCartQuantity";
 import useTRPCUtils from "../hooks/useTRPCUtils";
-import { api } from "../utils/api";
+import { api, type RouterOutputs } from "../utils/api";
 import { TIME_IN_MS } from "../utils/client";
 
-const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
+const RemoveFromCartButton = ({
+  cartItemId,
+  disabled,
+}: {
+  cartItemId: string;
+  disabled: boolean;
+}) => {
   const utils = useTRPCUtils();
 
   const { mutateAsync, isLoading } = api.cart.deleteFromCart.useMutation({
@@ -61,13 +68,87 @@ const RemoveFromCartButton = ({ cartItemId }: { cartItemId: string }) => {
   return (
     <Button
       variants={{ size: "sm", type: "danger" }}
-      disabled={isLoading}
+      disabled={disabled || isLoading}
       onClick={async () => {
         await mutateAsync({ cartItemId: cartItemId });
       }}
     >
       Remove
     </Button>
+  );
+};
+
+const CartItem = ({
+  cartItem,
+}: {
+  cartItem: RouterOutputs["cart"]["get"]["cart"]["cartItems"][0];
+}) => {
+  const { product, id, quantity } = cartItem;
+
+  const { isLoading: isLoadingQuantity, mutateAsync: updateQuantity } =
+    useEditCartQuantity({
+      productId: cartItem.productId,
+    });
+
+  const handleUpdateQuantity = async (increment: number) => {
+    await updateQuantity({
+      cartItemId: cartItem.id,
+      quantity: cartItem.quantity + increment,
+    });
+  };
+
+  return (
+    <div className="flex w-full gap-2 p-2">
+      <Image
+        fill
+        Container={
+          <Link
+            href={`/products/${product.id}`}
+            prefetch={false}
+            className="w-28 shrink-0 md:w-56"
+          />
+        }
+        className="rounded-sm object-cover"
+        src={product.images[0]?.publicUrl ?? ""}
+        alt={`Image of ${product.title}`}
+      />
+      <div className="flex min-w-0 flex-col">
+        <Link href={`/products/${product.id}`} prefetch={false}>
+          <TruncatedText
+            className="text-xl font-bold md:text-3xl"
+            title={product.title}
+            maxLines={2}
+          >
+            {product.title}
+          </TruncatedText>
+        </Link>
+        <p>{`$${product.price}`}</p>
+
+        <div className="flex gap-2">
+          <p>Qty: </p>
+          <div className="flex gap-1">
+            <button
+              onClick={async () => {
+                await handleUpdateQuantity(-1);
+              }}
+            >
+              -
+            </button>
+            <p className="font-semibold">{quantity}</p>
+            <button
+              onClick={async () => {
+                await handleUpdateQuantity(1);
+              }}
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <div className="mt-1">
+          <RemoveFromCartButton cartItemId={id} disabled={isLoadingQuantity} />
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -101,48 +182,8 @@ const CartPage = () => {
   return (
     <div className="p-4 md:p-8">
       <div className="mobile-scrollbar flex h-[70vh] w-full flex-col gap-1 overflow-auto">
-        {cart.cartItems.map(({ product, id, quantity }) => {
-          return (
-            <div className="flex w-full gap-2 p-2" key={product.id}>
-              <Image
-                fill
-                Container={
-                  <Link
-                    href={`/products/${product.id}`}
-                    prefetch={false}
-                    className="w-28 shrink-0 md:w-56"
-                  />
-                }
-                className="rounded-sm object-cover"
-                src={product.images[0]?.publicUrl ?? ""}
-                alt={`Image of ${product.title}`}
-              />
-              <div className="flex min-w-0 flex-col">
-                <Link href={`/products/${product.id}`} prefetch={false}>
-                  <TruncatedText
-                    className="text-xl font-bold md:text-3xl"
-                    title={product.title}
-                    maxLines={2}
-                  >
-                    {product.title}
-                  </TruncatedText>
-                </Link>
-                <p>{`$${product.price}`}</p>
-
-                <div className="flex gap-2">
-                  <p>Qty: </p>
-                  <div className="flex gap-1">
-                    <button>-</button>
-                    <p className="font-semibold">{quantity}</p>
-                    <button>+</button>
-                  </div>
-                </div>
-                <div className="mt-1">
-                  <RemoveFromCartButton cartItemId={id} />
-                </div>
-              </div>
-            </div>
-          );
+        {cart.cartItems.map((cartItem) => {
+          return <CartItem cartItem={cartItem} key={cartItem.id} />;
         })}
       </div>
       <div className="flex w-full flex-col items-center">
