@@ -1,3 +1,4 @@
+import { ProductCategories } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { type NextApiResponse } from "next";
 import { z } from "zod";
@@ -73,10 +74,14 @@ const productRouter = createTRPCRouter({
         description: z.string().min(1),
         imageKey: z.string(),
         price: ProductPriceValidator,
+        category: z.nativeEnum(ProductCategories),
       })
     )
     .mutation(
-      async ({ input: { title, description, imageKey, price }, ctx }) => {
+      async ({
+        input: { title, description, imageKey, price, category },
+        ctx,
+      }) => {
         const images = [];
 
         if (imageKey) {
@@ -98,6 +103,7 @@ const productRouter = createTRPCRouter({
               images: {
                 create: images,
               },
+              category: category,
             },
           });
         } catch (e) {

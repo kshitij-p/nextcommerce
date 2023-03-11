@@ -94,14 +94,22 @@ model Review {
     @@unique([userId, productId])
 }
 
+enum ProductCategories {
+    Appliances
+    Electronics
+    Software_and_Games
+    Other
+}
+
 model Product {
-    id          String     @id @default(cuid())
-    user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id          String            @id @default(cuid())
+    user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId      String
-    title       String     @db.Text
-    description String     @db.Text
+    title       String            @db.Text
+    description String            @db.Text
     price       Int
     images      Image[]
     cartItems   CartItem[]
     reviews     Review[]
+    category    ProductCategories @default(Other)
 }

@@ -9,6 +9,9 @@ import Form from "../../components/Form";
 import FileInput from "../../components/FileInput";
 import Button from "../../components/Button";
 import useTRPCUtils from "../../hooks/useTRPCUtils";
+import { PRODUCT_CATEGORIES } from "../../utils/client";
+import Select from "../../components/Select";
+import { type ProductCategories } from "@prisma/client";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -27,6 +30,14 @@ const CreateProductFormSchema = z.object({
         ),
 });
 
+const CATEGORY_OPTIONS: Array<{
+  key: ProductCategories;
+  value: (typeof PRODUCT_CATEGORIES)[keyof typeof PRODUCT_CATEGORIES];
+}> = Object.entries(PRODUCT_CATEGORIES).map(
+  ([catKey, catValue]) =>
+    ({ key: catKey as ProductCategories, value: catValue } as const)
+);
+
 type CreateProductForm = z.infer<typeof CreateProductFormSchema>;
 
 const CreateProductPage = () => {
@@ -37,6 +48,9 @@ const CreateProductPage = () => {
   const [productLink, setProductLink] = useState("");
 
   const [progress, setProgress] = useState(0);
+  const [category, setCategory] = useState<(typeof CATEGORY_OPTIONS)[0]>(
+    CATEGORY_OPTIONS[0] as (typeof CATEGORY_OPTIONS)[0]
+  );
 
   const { mutate: createProduct } = api.product.create.useMutation({
     onSuccess: async (data) => {
@@ -92,6 +106,7 @@ const CreateProductPage = () => {
       description: description,
       imageKey: key,
       price: price,
+      category: category.key,
     });
   };
 
@@ -101,6 +116,17 @@ const CreateProductPage = () => {
         <LabelledInput {...form.register("title")} />
         <LabelledInput {...form.register("description")} />
         <LabelledInput {...form.register("price", { valueAsNumber: true })} />
+        <div className="flex items-center">
+          Category
+          <Select
+            optionsClassName="text-start w-max"
+            options={CATEGORY_OPTIONS}
+            value={category}
+            setValue={setCategory}
+            textField={"value"}
+            multiple={false}
+          />
+        </div>
         <FileInput accept="image/*" {...form.register("files")} />
         {/* Progressbar */}
         <div

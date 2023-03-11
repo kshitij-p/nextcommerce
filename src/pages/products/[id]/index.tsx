@@ -30,7 +30,7 @@ import {
   invalidateCartItemQuery,
 } from "../../../hooks/cart/utils";
 
-type EditableProductFields = keyof Omit<Product, "userId" | "id">;
+type EditableProductFields = keyof Omit<Product, "userId" | "id" | "category">;
 
 type ProductPageProps = {
   product: RouterOutputs["product"]["get"]["product"] | null;
@@ -328,6 +328,7 @@ const ProductBuyArea = React.forwardRef(
         </Button>
         <Button>Buy now</Button>
         <Select
+          optionsClassName="text-center"
           options={quantityOptions}
           value={quantity}
           setValue={setQuantity}
