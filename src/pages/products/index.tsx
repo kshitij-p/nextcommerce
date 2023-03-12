@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import Image from "../../components/Image";
 import TruncatedText from "../../components/TruncatedText";
 import { TIME_IN_MS } from "../../utils/client";
@@ -11,29 +11,31 @@ import {
   DEFAULT_ALL_CATEGORY_OPTION_VALUE,
   AllProductCategoriesSelect,
 } from "../../components/ProductCategoriesSelect";
+import { type ProductCategories } from "@prisma/client";
 
 const AllProductsPage = () => {
   const { status } = useSession();
 
-  const {
-    data: { products: allProducts },
-    isLoading,
-  } = api.product.getAll.useQuery(undefined, {
-    initialData: { message: "Initial data received", products: [] },
-    initialDataUpdatedAt: 0,
-    staleTime: TIME_IN_MS.FIVE_MINUTES,
-  });
-
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState(DEFAULT_ALL_CATEGORY_OPTION_VALUE);
 
-  const products = useMemo(() => {
-    return allProducts.filter(
-      (product) =>
-        product.title.includes(searchQuery) &&
-        (category.key === "All" ? true : product.category === category.key)
-    );
-  }, [allProducts, searchQuery, category]);
+  const {
+    data: { products: products },
+    isLoading,
+  } = api.product.getAll.useQuery(
+    {
+      category:
+        category.key === "All"
+          ? undefined
+          : (category.key as ProductCategories),
+      titleQuery: searchQuery,
+    },
+    {
+      initialData: { message: "Initial data received", products: [] },
+      initialDataUpdatedAt: 0,
+      staleTime: TIME_IN_MS.FIVE_MINUTES,
+    }
+  );
 
   console.log(products[5]);
 

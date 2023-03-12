@@ -30,18 +30,37 @@ const revalidateProduct = async (res: NextApiResponse, productId: string) => {
 };
 
 const productRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const products = await ctx.prisma.product.findMany({
-      include: {
-        images: true,
-      },
-    });
+  getAll: publicProcedure
+    .input(
+      z.object({
+        titleQuery: z.string().optional(),
+        priceLte: ProductPriceValidator.optional(),
+        category: ProductCategoriesValidator.optional(),
+      })
+    )
+    .query(async ({ ctx, input: { titleQuery, priceLte, category } }) => {
+      const products = await ctx.prisma.product.findMany({
+        where: {
+          title: {
+            contains: titleQuery,
+          },
+          price: {
+            lte: priceLte,
+          },
+          category: {
+            equals: category,
+          },
+        },
+        include: {
+          images: true,
+        },
+      });
 
-    return {
-      message: "Successfully got all products.",
-      products: products,
-    };
-  }),
+      return {
+        message: "Successfully got all products.",
+        products: products,
+      };
+    }),
   get: publicProcedure
     .input(z.object({ id: ProductIdValidator }))
     .query(async ({ input: { id }, ctx }) => {
@@ -64,34 +83,6 @@ const productRouter = createTRPCRouter({
       return {
         message: "Successfully got the requested product.",
         product: product,
-      };
-    }),
-  search: publicProcedure
-    .input(
-      z.object({
-        titleQuery: z.string().optional(),
-        priceLte: ProductPriceValidator.optional(),
-        category: ProductCategoriesValidator.optional(),
-      })
-    )
-    .query(async ({ ctx, input: { titleQuery, priceLte, category } }) => {
-      const products = await ctx.prisma.product.findMany({
-        where: {
-          title: {
-            contains: titleQuery,
-          },
-          price: {
-            lte: priceLte,
-          },
-          category: {
-            equals: category,
-          },
-        },
-      });
-
-      return {
-        message: "Successfully got the requested products.",
-        products: products,
       };
     }),
   create: protectedProcedure
