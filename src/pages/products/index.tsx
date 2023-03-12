@@ -1,6 +1,5 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import React, { useState } from "react";
 import Image from "../../components/Image";
 import TruncatedText from "../../components/TruncatedText";
 import { extractQueryParam, TIME_IN_MS } from "../../utils/client";
@@ -8,13 +7,63 @@ import { api, type RouterOutputs } from "../../utils/api";
 import ButtonLink from "../../components/ButtonLink";
 import Loader from "../../components/Loader";
 import {
-  DEFAULT_ALL_CATEGORY_OPTION_VALUE,
   AllProductCategoriesSelect,
+  DEFAULT_ALL_CATEGORY_OPTION_VALUE,
 } from "../../components/ProductCategoriesSelect";
 import { type ProductCategories } from "@prisma/client";
 import { useRouter } from "next/router";
 import useTimeout from "../../hooks/useTimeout";
 import useInfiniteLoading from "../../hooks/useInfiniteLoading";
+
+const FilterBy = ({
+  category,
+  setCategory,
+  searchQuery,
+  onSearchQueryChange,
+  price,
+  onPriceChange,
+}: {
+  searchQuery: string | undefined;
+  onSearchQueryChange: React.ChangeEventHandler<HTMLInputElement>;
+  category: React.ComponentProps<typeof AllProductCategoriesSelect>["value"];
+  setCategory: React.ComponentProps<
+    typeof AllProductCategoriesSelect
+  >["setValue"];
+  price: string | undefined;
+  onPriceChange: React.ChangeEventHandler<HTMLInputElement>;
+}) => {
+  return (
+    <>
+      <input
+        className="rounded p-1 text-lg"
+        defaultValue={searchQuery}
+        onChange={onSearchQueryChange}
+      />
+      <div className="flex flex-col items-baseline gap-2 text-lg">
+        <div className="flex w-full items-center gap-2">
+          <p>Category: </p>
+          <AllProductCategoriesSelect
+            listElProps={{ className: "text-sm" }}
+            value={category}
+            setValue={setCategory}
+            openerProps={{ variants: { size: "sm", type: "secondary" } }}
+          />
+        </div>
+        <div className="flex w-full items-center gap-2">
+          <p>Price under: </p>
+          <div>
+            $
+            <input
+              className="max-w-[6ch] bg-neutral-800"
+              defaultValue={price}
+              onChange={onPriceChange}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 const AllProductsPage = () => {
   const { status } = useSession();
@@ -23,17 +72,34 @@ const AllProductsPage = () => {
 
   const searchQuery = extractQueryParam(router.query.title);
 
-  const [category, setCategory] = useState(DEFAULT_ALL_CATEGORY_OPTION_VALUE);
+  const category = {
+    key:
+      extractQueryParam(router.query.categoryKey) ??
+      DEFAULT_ALL_CATEGORY_OPTION_VALUE.key,
+    value:
+      extractQueryParam(router.query.categoryValue) ??
+      DEFAULT_ALL_CATEGORY_OPTION_VALUE.value,
+  };
+
+  const priceQuery = extractQueryParam(router.query.price);
 
   const { runAfterClearing } = useTimeout();
 
-  const setQueryParam = (params: { title?: string }) => {
+  const setQueryParam = (
+    params: {
+      title?: string;
+      categoryKey?: string;
+      categoryValue?: string;
+      price?: string;
+    },
+    delay = 250
+  ) => {
     runAfterClearing(async () => {
       const searchParams = new URLSearchParams({ ...router.query, ...params });
       await router.replace(`/products?${searchParams.toString()}`, undefined, {
         shallow: true,
       });
-    }, 250);
+    }, delay);
   };
 
   const { data, isLoading, fetchNextPage, hasNextPage } =
@@ -44,6 +110,7 @@ const AllProductsPage = () => {
             ? undefined
             : (category.key as ProductCategories),
         titleQuery: searchQuery,
+        priceLte: priceQuery?.length ? priceQuery : undefined,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -74,7 +141,7 @@ const AllProductsPage = () => {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex flex-col gap-2">
+      <div className="flex w-full flex-col items-center gap-2">
         <div className="ml-1 flex items-center gap-2 md:ml-2 xl:ml-3">
           <h2 className="text-3xl font-semibold md:text-5xl">Products</h2>
           {status === "authenticated" ? (
@@ -87,14 +154,24 @@ const AllProductsPage = () => {
             </ButtonLink>
           ) : null}
         </div>
-        <input
-          className="rounded p-1 md:p-2"
-          defaultValue={searchQuery}
-          onChange={(e) => {
-            setQueryParam({ title: e.currentTarget.value });
+        <FilterBy
+          searchQuery={searchQuery}
+          onSearchQueryChange={(e) =>
+            setQueryParam({ title: e.currentTarget.value })
+          }
+          category={category}
+          setCategory={(category) => {
+            setQueryParam(
+              {
+                categoryKey: category.key,
+                categoryValue: category.value,
+              },
+              10
+            );
           }}
+          price={priceQuery}
+          onPriceChange={(e) => setQueryParam({ price: e.currentTarget.value })}
         />
-        <AllProductCategoriesSelect value={category} setValue={setCategory} />
       </div>
       <div className="flex w-full flex-col items-center justify-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
         {isLoading ? (

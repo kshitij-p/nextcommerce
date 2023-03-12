@@ -41,7 +41,7 @@ const cvaVariants = {
     ],
   },
   size: {
-    sm: ["px-1", "py-1", "text-sm", "md:px-3", "md:py-2", "md:text-base"],
+    sm: ["px-1", "py-1", "text-sm", "md:px-2", "md:py-1", "md:text-base"],
     md: ["px-2", "py-1", "text-base", "md:px-3", "md:py-2", "md:text-xl"],
     lg: ["px-2", "py-1", "text-lg", "md:px-3", "md:py-2", "md:text-2xl"],
   },

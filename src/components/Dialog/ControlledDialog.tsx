@@ -46,7 +46,7 @@ export type ControlledDialogProps = Omit<
 > & {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  Root?: React.ReactElement<Record<string, unknown>>;
+  Root?: React.ReactElement<React.HTMLProps<HTMLElement>>;
   Opener?: React.ReactElement<Record<string, unknown>>;
   Container?: React.ReactElement<Record<string, unknown>>;
   Backdrop?: React.ReactElement<Record<string, unknown>>;
@@ -56,6 +56,7 @@ export type ControlledDialogProps = Omit<
   description?: React.ReactNode;
   size?: Partial<typeof DEFAULT_DIALOG_SIZE>;
   transitionProps?: Partial<typeof DEFAULT_TRANSITION_PROPS>;
+  zIndex?: number;
 };
 
 const DefaultTitle = React.forwardRef(
@@ -93,6 +94,7 @@ const ControlledDialog = React.forwardRef(
       description,
       transitionProps: passedTransitionProps = DEFAULT_TRANSITION_PROPS,
       size: passedSize = DEFAULT_DIALOG_SIZE,
+      zIndex = 1500,
       ...rest
     }: ControlledDialogProps,
     passedRef: ForwardedRef<HTMLDivElement>
@@ -122,6 +124,7 @@ const ControlledDialog = React.forwardRef(
             <Transition.Child {...transitionToProps(containerTransition)}>
               {React.cloneElement(Root, {
                 ...Root.props,
+                style: { ...Root.props?.style, zIndex: zIndex },
                 children: (
                   <HeadlessDialog.Panel
                     style={{

@@ -43,4 +43,7 @@ export const PRODUCT_CATEGORIES = productCategories satisfies {
 
 export const ProductCategoriesValidator = z.nativeEnum(ProductCategories);
 
-export const ProductPriceValidator = z.coerce.number().positive();
+export const ProductPriceValidator = z.preprocess(
+  (value) => parseInt(value as string),
+  z.number().positive()
+);

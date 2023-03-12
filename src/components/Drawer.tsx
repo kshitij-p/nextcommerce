@@ -1,7 +1,11 @@
 import React, { Fragment, useState } from "react";
 import Dialog from "./Dialog";
 
-const Drawer = ({ children, ...rest }: React.ComponentProps<typeof Dialog>) => {
+const Drawer = ({
+  children,
+  zIndex = 1400,
+  ...rest
+}: React.ComponentProps<typeof Dialog>) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,6 +27,7 @@ const Drawer = ({ children, ...rest }: React.ComponentProps<typeof Dialog>) => {
           as: Fragment,
         },
       }}
+      zIndex={zIndex}
     >
       {children}
     </Dialog>

@@ -59,7 +59,7 @@
     transform: scaleX(0);
     transform-origin: bottom right;
 
-    transition: transform 0.25s ease-out;
+    transition: transform 0.35s ease;
   }
 
   .underline-teal-anim:hover::after,

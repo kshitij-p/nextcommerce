@@ -42,7 +42,7 @@ const productRouter = createTRPCRouter({
     .query(
       async ({ ctx, input: { titleQuery, priceLte, category, cursor } }) => {
         //Pc screen can hold 6 times at a time
-        const LIMIT = 6;
+        const LIMIT = 9;
 
         const products = await ctx.prisma.product.findMany({
           take: LIMIT + 1,
