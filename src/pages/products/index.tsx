@@ -7,6 +7,10 @@ import { TIME_IN_MS } from "../../utils/client";
 import { api } from "../../utils/api";
 import ButtonLink from "../../components/ButtonLink";
 import Loader from "../../components/Loader";
+import {
+  DEFAULT_ALL_CATEGORY_OPTION_VALUE,
+  AllProductCategoriesSelect,
+} from "../../components/ProductCategoriesSelect";
 
 const AllProductsPage = () => {
   const { status } = useSession();
@@ -21,10 +25,17 @@ const AllProductsPage = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [category, setCategory] = useState(DEFAULT_ALL_CATEGORY_OPTION_VALUE);
 
   const products = useMemo(() => {
-    return allProducts.filter((product) => product.title.includes(searchQuery));
-  }, [allProducts, searchQuery]);
+    return allProducts.filter(
+      (product) =>
+        product.title.includes(searchQuery) &&
+        (category.key === "All" ? true : product.category === category.key)
+    );
+  }, [allProducts, searchQuery, category]);
+
+  console.log(products[5]);
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
@@ -46,6 +57,7 @@ const AllProductsPage = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.currentTarget.value)}
         />
+        <AllProductCategoriesSelect value={category} setValue={setCategory} />
       </div>
       <div className="flex w-full flex-col items-center justify-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
         {isLoading ? (

@@ -113,7 +113,6 @@ const CreateProductPage = () => {
             openerProps={{ variants: { type: "secondary" } }}
             value={category}
             setValue={setCategory}
-            textField={"value"}
             multiple={false}
           />
         </div>

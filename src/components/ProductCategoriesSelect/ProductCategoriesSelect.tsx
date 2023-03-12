@@ -16,14 +16,19 @@ export const DEFAULT_CATEGORY_OPTION_VALUE =
 
 const ProductCategoriesSelect = ({
   listElProps,
+  multiple = false,
   ...rest
 }: Omit<
   React.ComponentProps<typeof Select<(typeof CATEGORY_OPTIONS)[0]>>,
-  "options"
->) => {
+  "options" | "multiple" | "textField"
+> & {
+  multiple?: React.ComponentProps<typeof Select>["multiple"];
+}) => {
   return (
     <Select
       {...rest}
+      multiple={multiple}
+      textField={"value"}
       listElProps={{
         ...listElProps,
         className: `text-start w-max max-h-52 ${listElProps?.className ?? ""}`,

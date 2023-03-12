@@ -328,7 +328,7 @@ const ProductBuyArea = React.forwardRef(
         </Button>
         <Button>Buy now</Button>
         <Select
-          optionsClassName="text-center"
+          listElProps={{ className: "text-center" }}
           options={quantityOptions}
           value={quantity}
           setValue={setQuantity}

@@ -1,4 +1,4 @@
-import { type ProductCategories } from "@prisma/client";
+import { ProductCategories } from "@prisma/client";
 import { z } from "zod";
 
 export const TIME_IN_MS = {
@@ -33,4 +33,6 @@ export const PRODUCT_CATEGORIES = productCategories satisfies {
   [k in ProductCategories]: string;
 };
 
-export const ProductCategoriesValidator = z.nativeEnum(PRODUCT_CATEGORIES);
+export const ProductCategoriesValidator = z.nativeEnum(ProductCategories);
+
+export const ProductPriceValidator = z.coerce.number().positive();

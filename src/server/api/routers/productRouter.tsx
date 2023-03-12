@@ -3,6 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { type NextApiResponse } from "next";
 import { z } from "zod";
 import { env } from "../../../env.mjs";
+import {
+  ProductCategoriesValidator,
+  ProductPriceValidator,
+} from "../../../utils/client";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { deleteImage, deleteImageFromR2 } from "./imageRouter/util";
 
@@ -11,11 +15,6 @@ const getPublicUrlFromKey = (imageKey: string) => {
 };
 
 const ProductIdValidator = z.string().min(1);
-
-const ProductPriceValidator = z.preprocess(
-  (val) => parseInt(val as string),
-  z.number().positive()
-);
 
 const revalidateProduct = async (res: NextApiResponse, productId: string) => {
   let revalidated;
@@ -65,6 +64,34 @@ const productRouter = createTRPCRouter({
       return {
         message: "Successfully got the requested product.",
         product: product,
+      };
+    }),
+  search: publicProcedure
+    .input(
+      z.object({
+        titleQuery: z.string().optional(),
+        priceLte: ProductPriceValidator.optional(),
+        category: ProductCategoriesValidator.optional(),
+      })
+    )
+    .query(async ({ ctx, input: { titleQuery, priceLte, category } }) => {
+      const products = await ctx.prisma.product.findMany({
+        where: {
+          title: {
+            contains: titleQuery,
+          },
+          price: {
+            lte: priceLte,
+          },
+          category: {
+            equals: category,
+          },
+        },
+      });
+
+      return {
+        message: "Successfully got the requested products.",
+        products: products,
       };
     }),
   create: protectedProcedure
