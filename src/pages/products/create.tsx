@@ -119,7 +119,8 @@ const CreateProductPage = () => {
         <div className="flex items-center">
           Category
           <Select
-            optionsClassName="text-start w-max"
+            openerProps={{ variants: { type: "secondary" } }}
+            listElProps={{ className: "text-start w-max max-h-52" }}
             options={CATEGORY_OPTIONS}
             value={category}
             setValue={setCategory}

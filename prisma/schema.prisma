@@ -96,8 +96,25 @@ model Review {
 
 enum ProductCategories {
     Appliances
-    Electronics
     Software_and_Games
+    Beauty
+    Books
+    Car_and_Motorbike
+    Clothing_and_Accessories
+    Collectibles
+    Electronics
+    Furniture
+    Grocery_and_Food
+    Health_and_Personal_Care
+    Home_and_Kitchen
+    Jewellery
+    Movies_and_TV_Shows
+    Music
+    Office_Products
+    Pet_Supplies
+    Shoes_and_Footwear
+    Sports_and_Fitness
+    Watches
     Other
 }
 

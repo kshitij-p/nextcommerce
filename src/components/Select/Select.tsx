@@ -9,7 +9,8 @@ interface SelectGenericProps<T> {
   options: T extends Array<T> ? Array<T[keyof T]> : Array<T>; */
   textField: keyof T;
   options: Array<T>;
-  optionsClassName?: string;
+  openerProps?: Omit<React.ComponentProps<typeof Button>, "children">;
+  listElProps?: Omit<React.ComponentProps<"ul">, "children">;
 }
 
 interface SingleSelectProps<T> extends SelectGenericProps<T> {
@@ -27,7 +28,8 @@ const Select = <T extends Record<string, unknown>>({
   value,
   setValue,
   options,
-  optionsClassName = "",
+  openerProps,
+  listElProps,
   textField,
   multiple,
   className = "",
@@ -37,11 +39,13 @@ const Select = <T extends Record<string, unknown>>({
     <Listbox value={value} onChange={setValue} multiple={multiple}>
       <div {...rest} className={`relative flex ${className}`}>
         <Listbox.Button as={Fragment}>
-          <Button>{value[textField] as string}</Button>
+          <Button {...openerProps}>{value[textField] as string}</Button>
         </Listbox.Button>
 
         <Listbox.Options
-          className={`absolute top-full z-[1500] mt-2 flex flex-col gap-2 rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0 ${optionsClassName}`}
+          className={`mobile-scrollbar absolute top-full z-[1500] mt-1 flex flex-col gap-2 overflow-auto rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0 ${
+            listElProps?.className ?? ""
+          }`}
         >
           {options.map((x) => {
             return (
