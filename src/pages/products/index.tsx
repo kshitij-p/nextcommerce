@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import Image from "../../components/Image";
 import TruncatedText from "../../components/TruncatedText";
-import { TIME_IN_MS } from "../../utils/client";
+import { extractQueryParam, TIME_IN_MS } from "../../utils/client";
 import { api } from "../../utils/api";
 import ButtonLink from "../../components/ButtonLink";
 import Loader from "../../components/Loader";
@@ -12,12 +12,28 @@ import {
   AllProductCategoriesSelect,
 } from "../../components/ProductCategoriesSelect";
 import { type ProductCategories } from "@prisma/client";
+import { useRouter } from "next/router";
+import useTimeout from "../../hooks/useTimeout";
 
 const AllProductsPage = () => {
   const { status } = useSession();
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const searchQuery = extractQueryParam(router.query.title);
+
   const [category, setCategory] = useState(DEFAULT_ALL_CATEGORY_OPTION_VALUE);
+
+  const { runAfterClearing } = useTimeout();
+
+  const setQueryParam = (params: { title?: string }) => {
+    runAfterClearing(async () => {
+      const searchParams = new URLSearchParams(params);
+      await router.replace(`/products?${searchParams.toString()}`, undefined, {
+        shallow: true,
+      });
+    }, 250);
+  };
 
   const {
     data: { products: products },
@@ -37,7 +53,7 @@ const AllProductsPage = () => {
     }
   );
 
-  console.log(products[5]);
+  //to do throw a timeout before searching
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
@@ -56,8 +72,10 @@ const AllProductsPage = () => {
         </div>
         <input
           className="rounded p-1 md:p-2"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          defaultValue={searchQuery}
+          onChange={(e) => {
+            setQueryParam({ title: e.currentTarget.value });
+          }}
         />
         <AllProductCategoriesSelect value={category} setValue={setCategory} />
       </div>

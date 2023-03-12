@@ -1,4 +1,5 @@
 import { ProductCategories } from "@prisma/client";
+import { type ParsedUrlQuery } from "querystring";
 import { z } from "zod";
 
 export const TIME_IN_MS = {
@@ -28,6 +29,13 @@ const productCategories = {
   Watches: "Watches",
   Other: "Other",
 } as const;
+
+export const extractQueryParam = (
+  param: ParsedUrlQuery[keyof ParsedUrlQuery],
+  { index = 0 } = { index: 0 }
+) => {
+  return Array.isArray(param) ? param[index] : param;
+};
 
 export const PRODUCT_CATEGORIES = productCategories satisfies {
   [k in ProductCategories]: string;
