@@ -9,9 +9,10 @@ import Form from "../../components/Form";
 import FileInput from "../../components/FileInput";
 import Button from "../../components/Button";
 import useTRPCUtils from "../../hooks/useTRPCUtils";
-import { PRODUCT_CATEGORIES } from "../../utils/client";
-import Select from "../../components/Select";
-import { type ProductCategories } from "@prisma/client";
+import {
+  ProductCategoriesSelect,
+  DEFAULT_CATEGORY_OPTION_VALUE,
+} from "../../components/ProductCategoriesSelect";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -30,14 +31,6 @@ const CreateProductFormSchema = z.object({
         ),
 });
 
-const CATEGORY_OPTIONS: Array<{
-  key: ProductCategories;
-  value: (typeof PRODUCT_CATEGORIES)[keyof typeof PRODUCT_CATEGORIES];
-}> = Object.entries(PRODUCT_CATEGORIES).map(
-  ([catKey, catValue]) =>
-    ({ key: catKey as ProductCategories, value: catValue } as const)
-);
-
 type CreateProductForm = z.infer<typeof CreateProductFormSchema>;
 
 const CreateProductPage = () => {
@@ -48,9 +41,7 @@ const CreateProductPage = () => {
   const [productLink, setProductLink] = useState("");
 
   const [progress, setProgress] = useState(0);
-  const [category, setCategory] = useState<(typeof CATEGORY_OPTIONS)[0]>(
-    CATEGORY_OPTIONS[0] as (typeof CATEGORY_OPTIONS)[0]
-  );
+  const [category, setCategory] = useState(DEFAULT_CATEGORY_OPTION_VALUE);
 
   const { mutate: createProduct } = api.product.create.useMutation({
     onSuccess: async (data) => {
@@ -118,10 +109,8 @@ const CreateProductPage = () => {
         <LabelledInput {...form.register("price", { valueAsNumber: true })} />
         <div className="flex items-center">
           Category
-          <Select
+          <ProductCategoriesSelect
             openerProps={{ variants: { type: "secondary" } }}
-            listElProps={{ className: "text-start w-max max-h-52" }}
-            options={CATEGORY_OPTIONS}
             value={category}
             setValue={setCategory}
             textField={"value"}
