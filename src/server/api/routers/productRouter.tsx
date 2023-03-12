@@ -36,31 +36,48 @@ const productRouter = createTRPCRouter({
         titleQuery: z.string().optional(),
         priceLte: ProductPriceValidator.optional(),
         category: ProductCategoriesValidator.optional(),
+        cursor: z.string().optional(),
       })
     )
-    .query(async ({ ctx, input: { titleQuery, priceLte, category } }) => {
-      const products = await ctx.prisma.product.findMany({
-        where: {
-          title: {
-            contains: titleQuery,
-          },
-          price: {
-            lte: priceLte,
-          },
-          category: {
-            equals: category,
-          },
-        },
-        include: {
-          images: true,
-        },
-      });
+    .query(
+      async ({ ctx, input: { titleQuery, priceLte, category, cursor } }) => {
+        const limit = 3;
 
-      return {
-        message: "Successfully got all products.",
-        products: products,
-      };
-    }),
+        const products = await ctx.prisma.product.findMany({
+          take: limit + 1,
+          where: {
+            title: {
+              contains: titleQuery,
+            },
+            price: {
+              lte: priceLte,
+            },
+            category: {
+              equals: category,
+            },
+          },
+          include: {
+            images: true,
+          },
+          cursor: cursor ? { id: cursor } : undefined,
+          orderBy: {
+            id: "asc",
+          },
+        });
+
+        let nextCursor: typeof cursor | undefined = undefined;
+
+        if (products.length > limit) {
+          nextCursor = products.pop()?.id;
+        }
+
+        return {
+          message: "Successfully got all products.",
+          products: products,
+          nextCursor: nextCursor,
+        };
+      }
+    ),
   get: publicProcedure
     .input(z.object({ id: ProductIdValidator }))
     .query(async ({ input: { id }, ctx }) => {

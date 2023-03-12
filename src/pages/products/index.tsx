@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "../../components/Image";
 import TruncatedText from "../../components/TruncatedText";
 import { extractQueryParam, TIME_IN_MS } from "../../utils/client";
-import { api } from "../../utils/api";
+import { api, type RouterOutputs } from "../../utils/api";
 import ButtonLink from "../../components/ButtonLink";
 import Loader from "../../components/Loader";
 import {
@@ -14,6 +14,7 @@ import {
 import { type ProductCategories } from "@prisma/client";
 import { useRouter } from "next/router";
 import useTimeout from "../../hooks/useTimeout";
+import useInfiniteLoading from "../../hooks/useInfiniteLoading";
 
 const AllProductsPage = () => {
   const { status } = useSession();
@@ -28,32 +29,48 @@ const AllProductsPage = () => {
 
   const setQueryParam = (params: { title?: string }) => {
     runAfterClearing(async () => {
-      const searchParams = new URLSearchParams(params);
+      const searchParams = new URLSearchParams({ ...router.query, ...params });
       await router.replace(`/products?${searchParams.toString()}`, undefined, {
         shallow: true,
       });
     }, 250);
   };
 
-  const {
-    data: { products: products },
-    isLoading,
-  } = api.product.getAll.useQuery(
-    {
-      category:
-        category.key === "All"
-          ? undefined
-          : (category.key as ProductCategories),
-      titleQuery: searchQuery,
-    },
-    {
-      initialData: { message: "Initial data received", products: [] },
-      initialDataUpdatedAt: 0,
-      staleTime: TIME_IN_MS.FIVE_MINUTES,
-    }
-  );
+  const { data, isLoading, fetchNextPage, hasNextPage } =
+    api.product.getAll.useInfiniteQuery(
+      {
+        category:
+          category.key === "All"
+            ? undefined
+            : (category.key as ProductCategories),
+        titleQuery: searchQuery,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        initialData: {
+          pages: [
+            {
+              message: "Initial data received",
+              products: [],
+              nextCursor: undefined,
+            },
+          ] as Array<RouterOutputs["product"]["getAll"]>,
+          pageParams: [undefined],
+        },
+        initialDataUpdatedAt: 0,
+        staleTime: TIME_IN_MS.FIVE_MINUTES,
+      }
+    );
 
-  //to do throw a timeout before searching
+  const products =
+    data?.pages.reduce((prevProducts, currPage) => {
+      return [...prevProducts, ...currPage.products];
+    }, [] as RouterOutputs["product"]["getAll"]["products"]) ?? [];
+
+  const productInfiniteLoadingTarget = useInfiniteLoading({
+    fetchNextPage,
+    hasNextPage,
+  });
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
@@ -88,13 +105,18 @@ const AllProductsPage = () => {
             width="5rem"
           />
         ) : (
-          products.map((product) => {
+          products.map((product, idx) => {
             return (
               <Link
                 className="flex w-full items-start gap-2 rounded-sm p-4 text-base text-zinc-200 hover:bg-zinc-800 md:gap-4 md:text-2xl xl:max-w-[30%]"
                 prefetch={false}
                 key={product.id}
                 href={`/products/${product.id}`}
+                ref={
+                  idx === products.length - 1
+                    ? productInfiniteLoadingTarget
+                    : undefined
+                }
               >
                 <Image
                   fill
