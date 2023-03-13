@@ -2,16 +2,42 @@ import { useSession } from "next-auth/react";
 import React from "react";
 import Navbar from "./Navbar";
 import PageSpinner from "./ui/PageSpinner";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/router";
+import {
+  defaultAnimationTransition,
+  getAnimationVariant,
+} from "../utils/animationHelpers";
 
-const Layout = ({ children }: React.PropsWithChildren) => {
+const Layout = ({
+  children,
+  loading,
+}: React.PropsWithChildren & {
+  loading: boolean;
+}) => {
   const { status } = useSession();
+  const router = useRouter();
 
-  return status === "loading" ? (
-    <PageSpinner />
-  ) : (
+  return (
     <>
       <Navbar />
-      <main>{children}</main>
+      <AnimatePresence>
+        {status === "loading" || loading ? (
+          <PageSpinner />
+        ) : (
+          <motion.main
+            key={router.route}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            variants={getAnimationVariant("fade")}
+            initial={"hidden"}
+            animate={"visible"}
+            exit={"hidden"}
+            transition={defaultAnimationTransition}
+          >
+            {children}
+          </motion.main>
+        )}
+      </AnimatePresence>
     </>
   );
 };

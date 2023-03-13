@@ -431,7 +431,6 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
 const MainPage = ({
   product,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
-  console.log({ product });
   if (!product) {
     return <Error404Page />;
   }
