@@ -9,7 +9,7 @@ import {
 const PageSpinner = ({ children }: React.PropsWithChildren) => {
   return (
     <motion.div
-      className="absolute flex h-screen w-full items-center justify-center"
+      className="absolute inset-0 flex h-screen w-full items-center justify-center"
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       variants={getAnimationVariant("fade")}
       initial={"hidden"}

@@ -29,6 +29,7 @@ import {
   cancelCartItemQuery,
   invalidateCartItemQuery,
 } from "../../../hooks/cart/utils";
+import Error404Page from "../../404";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id" | "category">;
 
@@ -430,9 +431,9 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
 const MainPage = ({
   product,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
+  console.log({ product });
   if (!product) {
-    //To do show error page here
-    return <div>Failed to get product</div>;
+    return <Error404Page />;
   }
 
   return <ProductPage product={product} />;
