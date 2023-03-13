@@ -21,7 +21,7 @@ const ErrorPage: NextPage<{
   message?: string;
 }> = ({ statusCode, message }) => {
   return (
-    <div className="absolute inset-0 flex h-screen w-full items-center justify-center">
+    <div className="pointer-events-none absolute inset-0 flex h-screen w-full items-center justify-center">
       <div className="flex max-w-max items-center gap-8 text-lg tracking-wider md:text-4xl">
         {statusCode ? (
           <span className="border-r-2 px-2 md:px-4">{statusCode}</span>
