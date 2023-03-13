@@ -2,10 +2,10 @@ import { z } from "zod";
 import useForm from "../../hooks/useForm";
 import useTRPCUtils from "../../hooks/useTRPCUtils";
 import { api } from "../../utils/api";
-import Button from "../Button";
-import Form from "../Form";
-import StarRating from "../StarRating";
-import Textarea from "../Textarea";
+import Button from "../ui/Button";
+import Form from "../ui/Form";
+import StarRating from "../ui/StarRating";
+import Textarea from "../ui/Textarea";
 
 export const ReviewBodyValidator = z
   .string()

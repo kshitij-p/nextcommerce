@@ -1,7 +1,7 @@
 import { type ProductCategories } from "@prisma/client";
 import React from "react";
 import { PRODUCT_CATEGORIES } from "../../utils/client";
-import Select from "../Select";
+import Select from "../ui/Select";
 
 export const CATEGORY_OPTIONS: Array<{
   key: ProductCategories;

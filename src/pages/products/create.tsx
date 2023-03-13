@@ -4,10 +4,10 @@ import { z } from "zod";
 import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
 import useForm from "../../hooks/useForm";
-import LabelledInput from "../../components/LabelledInput";
-import Form from "../../components/Form";
-import FileInput from "../../components/FileInput";
-import Button from "../../components/Button";
+import LabelledInput from "../../components/ui/LabelledInput";
+import Form from "../../components/ui/Form";
+import FileInput from "../../components/ui/FileInput";
+import Button from "../../components/ui/Button";
 import useTRPCUtils from "../../hooks/useTRPCUtils";
 import {
   ProductCategoriesSelect,

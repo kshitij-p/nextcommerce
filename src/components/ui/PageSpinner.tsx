@@ -4,7 +4,7 @@ import Loader from "./Loader";
 import {
   getAnimationVariant,
   defaultAnimationTransition,
-} from "../utils/animationHelpers";
+} from "../../utils/animationHelpers";
 
 const PageSpinner = ({ children }: React.PropsWithChildren) => {
   return (

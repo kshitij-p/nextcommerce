@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useTRPCUtils from "../../hooks/useTRPCUtils";
 import { api } from "../../utils/api";
-import DangerDialog from "../DangerDialog";
+import DangerDialog from "../ui/DangerDialog";
 import { type ProductReview } from "./Reviews";
 
 const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {

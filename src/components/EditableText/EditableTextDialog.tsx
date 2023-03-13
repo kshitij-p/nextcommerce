@@ -1,6 +1,6 @@
-import Button from "../Button";
-import { type ControlledDialogProps } from "../Dialog/ControlledDialog";
-import StyledDialog from "../StyledDialog";
+import Button from "../ui/Button";
+import { type ControlledDialogProps } from "../ui/Dialog/ControlledDialog";
+import StyledDialog from "../ui/StyledDialog";
 
 export type EditableTextProps = {
   open: ControlledDialogProps["open"];

@@ -1,11 +1,11 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Image from "../../components/Image";
-import TruncatedText from "../../components/TruncatedText";
+import Image from "../../components/ui/Image";
+import TruncatedText from "../../components/ui/TruncatedText";
 import { extractQueryParam, TIME_IN_MS } from "../../utils/client";
 import { api, type RouterOutputs } from "../../utils/api";
-import ButtonLink from "../../components/ButtonLink";
-import Loader from "../../components/Loader";
+import ButtonLink from "../../components/ui/ButtonLink";
+import Loader from "../../components/ui/Loader";
 import {
   AllProductCategoriesSelect,
   DEFAULT_ALL_CATEGORY_OPTION_VALUE,
@@ -50,7 +50,7 @@ const FilterBy = ({
           />
         </div>
         <div className="flex w-full items-center gap-2">
-          <p>Price under: </p>
+          <p>Under: </p>
           <div>
             $
             <input

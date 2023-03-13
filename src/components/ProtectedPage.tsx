@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import React from "react";
-import PageSpinner from "./PageSpinner";
+import PageSpinner from "./ui/PageSpinner";
 
 //This is HOC whose props we will never use in this component so any here is fine.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

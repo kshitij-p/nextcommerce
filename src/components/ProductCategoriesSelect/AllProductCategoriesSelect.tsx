@@ -1,4 +1,4 @@
-import Select from "../Select";
+import Select from "../ui/Select";
 import { CATEGORY_OPTIONS } from "./ProductCategoriesSelect";
 
 export const ALL_CATEGORY_OPTIONS = [

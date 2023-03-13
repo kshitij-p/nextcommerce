@@ -1,10 +1,10 @@
 import Link from "next/link";
 import React, { useMemo } from "react";
-import Button from "../components/Button";
-import Divider from "../components/Divider";
-import Image from "../components/Image";
+import Button from "../components/ui/Button";
+import Divider from "../components/ui/Divider";
+import Image from "../components/ui/Image";
 import ProtectedPage from "../components/ProtectedPage";
-import TruncatedText from "../components/TruncatedText";
+import TruncatedText from "../components/ui/TruncatedText";
 import useEditCartQuantity from "../hooks/cart/useEditCartQuantity";
 import useTRPCUtils from "../hooks/useTRPCUtils";
 import { api, type RouterOutputs } from "../utils/api";

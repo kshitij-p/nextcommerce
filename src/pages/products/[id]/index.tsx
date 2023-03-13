@@ -7,9 +7,9 @@ import { prisma } from "../../../server/db";
 
 import { type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
-import Image from "../../../components/Image";
-import ExpandableText from "../../../components/ExpandableText";
-import Button from "../../../components/Button";
+import Image from "../../../components/ui/Image";
+import ExpandableText from "../../../components/ui/ExpandableText";
+import Button from "../../../components/ui/Button";
 import { useSession } from "next-auth/react";
 import React, { type ForwardedRef, useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
@@ -20,8 +20,8 @@ import EditableText, {
 } from "../../../components/EditableText";
 import { EditableTextDialog } from "../../../components/EditableText";
 import { type EditableTextProps } from "../../../components/EditableText/EditableTextDialog";
-import DangerDialog from "../../../components/DangerDialog";
-import Select from "../../../components/Select";
+import DangerDialog from "../../../components/ui/DangerDialog";
+import Select from "../../../components/ui/Select";
 import Reviews from "../../../components/ProductPage/Reviews";
 import useTRPCUtils from "../../../hooks/useTRPCUtils";
 import useEditCartQuantity from "../../../hooks/cart/useEditCartQuantity";

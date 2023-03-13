@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { flushSync } from "react-dom";
-import Input from "../Input";
-import Textarea from "../Textarea";
+import Input from "../ui/Input";
+import Textarea from "../ui/Textarea";
 import EditableHoverButton from "./EditableHoverButton";
 import type useEditableText from "./useEditableText";
 
