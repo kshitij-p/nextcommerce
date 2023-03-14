@@ -21,7 +21,7 @@ const Layout = ({
   return (
     <>
       <Navbar />
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="wait">
         {status === "loading" || loading ? (
           <PageSpinner />
         ) : (
