@@ -21,7 +21,7 @@ const Layout = ({
   return (
     <>
       <Navbar />
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout">
         {status === "loading" || loading ? (
           <PageSpinner />
         ) : (
@@ -31,7 +31,6 @@ const Layout = ({
             variants={getAnimationVariant("fade")}
             initial={"hidden"}
             animate={"visible"}
-            exit={"hidden"}
             transition={defaultAnimationTransition}
           >
             {children}

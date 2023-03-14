@@ -30,6 +30,7 @@ import {
   invalidateCartItemQuery,
 } from "../../../hooks/cart/utils";
 import Error404Page from "../../404";
+import Head from "next/head";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id" | "category">;
 
@@ -435,7 +436,14 @@ const MainPage = ({
     return <Error404Page />;
   }
 
-  return <ProductPage product={product} />;
+  return (
+    <>
+      <Head>
+        <title>{`${product.title} | Nextcommerce`}</title>
+      </Head>
+      <ProductPage product={product} />
+    </>
+  );
 };
 
 export default PageWithFallback(MainPage);

@@ -13,6 +13,7 @@ import {
   ProductCategoriesSelect,
   DEFAULT_CATEGORY_OPTION_VALUE,
 } from "../../components/ProductCategoriesSelect";
+import Head from "next/head";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -102,36 +103,41 @@ const CreateProductPage = () => {
   };
 
   return (
-    <div>
-      <Form form={form} onSubmit={handleCreate}>
-        <LabelledInput {...form.register("title")} />
-        <LabelledInput {...form.register("description")} />
-        <LabelledInput {...form.register("price", { valueAsNumber: true })} />
-        <div className="flex items-center">
-          Category
-          <ProductCategoriesSelect
-            openerProps={{ variants: { type: "secondary" } }}
-            value={category}
-            setValue={setCategory}
-            multiple={false}
+    <>
+      <Head>
+        <title>Create a product | Nextcommerce</title>
+      </Head>
+      <div>
+        <Form form={form} onSubmit={handleCreate}>
+          <LabelledInput {...form.register("title")} />
+          <LabelledInput {...form.register("description")} />
+          <LabelledInput {...form.register("price", { valueAsNumber: true })} />
+          <div className="flex items-center">
+            Category
+            <ProductCategoriesSelect
+              openerProps={{ variants: { type: "secondary" } }}
+              value={category}
+              setValue={setCategory}
+              multiple={false}
+            />
+          </div>
+          <FileInput accept="image/*" {...form.register("files")} />
+          {/* Progressbar */}
+          <div
+            className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
+            style={{
+              width: `${progress}%`,
+            }}
           />
-        </div>
-        <FileInput accept="image/*" {...form.register("files")} />
-        {/* Progressbar */}
-        <div
-          className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
-          style={{
-            width: `${progress}%`,
-          }}
-        />
-        <Button type="submit">Create</Button>
-        {productLink ? (
-          <Link href={`/products/${productLink}`}>
-            Success! Click to visit your product
-          </Link>
-        ) : null}
-      </Form>
-    </div>
+          <Button type="submit">Create</Button>
+          {productLink ? (
+            <Link href={`/products/${productLink}`}>
+              Success! Click to visit your product
+            </Link>
+          ) : null}
+        </Form>
+      </div>
+    </>
   );
 };
 

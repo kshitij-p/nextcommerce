@@ -14,6 +14,7 @@ import { type ProductCategories } from "@prisma/client";
 import { useRouter } from "next/router";
 import useTimeout from "../../hooks/useTimeout";
 import useInfiniteLoading from "../../hooks/useInfiniteLoading";
+import Head from "next/head";
 
 const FilterBy = ({
   category,
@@ -34,6 +35,9 @@ const FilterBy = ({
 }) => {
   return (
     <>
+      <Head>
+        <title>Products | Nextcommerce</title>
+      </Head>
       <input
         className="rounded p-1 text-lg"
         defaultValue={searchQuery}
@@ -43,7 +47,7 @@ const FilterBy = ({
         <div className="flex w-full items-center gap-2">
           <p>Category: </p>
           <AllProductCategoriesSelect
-            listElProps={{ className: "text-sm" }}
+            listElProps={{ className: "text-sm right-0" }}
             value={category}
             setValue={setCategory}
             openerProps={{ variants: { size: "sm", type: "secondary" } }}
