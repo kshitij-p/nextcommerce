@@ -37,12 +37,16 @@ const productRouter = createTRPCRouter({
         priceLte: ProductPriceValidator.optional(),
         category: ProductCategoriesValidator.optional(),
         cursor: z.string().optional(),
+        limit: z.number().optional(),
       })
     )
     .query(
-      async ({ ctx, input: { titleQuery, priceLte, category, cursor } }) => {
+      async ({
+        ctx,
+        input: { titleQuery, priceLte, category, cursor, limit: passedLimit },
+      }) => {
         //Pc screen can hold 6 times at a time
-        const LIMIT = 9;
+        const LIMIT = passedLimit ?? 9;
 
         const products = await ctx.prisma.product.findMany({
           take: LIMIT + 1,
