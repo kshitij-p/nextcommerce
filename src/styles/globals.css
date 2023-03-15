@@ -33,15 +33,15 @@
     width: 10px;
   }
 
+  .underline-teal {
+    text-decoration: underline;
+    text-decoration-color: theme("colors.teal.400");
+  }
+
   .underline-teal-anim {
     position: relative;
     padding: 0.25rem;
     border-radius: 2px;
-  }
-
-  .underline-teal-anim:focus {
-    position: relative;
-    outline: 2px solid theme("colors.teal.400");
   }
 
   .underline-teal-anim::after {

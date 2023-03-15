@@ -18,13 +18,22 @@ const Navbar = () => {
         <Link className="text-xl font-bold md:text-4xl" href="/">
           NEXT
         </Link>
-        <Link className="underline-teal-anim" href="/products">
+        <Link
+          className="underline-teal-anim focus:outline focus:outline-2 focus:outline-teal-500"
+          href="/products"
+        >
           Products
         </Link>
-        <Link className="underline-teal-anim" href="/cart">
+        <Link
+          className="underline-teal-anim focus:outline focus:outline-2 focus:outline-teal-500"
+          href="/cart"
+        >
           Cart
         </Link>
-        <button className="underline-teal-anim" onClick={handleAuthButtonClick}>
+        <button
+          className="underline-teal-anim focus:outline focus:outline-2 focus:outline-teal-500"
+          onClick={handleAuthButtonClick}
+        >
           {status !== "authenticated" ? "Login" : "Logout"}
         </button>
       </nav>

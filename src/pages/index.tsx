@@ -84,7 +84,7 @@ const FeaturedProducts = () => {
 
   const { index: activeIndex, direction } = state;
 
-  const activeImgRef = useRef<HTMLDivElement>(null);
+  const controlsContainerRef = useRef<HTMLDivElement>(null);
 
   const handleCarouselChange = (newState: typeof state) => {
     setState({ ...newState, dragging: false });
@@ -105,20 +105,37 @@ const FeaturedProducts = () => {
   //To do add image placeholder here
 
   return (
-    <div>
+    <div className="flex flex-col gap-2 md:gap-4 xl:gap-8">
       <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold">Featured Products</h3>
-        <div className="mr-4">
-          <button onClick={() => incrementCarousel(-1)}>
-            <ArrowLeftIcon className="h-auto w-6" />
+        <a
+          className="underline-teal-anim text-2xl font-bold focus:outline-0 md:text-5xl xl:text-7xl"
+          id={"featured-products"}
+          href={"#featured-products"}
+        >
+          Featured Products
+        </a>
+        <div
+          className="group mr-4 flex items-center focus:outline-0"
+          tabIndex={0}
+          onKeyUp={(e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+              e.preventDefault();
+              incrementCarousel(e.key === "ArrowLeft" ? -1 : 1);
+              controlsContainerRef.current?.focus();
+            }
+          }}
+          ref={controlsContainerRef}
+        >
+          <button tabIndex={-1} onClick={() => incrementCarousel(-1)}>
+            <ArrowLeftIcon className="h-auto w-6 opacity-50 transition hover:opacity-100 focus:opacity-100 group-focus:opacity-100 md:w-12 xl:w-20" />
           </button>
-          <button onClick={() => incrementCarousel(1)}>
-            <ArrowRightIcon className="h-auto w-6" />
+          <button tabIndex={-1} onClick={() => incrementCarousel(1)}>
+            <ArrowRightIcon className="h-auto w-6 opacity-50 transition hover:opacity-100 focus:opacity-100 group-focus:opacity-100 md:w-12 xl:w-20" />
           </button>
         </div>
       </div>
       <div className="relative flex w-full justify-center overflow-hidden">
-        <div className="aspect-square h-auto w-[34%]" ref={activeImgRef} />
+        <div className="aspect-square h-auto w-[34%]" />
         {/* ^ this div is to manage relative parent ctn's height and so shld
         be equal to image container's height */}
         <AnimatePresence initial={false} custom={direction}>
@@ -155,7 +172,7 @@ const FeaturedProducts = () => {
             {getProductsArray({
               activeIndex,
               totalProducts: products.length,
-              maxProducts: 10,
+              maxProducts: 5,
             }).map(({ loopedIndex, index }, arrIdx) => {
               const product = products[loopedIndex];
 
@@ -168,7 +185,8 @@ const FeaturedProducts = () => {
               const order = `order-[${arrIdx}]`;
 
               const imgContainerProps = {
-                className: "relative flex aspect-square h-full w-full",
+                className:
+                  "relative flex aspect-square h-full w-full cursor-pointer",
                 draggable: false,
                 onClick: isActive
                   ? state.dragging
@@ -203,18 +221,18 @@ const FeaturedProducts = () => {
                   className={`h-full flex-shrink-0 ${order}
                   ${
                     isActive
-                      ? "z-10 w-[34%] brightness-100"
-                      : "w-[16.5%] brightness-[35%]"
-                  } transition`}
+                      ? "z-10 w-[34%] shadow-[0px_0px_24px_6px_black] brightness-100 focus-within:scale-[102%] focus-within:shadow-[0px_0px_24px_8px_black] hover:scale-[102%] hover:shadow-[0px_0px_24px_8px_black]"
+                      : "w-[16.5%] brightness-[35%] data-[dragging=false]:hover:brightness-75 data-[dragging=false]:focus:brightness-75"
+                  } transition duration-300`}
                   key={product.id}
                   draggable={false}
-                  style={{
-                    boxShadow: isActive ? "0px 0px 24px 6px black" : "",
-                  }}
+                  data-active={isActive}
+                  data-dragging={state.dragging}
                 >
                   {isActive ? (
                     <Link
                       {...imgContainerProps}
+                      className={`${imgContainerProps.className} `}
                       href={`/products/${product.id}`}
                     >
                       {ProductImage}
