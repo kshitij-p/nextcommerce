@@ -2,10 +2,12 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { api } from "../utils/api";
+import { api, type RouterOutputs } from "../utils/api";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
 import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
+import { TIME_IN_MS } from "../utils/client";
+import PageSpinner from "../components/ui/PageSpinner";
 
 const variants = {
   enter: (direction: number) => {
@@ -69,13 +71,11 @@ const swipePower = (offset: number, velocity: number) => {
   return Math.abs(offset) * velocity;
 };
 
-const FeaturedProducts = () => {
-  const { data } = api.product.getAll.useQuery({
-    limit: 10,
-  });
-
-  const products = data?.products;
-
+const FeaturedProducts = ({
+  products,
+}: {
+  products: RouterOutputs["product"]["getAll"]["products"] | undefined;
+}) => {
   const [state, setState] = useState({
     direction: 0,
     index: 0,
@@ -251,6 +251,19 @@ const FeaturedProducts = () => {
 };
 
 const Home: NextPage = () => {
+  const { data, isLoading } = api.product.getAll.useQuery(
+    {
+      limit: 10,
+    },
+    {
+      staleTime: TIME_IN_MS.FIVE_MINUTES,
+    }
+  );
+
+  if (isLoading) {
+    return <PageSpinner />;
+  }
+
   return (
     <>
       <Head>
@@ -268,11 +281,11 @@ const Home: NextPage = () => {
         <div className={`hero-section relative inset-0 h-screen w-full`}>
           <div className={`absolute inset-0 h-full w-full`}>
             <div
-              className={`absolute inset-0 z-[2] h-full w-full bg-[url("/images/hero-5-fg.png")] bg-cover bg-[left_center] brightness-90 lg:inset-[unset] lg:right-0 lg:aspect-square lg:w-[70%] lg:bg-[right_30%]`}
+              className={`absolute inset-0 z-[2] h-full w-full bg-[url("/images/hero-fg.webp")] bg-cover bg-[left_center] brightness-90 lg:inset-[unset] lg:right-0 lg:aspect-square lg:w-[70%] lg:bg-[right_30%]`}
             />
             {/*  ^ Fg image */}
             <div
-              className={`absolute inset-0 aspect-[9/16] h-full w-full bg-[url("/images/hero-5.jpg")] bg-cover bg-[left_center] brightness-90 lg:inset-[unset] lg:right-0 lg:aspect-square lg:w-[70%] lg:bg-[right_30%]`}
+              className={`absolute inset-0 aspect-[9/16] h-full w-full bg-[url("/images/hero-bg.webp")] bg-cover bg-[left_center] brightness-90 lg:inset-[unset] lg:right-0 lg:aspect-square lg:w-[70%] lg:bg-[right_30%]`}
             />
             {/* ^ Bg image */}
             <div className="l-8 -1/2 flex h-full w-full items-center">
@@ -298,7 +311,7 @@ const Home: NextPage = () => {
         </div>
         <div className="w-full px-4 py-12 md:px-8 md:py-24 xl:px-10 xl:py-28">
           <div>
-            <FeaturedProducts />
+            <FeaturedProducts products={data?.products} />
           </div>
         </div>
       </div>
