@@ -5,9 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { api, type RouterOutputs } from "../utils/api";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
-import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import { TIME_IN_MS } from "../utils/client";
 import PageSpinner from "../components/ui/PageSpinner";
+import HandDrawnArrowLeftIcon from "../components/icons/HandDrawnArrowLeftIcon";
+import HandDrawnArrowRightIcon from "../components/icons/HandDrawnArrowRightIcon";
 
 const variants = {
   enter: (direction: number) => {
@@ -115,7 +116,7 @@ const FeaturedProducts = ({
           Featured Products
         </a>
         <div
-          className="group mr-4 flex items-center focus:outline-0"
+          className="group mr-4 flex items-center gap-4 focus:outline-0 md:gap-8 xl:gap-12"
           tabIndex={0}
           onKeyUp={(e) => {
             if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
@@ -126,11 +127,25 @@ const FeaturedProducts = ({
           }}
           ref={controlsContainerRef}
         >
-          <button tabIndex={-1} onClick={() => incrementCarousel(-1)}>
-            <ArrowLeftIcon className="h-auto w-6 opacity-50 transition hover:opacity-100 focus:opacity-100 group-focus:opacity-100 md:w-12 xl:w-20" />
+          <button
+            tabIndex={-1}
+            onClick={() => incrementCarousel(-1)}
+            aria-label={"Move featured products carousel to the left button"}
+          >
+            <HandDrawnArrowLeftIcon className="h-auto w-6 opacity-50 transition hover:opacity-100 focus:opacity-100 group-focus:opacity-100 md:w-12 xl:w-20" />
+            <p className="sr-only">
+              Shift featured products carousel to the left
+            </p>
           </button>
-          <button tabIndex={-1} onClick={() => incrementCarousel(1)}>
-            <ArrowRightIcon className="h-auto w-6 opacity-50 transition hover:opacity-100 focus:opacity-100 group-focus:opacity-100 md:w-12 xl:w-20" />
+          <button
+            tabIndex={-1}
+            onClick={() => incrementCarousel(1)}
+            aria-label={"Move featured products carousel to the right button"}
+          >
+            <HandDrawnArrowRightIcon className="h-auto w-6 opacity-50 transition hover:opacity-100 focus:opacity-100 group-focus:opacity-100 md:w-12 xl:w-20" />
+            <p className="sr-only">
+              Shift featured products carousel to the right
+            </p>
           </button>
         </div>
       </div>
