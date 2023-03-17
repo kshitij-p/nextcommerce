@@ -88,6 +88,9 @@ const CreateProductPage = () => {
       await fetch(presignedUrl, {
         method: "PUT",
         body: file,
+        headers: new Headers({
+          "Cache-Control": "public, max-age=31536000",
+        }),
       });
     } catch (e) {
       return;
@@ -108,7 +111,7 @@ const CreateProductPage = () => {
     variants: React.ComponentProps<typeof LabelledInput>["variants"];
     className: string;
   } = {
-    className: "w-full",
+    className: "w-full mobile-scrollbar",
     variants: { padding: "lg" },
   };
 
@@ -118,24 +121,29 @@ const CreateProductPage = () => {
         <title>Create a product | Nextcommerce</title>
       </Head>
       <div className="flex flex-col xl:flex-row">
-        {/* To do add a diff image here and fix the alt */}
-        <div className="relative aspect-video w-full shrink-0 xl:order-last xl:w-[30%]">
-          <Image
-            className="object-cover"
-            src={"/images/create-product-banner.jpeg"}
-            alt={"Image of a cat"}
-            fill
-          />
+        <div className="w-full shrink-0 xl:order-last xl:w-[50%] ">
+          <div className="relative aspect-video w-full shrink-0 xl:aspect-square xl:w-3/4">
+            <Image
+              className="object-cover object-center xl:rounded-3xl"
+              src={"/images/create-product-banner.webp"}
+              alt={"Image of a girl writing"}
+              fill
+            />
+          </div>
         </div>
-        <div className="flex w-full">
+        <div className="flex w-full xl:w-1/2">
           <Form form={form} onSubmit={handleCreate} className={"p-4 md:p-8"}>
-            <div className="flex flex-col gap-4 text-2xl md:text-4xl">
+            <div className="flex flex-col gap-4 text-2xl text-neutral-300 md:text-4xl">
+              <div className="mb-2 md:mb-8">
+                <h2 className="text-4xl font-extrabold text-neutral-50 md:text-7xl">
+                  Create a product
+                </h2>
+              </div>
               <LabelledInput {...inputProps} {...form.register("title")} />
 
               <LabelledInput
                 {...inputProps}
                 inputEl="textarea"
-                autoResize
                 style={{ resize: "none" }}
                 {...form.register("description")}
               />

@@ -8,10 +8,11 @@ const inputVariants = {
     unfilled: [
       "bg-transparent",
       "border-2",
-      "border-neutral-800",
-      "hover:border-teal-800",
-      "focus:border-teal-700",
-      "focus:shadow-[0px_0px_6px_#0f766e]",
+      "border-teal-900",
+      "aria-[invalid=true]:border-red-700/30",
+      "aria-[invalid]:hover:border-teal-800",
+      "aria-[invalid]:focus:border-teal-700",
+      "aria-[invalid]:focus:shadow-[0px_0px_6px_#0f766e]",
     ],
   },
   borderRadius: {
@@ -74,6 +75,7 @@ const LabelledInput = React.forwardRef(
       variants: passedVariants = DEFAULT_INPUT_VARIANTS,
       className = "",
       inputEl = "input",
+      ErrorText,
       ...rest
     }: TextareaProps | InputProps,
     passedRef: ForwardedRef<HTMLInputElement | HTMLTextAreaElement>
@@ -83,6 +85,14 @@ const LabelledInput = React.forwardRef(
     const inputProps = {
       className: `${inputClasses(variants)} ${className}`,
       name: name,
+      ErrorText: (
+        <b
+          {...ErrorText?.props}
+          className={`text-[0.75em] font-medium text-red-500 ${
+            ErrorText?.props.className ?? ""
+          }`}
+        />
+      ),
     };
 
     return (

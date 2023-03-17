@@ -12,6 +12,9 @@ const UnstyledTextarea = React.forwardRef(
     {
       autoResize = false,
       cursorToTextEndOnFocus = false,
+      showErrors = true,
+      ErrorText = <b className="text-red-500" />,
+      orientation = "vertical",
       onChange,
       onFocus,
       name,
@@ -21,6 +24,9 @@ const UnstyledTextarea = React.forwardRef(
       autoResize?: boolean;
       cursorToTextEndOnFocus?: boolean;
       isInvalid?: boolean;
+      ErrorText?: React.ReactElement<React.HTMLProps<HTMLElement>>;
+      showErrors?: boolean;
+      orientation?: "vertical" | "horizontal";
     },
     passedRef: ForwardedRef<HTMLTextAreaElement>
   ) => {
@@ -90,7 +96,11 @@ const UnstyledTextarea = React.forwardRef(
     }, [resizeToFit]);
 
     return (
-      <>
+      <div
+        className={`flex ${
+          orientation === "vertical" ? "flex-col" : "flex-row"
+        }`}
+      >
         <textarea
           {...rest}
           name={name}
@@ -99,8 +109,13 @@ const UnstyledTextarea = React.forwardRef(
           onFocus={cursorToTextEndOnFocus ? handleFocus : onFocus}
           ref={handleRef}
         />
-        {errorMessage ? <b className="text-red-500">{errorMessage}</b> : null}
-      </>
+        {showErrors && errorMessage
+          ? React.cloneElement(ErrorText, {
+              ...ErrorText.props,
+              children: errorMessage,
+            })
+          : null}
+      </div>
     );
   }
 );

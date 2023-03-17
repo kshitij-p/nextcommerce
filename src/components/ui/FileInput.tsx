@@ -5,7 +5,7 @@ import Input from "./Input";
 
 const FileInput = React.forwardRef(
   (
-    { ...rest }: Omit<React.ComponentProps<typeof Input>, "type">,
+    { ErrorText, ...rest }: Omit<React.ComponentProps<typeof Input>, "type">,
     passedRef
   ) => {
     const [fileRef, setFileRef] = useState<HTMLInputElement | null>(null);
@@ -28,9 +28,10 @@ const FileInput = React.forwardRef(
     };
 
     return (
-      <>
+      <div className="relative flex flex-col">
         <div>
           <Button
+            variants={{ type: "secondary" }}
             onClick={() => {
               fileRef?.click();
             }}
@@ -41,10 +42,21 @@ const FileInput = React.forwardRef(
             <p>{renderFileName(fileRef.files[0])}</p>
           ) : null}
         </div>
-        <div className="hidden">
-          <Input {...rest} type={"file"} ref={handleRef} />
-        </div>
-      </>
+        <Input
+          {...rest}
+          ErrorText={
+            <b
+              {...ErrorText?.props}
+              className={`text-[0.75em] font-medium text-red-500 ${
+                ErrorText?.props.className ?? ""
+              }`}
+            />
+          }
+          className="hidden"
+          type={"file"}
+          ref={handleRef}
+        />
+      </div>
     );
   }
 );
