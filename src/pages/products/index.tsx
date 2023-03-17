@@ -44,7 +44,7 @@ const FilterBy = ({
         onChange={onSearchQueryChange}
       />
       <div className="flex flex-col items-baseline gap-2 text-lg">
-        <div className="flex w-full items-center gap-2">
+        <label className="flex w-full items-center gap-2">
           <p>Category: </p>
           <AllProductCategoriesSelect
             listElProps={{ className: "text-sm" }}
@@ -52,18 +52,18 @@ const FilterBy = ({
             setValue={setCategory}
             openerProps={{ variants: { size: "sm", type: "secondary" } }}
           />
-        </div>
-        <div className="flex w-full items-center gap-2">
+        </label>
+        <label className="flex w-full items-center gap-2">
           <p>Under: </p>
           <div>
             $
             <input
-              className="max-w-[6ch] bg-neutral-800"
+              className="max-w-[6ch] rounded-sm border-b border-b-neutral-700 bg-neutral-800 bg-transparent focus:border-b-neutral-300 focus:outline-0"
               defaultValue={price}
               onChange={onPriceChange}
             />
           </div>
-        </div>
+        </label>
       </div>
     </>
   );
