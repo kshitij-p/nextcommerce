@@ -41,7 +41,9 @@ const FileInput = React.forwardRef(
             <p>{renderFileName(fileRef.files[0])}</p>
           ) : null}
         </div>
-        <Input {...rest} className="hidden" type={"file"} ref={handleRef} />
+        <div className="hidden">
+          <Input {...rest} type={"file"} ref={handleRef} />
+        </div>
       </>
     );
   }

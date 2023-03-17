@@ -5,7 +5,7 @@ import { api } from "../../utils/api";
 import Button from "../ui/Button";
 import Form from "../ui/Form";
 import StarRating from "../ui/StarRating";
-import Textarea from "../ui/Textarea";
+import UnstyledTextarea from "../ui/Textarea/UnstyledTextarea";
 
 export const ReviewBodyValidator = z
   .string()
@@ -57,7 +57,7 @@ const CreateReview = ({ productId }: { productId: string }) => {
             onRatingChange={onChange}
             value={form.getValues("rating").toString()}
           />
-          <Textarea
+          <UnstyledTextarea
             {...form.register("body")}
             autoResize
             className="resize-none rounded-sm bg-neutral-800 p-1 ring-0

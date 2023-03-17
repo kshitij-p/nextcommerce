@@ -5,9 +5,9 @@ import React, {
   useRef,
 } from "react";
 import { useFormContext } from "react-hook-form";
-import useMultipleRefs from "../../hooks/useMultipleRefs";
+import useMultipleRefs from "../../../hooks/useMultipleRefs";
 
-const Textarea = React.forwardRef(
+const UnstyledTextarea = React.forwardRef(
   (
     {
       autoResize = false,
@@ -39,8 +39,14 @@ const Textarea = React.forwardRef(
         if (initHeightRef.current === null) {
           initHeightRef.current = el.clientHeight;
         }
+
+        console.log();
+        const padding = parseInt(window.getComputedStyle(el).paddingBlock);
+
         el.style.height = `${initHeightRef.current ?? 0}px`;
-        el.style.height = `${el.scrollHeight}px`;
+        el.style.height = `${
+          el.scrollHeight + (isNaN(padding) ? 0 : padding)
+        }px`;
       },
       [autoResize]
     );
@@ -100,6 +106,6 @@ const Textarea = React.forwardRef(
   }
 );
 
-Textarea.displayName = "Textarea";
+UnstyledTextarea.displayName = "UnstyledTextarea";
 
-export default Textarea;
+export default UnstyledTextarea;

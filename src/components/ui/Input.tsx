@@ -24,7 +24,7 @@ const Input = React.forwardRef(
 
     return (
       <div
-        className={`max-w-max ${
+        className={`flex max-w-max ${
           orientation === "vertical" ? "flex-col" : "flex-row"
         }`}
       >

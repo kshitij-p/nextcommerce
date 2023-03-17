@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { flushSync } from "react-dom";
 import Input from "../ui/Input";
-import Textarea from "../ui/Textarea";
+import UnstyledTextarea from "../ui/Textarea/UnstyledTextarea";
 import EditableHoverButton from "./EditableHoverButton";
 import type useEditableText from "./useEditableText";
 
@@ -97,7 +97,11 @@ const EditableText = ({
           <label className="flex items-center gap-1">
             {labelText ? <p>{labelText}</p> : null}
             {inputElement === "textarea" ? (
-              <Textarea {...textElProps} autoResize cursorToTextEndOnFocus />
+              <UnstyledTextarea
+                {...textElProps}
+                autoResize
+                cursorToTextEndOnFocus
+              />
             ) : (
               <Input {...textElProps} />
             )}

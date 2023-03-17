@@ -14,6 +14,7 @@ import {
   DEFAULT_CATEGORY_OPTION_VALUE,
 } from "../../components/ProductCategoriesSelect";
 import Head from "next/head";
+import Image from "next/image";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -68,6 +69,7 @@ const CreateProductPage = () => {
     price,
     files,
   }: CreateProductForm) => {
+    setProgress(0);
     const file = files?.[0];
 
     if (!file) {
@@ -102,40 +104,74 @@ const CreateProductPage = () => {
     });
   };
 
+  const inputProps: {
+    variants: React.ComponentProps<typeof LabelledInput>["variants"];
+    className: string;
+  } = {
+    className: "w-full",
+    variants: { padding: "lg" },
+  };
+
   return (
     <>
       <Head>
         <title>Create a product | Nextcommerce</title>
       </Head>
-      <div>
-        <Form form={form} onSubmit={handleCreate}>
-          <LabelledInput {...form.register("title")} />
-          <LabelledInput {...form.register("description")} />
-          <LabelledInput {...form.register("price", { valueAsNumber: true })} />
-          <div className="flex items-center">
-            Category
-            <ProductCategoriesSelect
-              openerProps={{ variants: { type: "secondary" } }}
-              value={category}
-              setValue={setCategory}
-              multiple={false}
-            />
-          </div>
-          <FileInput accept="image/*" {...form.register("files")} />
-          {/* Progressbar */}
-          <div
-            className={`h-1 w-full rounded-sm bg-teal-400 transition-all duration-300`}
-            style={{
-              width: `${progress}%`,
-            }}
+      <div className="flex flex-col xl:flex-row">
+        {/* To do add a diff image here and fix the alt */}
+        <div className="relative aspect-video w-full shrink-0 xl:order-last xl:w-[30%]">
+          <Image
+            className="object-cover"
+            src={"/images/create-product-banner.jpeg"}
+            alt={"Image of a cat"}
+            fill
           />
-          <Button type="submit">Create</Button>
-          {productLink ? (
-            <Link href={`/products/${productLink}`}>
-              Success! Click to visit your product
-            </Link>
-          ) : null}
-        </Form>
+        </div>
+        <div className="flex w-full">
+          <Form form={form} onSubmit={handleCreate} className={"p-4 md:p-8"}>
+            <div className="flex flex-col gap-4 text-2xl md:text-4xl">
+              <LabelledInput {...inputProps} {...form.register("title")} />
+
+              <LabelledInput
+                {...inputProps}
+                inputEl="textarea"
+                autoResize
+                style={{ resize: "none" }}
+                {...form.register("description")}
+              />
+              <LabelledInput
+                {...inputProps}
+                {...form.register("price", { valueAsNumber: true })}
+              />
+              <label className="flex items-center gap-2 md:gap-4">
+                Category
+                <ProductCategoriesSelect
+                  openerProps={{ variants: { type: "secondary" } }}
+                  listElProps={{ className: "text-base md:text-lg" }}
+                  value={category}
+                  setValue={setCategory}
+                  multiple={false}
+                />
+              </label>
+              <FileInput accept="image/*" {...form.register("files")} />
+              {/* Progressbar */}
+              <div
+                className={`${
+                  progress > 0 ? "h-1" : "h-0"
+                } w-full rounded-sm bg-teal-400 transition-all duration-300`}
+                style={{
+                  width: `${progress}%`,
+                }}
+              />
+              <Button type="submit">Create</Button>
+              {productLink ? (
+                <Link href={`/products/${productLink}`}>
+                  Success! Click to visit your product
+                </Link>
+              ) : null}
+            </div>
+          </Form>
+        </div>
       </div>
     </>
   );
