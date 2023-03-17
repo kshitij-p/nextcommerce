@@ -40,7 +40,6 @@ const UnstyledTextarea = React.forwardRef(
           initHeightRef.current = el.clientHeight;
         }
 
-        console.log();
         const padding = parseInt(window.getComputedStyle(el).paddingBlock);
 
         el.style.height = `${initHeightRef.current ?? 0}px`;

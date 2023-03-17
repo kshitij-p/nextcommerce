@@ -157,7 +157,7 @@ const CreateProductPage = () => {
               {/* Progressbar */}
               <div
                 className={`${
-                  progress > 0 ? "h-1" : "h-0"
+                  progress > 0 ? "relative h-1" : "absolute h-0"
                 } w-full rounded-sm bg-teal-400 transition-all duration-300`}
                 style={{
                   width: `${progress}%`,

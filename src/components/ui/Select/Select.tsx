@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import { Listbox } from "@headlessui/react";
 import Button from "../Button";
+import { useFloating, flip, offset } from "@floating-ui/react-dom";
 
 interface SelectGenericProps<T> {
   value: T;
@@ -35,17 +36,29 @@ const Select = <T extends Record<string, unknown>>({
   className = "",
   ...rest
 }: SelectProps<T>) => {
+  const { x, y, strategy, refs } = useFloating({
+    placement: "bottom-start",
+    middleware: [offset(8), flip()],
+  });
+
   return (
     <Listbox value={value} onChange={setValue} multiple={multiple}>
       <div {...rest} className={`relative flex ${className}`}>
-        <Listbox.Button as={Fragment}>
+        <Listbox.Button as={"div"} ref={refs.setReference}>
           <Button {...openerProps}>{value[textField] as string}</Button>
         </Listbox.Button>
 
         <Listbox.Options
-          className={`mobile-scrollbar absolute top-full z-[1500] mt-1 flex flex-col gap-2 overflow-auto rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0 ${
+          className={`mobile-scrollbar z-[1500] flex flex-col gap-2 overflow-auto rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0 ${
             listElProps?.className ?? ""
           }`}
+          style={{
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0,
+            width: "max-content",
+          }}
+          ref={refs.setFloating}
         >
           {options.map((x) => {
             return (
