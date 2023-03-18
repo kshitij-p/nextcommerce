@@ -228,7 +228,7 @@ const FeaturedProducts = ({
                   fill
                   src={product.images?.[0]?.publicUrl ?? ""}
                   alt={`Image of ${product.title}`}
-                  sizes={`(max-width: ${breakpoints.sm}) 210px, (max-width: ${breakpoints.md}) 250px, (max-width: ${breakpoints.lg}): 330px, (max-width: ${breakpoints.xl}): 640px`}
+                  sizes={`(max-width: ${breakpoints.sm}) 210px, (max-width: ${breakpoints.md}) 250px, (max-width: ${breakpoints.lg}): 330px, 640px`}
                 />
               );
 

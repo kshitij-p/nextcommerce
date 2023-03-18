@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "../../components/ui/Image";
 import TruncatedText from "../../components/ui/TruncatedText";
-import { extractQueryParam, TIME_IN_MS } from "../../utils/client";
+import { breakpoints, extractQueryParam, TIME_IN_MS } from "../../utils/client";
 import { api, type RouterOutputs } from "../../utils/api";
 import ButtonLink from "../../components/ui/ButtonLink";
 import Loader from "../../components/ui/Loader";
@@ -200,6 +200,7 @@ const AllProductsPage = () => {
                 }
               >
                 <Image
+                  priority={idx <= 2}
                   fill
                   Container={
                     <div className="w-36 shrink-0 self-center md:w-56" />
@@ -208,6 +209,7 @@ const AllProductsPage = () => {
                   src={product.images[0]?.publicUrl ?? ""}
                   aspectRatio={"1 / 1"}
                   alt={`${product.title}'s image`}
+                  sizes={`(max-width: ${breakpoints.sm}): 144px, 224px`}
                 />
                 <div className="flex min-w-0 flex-col">
                   <TruncatedText
