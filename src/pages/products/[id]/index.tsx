@@ -382,6 +382,7 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
         Container={
           <div className="w-full max-w-xl self-center xl:self-start" />
         }
+        sizes={`576px`}
       />
       <div className="flex w-full flex-col gap-2 text-lg md:gap-3 md:text-3xl xl:mt-2 xl:text-2xl">
         <EditableProductText
