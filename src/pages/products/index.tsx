@@ -100,7 +100,7 @@ const AllProductsPage = () => {
   ) => {
     runAfterClearing(async () => {
       const searchParams = new URLSearchParams({ ...router.query, ...params });
-      await router.replace(`/products?${searchParams.toString()}`, undefined, {
+      await router.push(`/products?${searchParams.toString()}`, undefined, {
         shallow: true,
       });
     }, delay);
