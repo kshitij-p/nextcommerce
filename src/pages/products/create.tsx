@@ -16,6 +16,7 @@ import {
 import Head from "next/head";
 import Image from "next/image";
 import { breakpoints } from "../../utils/client";
+import bannerImg from "../../../public/images/create-product-banner.webp";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -127,7 +128,7 @@ const CreateProductPage = () => {
             <Image
               priority
               className="object-cover object-center xl:rounded-3xl"
-              src={"/images/create-product-banner.webp"}
+              src={bannerImg}
               alt={"Image of a girl writing"}
               fill
               sizes={`(max-width: ${breakpoints.xl}): 100vw, 720px`}
