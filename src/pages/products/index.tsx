@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import useTimeout from "../../hooks/useTimeout";
 import useInfiniteLoading from "../../hooks/useInfiniteLoading";
 import Head from "next/head";
+import { AnimatePresence, motion } from "framer-motion";
 
 const FilterBy = ({
   category,
@@ -106,7 +107,7 @@ const AllProductsPage = () => {
     }, delay);
   };
 
-  const { data, isLoading, fetchNextPage, hasNextPage } =
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     api.product.getAll.useInfiniteQuery(
       {
         category:
@@ -230,6 +231,17 @@ const AllProductsPage = () => {
           })
         )}
       </div>
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: "0" }}
+          animate={{ opacity: "1" }}
+          exit={{ opacity: "0" }}
+        >
+          {isFetchingNextPage ? (
+            <Loader className="aspect-square h-auto w-8" />
+          ) : null}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };

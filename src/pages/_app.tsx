@@ -19,8 +19,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  //To do add route transitions
-
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);

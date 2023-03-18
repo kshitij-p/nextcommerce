@@ -8,8 +8,6 @@ const imageRouter = createTRPCRouter({
   getPresignedUrl: protectedProcedure.mutation(async () => {
     const key = `image-${Date.now()}-${Math.round(Math.random() * 100)}`;
 
-    //To do add validation here for images
-
     const presignedUrl = await getSignedUrl(
       s3Client,
       new PutObjectCommand({

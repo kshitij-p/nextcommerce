@@ -132,6 +132,7 @@ const CreateProductPage = () => {
               alt={"Image of a girl writing"}
               fill
               sizes={`(max-width: ${breakpoints.xl}): 100vw, 720px`}
+              placeholder="blur"
             />
           </div>
         </div>
