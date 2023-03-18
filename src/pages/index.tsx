@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { api, type RouterOutputs } from "../utils/api";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
-import { TIME_IN_MS } from "../utils/client";
+import { breakpoints, TIME_IN_MS } from "../utils/client";
 import PageSpinner from "../components/ui/PageSpinner";
 import HandDrawnArrowLeftIcon from "../components/icons/HandDrawnArrowLeftIcon";
 import HandDrawnArrowRightIcon from "../components/icons/HandDrawnArrowRightIcon";
@@ -228,6 +228,7 @@ const FeaturedProducts = ({
                   fill
                   src={product.images?.[0]?.publicUrl ?? ""}
                   alt={`Image of ${product.title}`}
+                  sizes={`(max-width: ${breakpoints.sm}) 210px, (max-width: ${breakpoints.md}) 250px, (max-width: ${breakpoints.lg}): 330px, (max-width: ${breakpoints.xl}): 640px`}
                 />
               );
 

@@ -45,8 +45,8 @@ const productRouter = createTRPCRouter({
         ctx,
         input: { titleQuery, priceLte, category, cursor, limit: passedLimit },
       }) => {
-        //Pc screen can hold 6 times at a time
-        const LIMIT = passedLimit ?? 9;
+        //Pc screen can hold 6 times at a time. Featured products uses 10 as limit so havin same limit will make it load faster if home screen is loaded first.
+        const LIMIT = passedLimit ?? 10;
 
         const products = await ctx.prisma.product.findMany({
           take: LIMIT + 1,
