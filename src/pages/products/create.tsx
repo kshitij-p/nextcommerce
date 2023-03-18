@@ -15,6 +15,7 @@ import {
 } from "../../components/ProductCategoriesSelect";
 import Head from "next/head";
 import Image from "next/image";
+import { breakpoints } from "../../utils/client";
 
 const CreateProductFormSchema = z.object({
   title: z.string().min(1, "Must have atleast 1 character"),
@@ -124,10 +125,12 @@ const CreateProductPage = () => {
         <div className="w-full shrink-0 xl:order-last xl:w-[50%] ">
           <div className="relative aspect-video w-full shrink-0 xl:aspect-square xl:w-3/4">
             <Image
+              priority
               className="object-cover object-center xl:rounded-3xl"
               src={"/images/create-product-banner.webp"}
               alt={"Image of a girl writing"}
               fill
+              sizes={`(max-width: ${breakpoints.xl}): 100vw, 720px`}
             />
           </div>
         </div>

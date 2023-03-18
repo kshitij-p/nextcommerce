@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import { flushSync } from "react-dom";
 import { type PageProduct } from "../../pages/products/[id]";
 import { api, type RouterOutputs } from "../../utils/api";
-import { TIME_IN_MS } from "../../utils/client";
+import { breakpoints, TIME_IN_MS } from "../../utils/client";
 import Avatar from "../ui/Avatar";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { useEditableText } from "../EditableText";
@@ -123,6 +123,7 @@ const Review = ({ review }: { review: ProductReview }) => {
           src={review.user.image}
           Container={<div className="relative w-[40px] md:w-[50px]" />}
           alt={`${review.user.name ?? "Unknown user"}'s profile picture`}
+          sizes={`(max-width: ${breakpoints.md}): 40px, 50px`}
         />
         <div className="flex flex-col">
           <b className="text-base md:text-xl">{`${
