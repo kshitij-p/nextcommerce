@@ -62,7 +62,6 @@ const useEditCartQuantity = ({ productId }: { productId: Product["id"] }) => {
       await invalidateCartItemQuery({ utils, productId });
     },
     onSuccess: () => {
-      //To do throw a toast here
       console.log("updated product quantity");
     },
   });

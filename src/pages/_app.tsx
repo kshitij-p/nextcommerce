@@ -11,7 +11,7 @@ import Layout from "../components/Layout";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { toast, Toaster } from "react-hot-toast";
 
 const inter = Montserrat({ subsets: ["latin"] });
 
@@ -30,6 +30,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
     const handleEnd = () => {
       setLoading(false);
+      toast.dismiss();
     };
 
     router.events.on("routeChangeStart", handleStart);
@@ -51,19 +52,23 @@ const MyApp: AppType<{ session: Session | null }> = ({
             font-family: ${inter.style.fontFamily};
           }
         `}</style>
+        <Toaster
+          position="bottom-left"
+          toastOptions={{
+            duration: 4000,
+            className:
+              "px-3 py-2 text-lg shadow-md md:px-4 md:py-3 md:text-xl flex-row-reverse",
+            style: {
+              background: "rgb(38, 38, 38)",
+              color: "rgb(250, 250, 250)",
+              borderRadius: "0.37rem",
+              maxWidth: "90vw",
+            },
+          }}
+        />
         <Layout loading={loading}>
           <ReactQueryDevtools initialIsOpen={false} />
           <Component {...pageProps} />
-          <AnimatePresence>
-            {loading && (
-              <motion.div
-                className="absolute inset-0 h-1 bg-teal-500"
-                initial={{ width: "0%" }}
-                animate={{ width: "25%" }}
-                exit={{ width: "100%" }}
-              />
-            )}
-          </AnimatePresence>
         </Layout>
       </>
     </SessionProvider>

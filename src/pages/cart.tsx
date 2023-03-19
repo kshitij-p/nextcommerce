@@ -58,11 +58,9 @@ const RemoveFromCartButton = ({
       utils.cart.get.setData(undefined, ctx.previousCart);
     },
     onSuccess: async (data) => {
-      //To do throw a toast here
       await utils.cart.getProduct.invalidate({
         productId: data.deletedCartItem.productId,
       });
-      console.log("successfully removed from cart");
     },
   });
 

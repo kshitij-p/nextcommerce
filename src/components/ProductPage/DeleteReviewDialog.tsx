@@ -12,8 +12,6 @@ const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {
   const { mutate: deleteReview, isLoading } = api.review.delete.useMutation({
     onSuccess: async () => {
       await utils.review.getForProduct.invalidate();
-      //To do throw a toast here
-      console.log("deleted review");
     },
     onSettled: () => {
       setOpen(false);

@@ -13,7 +13,7 @@ import Button from "../../../components/ui/Button";
 import { useSession } from "next-auth/react";
 import React, { type ForwardedRef, useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
-import { TIME_IN_MS } from "../../../utils/client";
+import { TIME_IN_MS, toast } from "../../../utils/client";
 import { z } from "zod";
 import EditableText, {
   useEditableText,
@@ -126,10 +126,8 @@ const ProductEditDialog = ({
       utils.product.get.setData({ id: product.id }, ctx.previousProduct);
     },
     onSuccess: async () => {
-      //To do throw a toast here
       await utils.product.getAll.cancel();
       await utils.product.getAll.invalidate();
-      console.log("Successfully edited");
     },
   });
 
@@ -288,6 +286,9 @@ const ProductBuyArea = React.forwardRef(
         onSuccess: () => {
           //To do throw a toast here
           console.log("added to cart");
+          toast("Added to cart", {
+            type: "success",
+          });
         },
       });
 

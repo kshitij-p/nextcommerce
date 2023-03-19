@@ -131,6 +131,7 @@ const AllProductsPage = () => {
         },
         initialDataUpdatedAt: 0,
         staleTime: TIME_IN_MS.FIVE_MINUTES,
+        refetchOnWindowFocus: false,
       }
     );
 
