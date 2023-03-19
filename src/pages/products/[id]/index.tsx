@@ -294,7 +294,7 @@ const ProductBuyArea = React.forwardRef(
       });
 
     const { mutateAsync: updateQuantity, isLoading: isUpdatingQty } =
-      useEditCartQuantity({ productId: product.id });
+      useEditCartQuantity({ productId: product.id, toastOnSuccess: true });
 
     const { data } = api.cart.getProduct.useQuery(
       { productId: product.id },

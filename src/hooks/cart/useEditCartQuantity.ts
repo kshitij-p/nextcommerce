@@ -1,9 +1,16 @@
 import { type Product } from "@prisma/client";
 import { api } from "../../utils/api";
+import toast from "../../utils/toast";
 import useTRPCUtils from "../useTRPCUtils";
 import { cancelCartItemQuery, invalidateCartItemQuery } from "./utils";
 
-const useEditCartQuantity = ({ productId }: { productId: Product["id"] }) => {
+const useEditCartQuantity = ({
+  productId,
+  toastOnSuccess = false,
+}: {
+  productId: Product["id"];
+  toastOnSuccess?: boolean;
+}) => {
   const utils = useTRPCUtils();
 
   return api.cart.updateQuantity.useMutation({
@@ -63,6 +70,11 @@ const useEditCartQuantity = ({ productId }: { productId: Product["id"] }) => {
     },
     onSuccess: () => {
       console.log("updated product quantity");
+      if (toastOnSuccess) {
+        toast("Updated quantity in cart", {
+          type: "success",
+        });
+      }
     },
   });
 };
