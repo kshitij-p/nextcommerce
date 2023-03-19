@@ -136,14 +136,21 @@ const CartItem = ({
           <p>Qty: </p>
           <div className="flex gap-1">
             <button
-              onClick={async () => {
-                await handleUpdateQuantity(-1);
-              }}
+              className="focus:outline-0 enabled:hover:text-teal-200 enabled:focus:text-teal-500 disabled:opacity-50"
+              disabled={cartItem.quantity <= 1}
+              onClick={
+                cartItem.quantity > 1
+                  ? async () => {
+                      await handleUpdateQuantity(-1);
+                    }
+                  : undefined
+              }
             >
               -
             </button>
             <p className="font-semibold">{quantity}</p>
             <button
+              className="focus:outline-0 enabled:hover:text-teal-200 enabled:focus:text-teal-500 disabled:opacity-50"
               onClick={async () => {
                 await handleUpdateQuantity(1);
               }}
