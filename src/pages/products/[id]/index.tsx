@@ -225,10 +225,13 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
 
   const { mutate, isLoading } = api.product.delete.useMutation({
     onSuccess: async () => {
-      //To do throw a toast here
       await utils.product.getAll.invalidate();
       await utils.cart.get.invalidate();
-      console.log("Deleted");
+
+      toast("This product has been deleted", {
+        type: "danger",
+        duration: Infinity,
+      });
     },
     onSettled: () => {
       setOpen(false);
@@ -284,8 +287,6 @@ const ProductBuyArea = React.forwardRef(
           await invalidateCartItemQuery({ utils, productId: product.id });
         },
         onSuccess: () => {
-          //To do throw a toast here
-          console.log("added to cart");
           toast("Added to cart", {
             type: "success",
           });
