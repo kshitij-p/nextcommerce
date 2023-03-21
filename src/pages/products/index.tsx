@@ -16,6 +16,8 @@ import useTimeout from "../../hooks/useTimeout";
 import useInfiniteLoading from "../../hooks/useInfiniteLoading";
 import Head from "next/head";
 import { AnimatePresence, motion } from "framer-motion";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import Divider from "../../components/ui/Divider";
 
 const FilterBy = ({
   category,
@@ -39,11 +41,26 @@ const FilterBy = ({
       <Head>
         <title>Products | Nextcommerce</title>
       </Head>
-      <input
-        className="rounded p-1 text-lg"
-        defaultValue={searchQuery}
-        onChange={onSearchQueryChange}
-      />
+      <label
+        className="flex items-center gap-1 rounded-lg
+        border-2 border-teal-900 py-1 px-2
+        text-lg transition focus-within:border-teal-700
+        focus-within:shadow-[0px_0px_6px_#0f766e]
+        hover:border-teal-800 focus-within:hover:border-teal-700 md:gap-2 md:py-1 md:px-2"
+      >
+        <MagnifyingGlassIcon
+          className="aspect-square h-auto text-teal-800"
+          width={20}
+        />
+        <Divider className="bg-teal-800" size="1.25rem" vertical />
+        <input
+          className="bg-transparent text-neutral-300
+         focus:outline-0"
+          aria-invalid={false}
+          defaultValue={searchQuery}
+          onChange={onSearchQueryChange}
+        />
+      </label>
       <div className="flex flex-col items-baseline gap-2 text-lg">
         <label className="flex w-full items-center gap-2">
           <p>Category: </p>

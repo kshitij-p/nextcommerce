@@ -61,7 +61,10 @@ const toast = (
           ...passedStyle,
         },
         icon: restOptions.icon ?? (
-          <ExclamationTriangleIcon width={20} height="auto" />
+          <ExclamationTriangleIcon
+            className="aspect-square h-auto"
+            width={20}
+          />
         ),
         iconTheme: {
           primary: "rgb(255, 233, 233)",

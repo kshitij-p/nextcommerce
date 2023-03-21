@@ -69,7 +69,6 @@ const useEditCartQuantity = ({
       await invalidateCartItemQuery({ utils, productId });
     },
     onSuccess: () => {
-      console.log("updated product quantity");
       if (toastOnSuccess) {
         toast("Updated quantity in cart", {
           type: "success",
