@@ -74,51 +74,51 @@ const FilterBy = ({
 
   return (
     <>
-      <label
-        className="flex items-center gap-1 rounded-lg
-        border-2 border-teal-900 py-1 px-2
-        text-lg transition focus-within:border-teal-700
-        focus-within:shadow-[0px_0px_6px_#0f766e]
-        hover:border-teal-800 focus-within:hover:border-teal-700 md:gap-2 md:py-1 md:px-2"
-      >
-        <MagnifyingGlassIcon
-          className="aspect-square h-auto text-teal-800"
-          width={20}
-        />
-        <Divider className="bg-teal-800" size="1.25rem" vertical />
-        <Autocomplete
-          inputElProps={{
-            className:
-              "bg-transparent text-neutral-300 focus:outline-0 text-lg",
-          }}
-          listElProps={{
-            className: "max-w-full",
-          }}
-          listItemProps={{
-            className: "truncate",
-            textAsTitle: true,
-          }}
-          textField={"title"}
-          options={autocompleteData}
-          value={autocompleteValue}
-          onChange={(value) => {
-            setAutocompleteValue(value);
-            setQueryParam({ title: value.title }, 0);
-          }}
-          query={autocompleteQuery}
-          onQueryChange={(title, triggeredByOptionSelect) => {
-            setAutocompleteQuery(title);
-            if (!title) {
-              setQueryParam({ title: title }, 0);
-            }
-            if (!triggeredByOptionSelect) {
-              setAutocompleteTimeout(() => {
-                void fetchAutocompleteData({ title });
-              }, 500);
-            }
-          }}
-        />
-      </label>
+      <Autocomplete
+        Opener={
+          <div
+            className="flex items-center gap-1 rounded-lg
+            border-2 border-teal-900 py-1 px-2
+            text-lg transition focus-within:border-teal-700
+            focus-within:shadow-[0px_0px_6px_#0f766e]
+            hover:border-teal-800 focus-within:hover:border-teal-700 md:gap-2 md:py-1 md:px-2"
+          >
+            <MagnifyingGlassIcon
+              className="aspect-square h-auto text-teal-800"
+              width={20}
+            />
+            <Divider className="bg-teal-800" size="1.25rem" vertical />
+          </div>
+        }
+        inputElProps={{
+          className: "bg-transparent text-neutral-300 focus:outline-0 text-lg",
+        }}
+        listElProps={{
+          className: "w-full h-52",
+        }}
+        listItemProps={{
+          textAsTitle: true,
+        }}
+        textField={"title"}
+        options={autocompleteData}
+        value={autocompleteValue}
+        onChange={(value) => {
+          setAutocompleteValue(value);
+          setQueryParam({ title: value.title }, 0);
+        }}
+        query={autocompleteQuery}
+        onQueryChange={(title, triggeredByOptionSelect) => {
+          setAutocompleteQuery(title);
+          if (!title) {
+            setQueryParam({ title: title }, 0);
+          }
+          if (!triggeredByOptionSelect) {
+            setAutocompleteTimeout(() => {
+              void fetchAutocompleteData({ title });
+            }, 500);
+          }
+        }}
+      />
       <div className="flex flex-col items-baseline gap-2 text-lg">
         <label className="flex w-full items-center gap-2">
           <p>Category: </p>

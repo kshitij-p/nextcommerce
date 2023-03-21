@@ -11,7 +11,7 @@ export const SelectListItem = React.forwardRef(
     return (
       <li
         {...rest}
-        className={`cursor-pointer items-center justify-center rounded border-2 border-transparent p-2 transition ui-selected:border-teal-700 ui-selected:bg-teal-700/40 ui-active:border-teal-500 ${className}`}
+        className={`shrink-0 cursor-pointer items-center justify-center truncate rounded border-2 border-transparent p-2 transition ui-selected:border-teal-700 ui-selected:bg-teal-700/40 ui-active:border-teal-500 ${className}`}
         ref={passedRef}
       >
         {children}
@@ -97,7 +97,6 @@ const Select = <T extends Record<string, unknown>>({
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
-              width: "max-content",
             }}
             ref={refs.setFloating}
           >

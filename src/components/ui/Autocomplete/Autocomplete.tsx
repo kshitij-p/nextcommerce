@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo } from "react";
+import React, { Fragment, type HTMLProps, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
 import {
   SelectList,
@@ -19,9 +19,10 @@ const Autocomplete = <
   defaultQuery,
   onQueryChange,
   textField,
+  Opener = <div />,
   inputElProps,
   listElProps,
-  listItemProps,
+  listItemProps: passedListItemProps = {},
   className = "",
   ...rest
 }: Omit<React.ComponentProps<"div">, "value" | "onChange"> & {
@@ -32,11 +33,15 @@ const Autocomplete = <
   defaultQuery?: string;
   onQueryChange: (query: string, triggeredByOptionSelect: boolean) => void;
   textField: TKey;
+  Opener?: React.ReactElement<HTMLProps<HTMLElement>>;
   inputElProps?: Omit<
     React.ComponentProps<"input">,
     "value" | "onChange" | "defaultValue"
   >;
-  listElProps?: Omit<React.ComponentProps<typeof SelectList>, "children">;
+  listElProps?: Omit<
+    React.ComponentPropsWithRef<typeof SelectList>,
+    "children"
+  >;
   listItemProps?: Omit<
     React.ComponentProps<typeof SelectListItem>,
     "children"
@@ -52,6 +57,8 @@ const Autocomplete = <
       : options;
   }, [query, options, textField]);
 
+  const { textAsTitle, ...listItemProps } = passedListItemProps;
+
   return (
     <Combobox
       value={value}
@@ -61,18 +68,26 @@ const Autocomplete = <
       }}
     >
       <div {...rest} className={`relative flex ${className}`}>
-        <div ref={refs.setReference}>
-          <Combobox.Button as={Fragment}>
-            <Combobox.Input
-              {...inputElProps}
-              value={query}
-              defaultValue={defaultQuery}
-              onChange={(e) => {
-                onQueryChange(e.currentTarget.value, false);
-              }}
-            />
-          </Combobox.Button>
-        </div>
+        <Combobox.Button as={Fragment}>
+          {React.cloneElement(Opener, {
+            ...Opener.props,
+            ref: refs.setReference,
+            children: (
+              <>
+                {Opener.props.children}
+                <Combobox.Input
+                  {...inputElProps}
+                  value={query}
+                  defaultValue={defaultQuery}
+                  onChange={(e) => {
+                    onQueryChange(e.currentTarget.value, false);
+                  }}
+                />
+              </>
+            ),
+          })}
+        </Combobox.Button>
+
         <Combobox.Options as={Fragment}>
           <SelectList
             {...listElProps}
@@ -80,7 +95,6 @@ const Autocomplete = <
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
-              width: "max-content",
             }}
             ref={refs.setFloating}
           >
@@ -95,7 +109,7 @@ const Autocomplete = <
                   title={
                     listItemProps?.title
                       ? listItemProps.title
-                      : listItemProps?.textAsTitle
+                      : textAsTitle
                       ? option[textField]
                       : undefined
                   }
