@@ -129,4 +129,6 @@ model Product {
     cartItems   CartItem[]
     reviews     Review[]
     category    ProductCategories @default(Other)
+
+    @@index(fields: [title, price, category])
 }
