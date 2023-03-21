@@ -18,6 +18,16 @@ import Head from "next/head";
 import { AnimatePresence, motion } from "framer-motion";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Divider from "../../components/ui/Divider";
+import Autocomplete from "../../components/ui/Autocomplete";
+import { useState } from "react";
+
+const testOptions = [
+  { text: "kekw" },
+  { text: "kekw1" },
+  { text: "kekw2" },
+  { text: "kekw3" },
+  { text: "kekw4" },
+];
 
 const FilterBy = ({
   category,
@@ -38,8 +48,21 @@ const FilterBy = ({
   price: string | undefined;
   onPriceChange: React.ChangeEventHandler<HTMLInputElement>;
 }) => {
+  const [autocompleteValue, setAutocompleteValue] = useState(
+    testOptions[0] as (typeof testOptions)[0]
+  );
+  const [autocompleteQuery, setAutocompleteQuery] = useState("");
+
   return (
     <>
+      <Autocomplete
+        textField={"text"}
+        options={testOptions}
+        value={autocompleteValue}
+        onChange={setAutocompleteValue}
+        query={autocompleteQuery}
+        onQueryChange={setAutocompleteQuery}
+      />
       <label
         className="flex items-center gap-1 rounded-lg
         border-2 border-teal-900 py-1 px-2
@@ -168,6 +191,8 @@ const AllProductsPage = () => {
   });
 
   console.log({ autocompleteData });
+
+  //To do ssg featured products
 
   return (
     <>
