@@ -56,7 +56,7 @@ interface SelectGenericProps<T> {
   textField: keyof T;
   options: Array<T>;
   openerProps?: Omit<React.ComponentProps<typeof Button>, "children">;
-  listElProps?: Omit<React.ComponentProps<"ul">, "children">;
+  listElProps?: Omit<React.ComponentProps<typeof SelectList>, "children">;
 }
 
 interface SingleSelectProps<T> extends SelectGenericProps<T> {
@@ -92,7 +92,7 @@ const Select = <T extends Record<string, unknown>>({
 
         <Listbox.Options as={Fragment}>
           <SelectList
-            className={listElProps?.className}
+            {...listElProps}
             style={{
               position: strategy,
               top: y ?? 0,

@@ -21,14 +21,6 @@ import Divider from "../../components/ui/Divider";
 import Autocomplete from "../../components/ui/Autocomplete";
 import { useState } from "react";
 
-const testOptions = [
-  { text: "kekw" },
-  { text: "kekw1" },
-  { text: "kekw2" },
-  { text: "kekw3" },
-  { text: "kekw4" },
-];
-
 const FilterBy = ({
   searchQuery,
   category,
@@ -61,26 +53,27 @@ const FilterBy = ({
     }, delay);
   };
 
-  const { data: autocompleteData, mutate: fetchAutocompleteData } =
-    api.product.getAutocomplete.useMutation();
+  const { data: autocompleteMutationData, mutate: fetchAutocompleteData } =
+    api.product.getAutocomplete.useMutation({});
 
-  const [autocompleteValue, setAutocompleteValue] = useState(
-    testOptions[0] as (typeof testOptions)[0]
-  );
-  const [autocompleteQuery, setAutocompleteQuery] = useState("");
+  const autocompleteData =
+    autocompleteMutationData?.products ??
+    ([] as RouterOutputs["product"]["getAutocomplete"]["products"]);
 
-  console.log({ autocompleteData });
+  const [autocompleteValue, setAutocompleteValue] = useState<
+    (typeof autocompleteData)[0]
+  >({
+    id: "",
+    category: "Other",
+    description: "",
+    price: 1,
+    title: "",
+    userId: "",
+  });
+  const [autocompleteQuery, setAutocompleteQuery] = useState(searchQuery ?? "");
 
   return (
     <>
-      <Autocomplete
-        textField={"text"}
-        options={testOptions}
-        value={autocompleteValue}
-        onChange={setAutocompleteValue}
-        query={autocompleteQuery}
-        onQueryChange={setAutocompleteQuery}
-      />
       <label
         className="flex items-center gap-1 rounded-lg
         border-2 border-teal-900 py-1 px-2
@@ -93,22 +86,35 @@ const FilterBy = ({
           width={20}
         />
         <Divider className="bg-teal-800" size="1.25rem" vertical />
-        <input
-          className="bg-transparent text-neutral-300
-         focus:outline-0"
-          aria-invalid={false}
-          defaultValue={searchQuery}
-          onChange={(e) => {
-            let title = e.currentTarget.value;
-            setAutocompleteTimeout(() => {
-              console.log("search for ", title);
-              void fetchAutocompleteData({ title });
-            }, 500);
+        <Autocomplete
+          inputElProps={{
+            className:
+              "bg-transparent text-neutral-300 focus:outline-0 text-lg",
           }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              setQueryParam({ title: e.currentTarget.value }, 0);
+          listElProps={{
+            className: "max-w-full",
+          }}
+          listItemProps={{
+            className: "truncate",
+            textAsTitle: true,
+          }}
+          textField={"title"}
+          options={autocompleteData}
+          value={autocompleteValue}
+          onChange={(value) => {
+            setAutocompleteValue(value);
+            setQueryParam({ title: value.title }, 0);
+          }}
+          query={autocompleteQuery}
+          onQueryChange={(title, triggeredByOptionSelect) => {
+            setAutocompleteQuery(title);
+            if (!title) {
+              setQueryParam({ title: title }, 0);
+            }
+            if (!triggeredByOptionSelect) {
+              setAutocompleteTimeout(() => {
+                void fetchAutocompleteData({ title });
+              }, 500);
             }
           }}
         />
