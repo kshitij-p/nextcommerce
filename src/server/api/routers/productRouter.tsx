@@ -88,16 +88,23 @@ const productRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().optional(),
+        limit: z.number().optional(),
       })
     )
-    .mutation(async ({ ctx, input: { title } }) => {
+    .mutation(async ({ ctx, input: { title, limit: passedLimit } }) => {
+      const LIMIT = passedLimit ?? 20;
+
       const products = title
         ? await ctx.prisma.product.findMany({
+            take: LIMIT,
             where: {
               title: {
                 startsWith: title.trim(),
                 mode: "insensitive",
               },
+            },
+            orderBy: {
+              id: "asc",
             },
           })
         : [];

@@ -19,6 +19,9 @@ const cartRouter = createTRPCRouter({
               },
             },
           },
+          orderBy: {
+            id: "asc",
+          },
         },
       },
     });
