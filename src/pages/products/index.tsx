@@ -24,11 +24,13 @@ const FilterBy = ({
   setCategory,
   searchQuery,
   onSearchQueryChange,
+  onSearchKeyDown,
   price,
   onPriceChange,
 }: {
   searchQuery: string | undefined;
   onSearchQueryChange: React.ChangeEventHandler<HTMLInputElement>;
+  onSearchKeyDown: React.KeyboardEventHandler<HTMLInputElement>;
   category: React.ComponentProps<typeof AllProductCategoriesSelect>["value"];
   setCategory: React.ComponentProps<
     typeof AllProductCategoriesSelect
@@ -38,9 +40,6 @@ const FilterBy = ({
 }) => {
   return (
     <>
-      <Head>
-        <title>Products | Nextcommerce</title>
-      </Head>
       <label
         className="flex items-center gap-1 rounded-lg
         border-2 border-teal-900 py-1 px-2
@@ -59,6 +58,7 @@ const FilterBy = ({
           aria-invalid={false}
           defaultValue={searchQuery}
           onChange={onSearchQueryChange}
+          onKeyDown={onSearchKeyDown}
         />
       </label>
       <div className="flex flex-col items-baseline gap-2 text-lg">
@@ -105,7 +105,9 @@ const AllProductsPage = () => {
 
   const priceQuery = extractQueryParam(router.query.price);
 
-  const { runAfterClearing } = useTimeout();
+  const { runAfterClearing: setQueryParamTimeout } = useTimeout();
+
+  const { runAfterClearing: setAutocompleteTimeout } = useTimeout();
 
   const setQueryParam = (
     params: {
@@ -116,7 +118,7 @@ const AllProductsPage = () => {
     },
     delay = 250
   ) => {
-    runAfterClearing(async () => {
+    setQueryParamTimeout(async () => {
       const searchParams = new URLSearchParams({ ...router.query, ...params });
       await router.push(`/products?${searchParams.toString()}`, undefined, {
         shallow: true,
@@ -152,6 +154,9 @@ const AllProductsPage = () => {
       }
     );
 
+  const { data: autocompleteData, mutate: fetchAutocompleteData } =
+    api.product.getAutocomplete.useMutation();
+
   const products =
     data?.pages.reduce((prevProducts, currPage) => {
       return [...prevProducts, ...currPage.products];
@@ -162,105 +167,124 @@ const AllProductsPage = () => {
     hasNextPage,
   });
 
-  return (
-    <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex w-full flex-col items-center gap-2">
-        <div className="ml-1 flex items-center gap-2 md:ml-2 xl:ml-3">
-          <h2 className="text-3xl font-semibold md:text-5xl">Products</h2>
-          {status === "authenticated" ? (
-            <ButtonLink
-              className="text-xl"
-              href={`/products/create`}
-              variants={{ type: "secondary" }}
-            >
-              Create
-            </ButtonLink>
-          ) : null}
-        </div>
-        <FilterBy
-          searchQuery={searchQuery}
-          onSearchQueryChange={(e) =>
-            setQueryParam({ title: e.currentTarget.value })
-          }
-          category={category}
-          setCategory={(category) => {
-            setQueryParam(
-              {
-                categoryKey: category.key,
-                categoryValue: category.value,
-              },
-              10
-            );
-          }}
-          price={priceQuery}
-          onPriceChange={(e) => setQueryParam({ price: e.currentTarget.value })}
-        />
-      </div>
-      <div className="flex w-full flex-col items-center justify-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
-        {isLoading ? (
-          <Loader
-            className="mt-12"
-            variant="default"
-            height="5rem"
-            width="5rem"
-          />
-        ) : (
-          products.map((product, idx) => {
-            return (
-              <Link
-                className="flex w-full items-start gap-2 rounded-sm p-4 text-base text-zinc-200 hover:bg-zinc-800 md:gap-4 md:text-2xl xl:max-w-[30%]"
-                prefetch={false}
-                key={product.id}
-                href={`/products/${product.id}`}
-                ref={
-                  idx === products.length - 1
-                    ? productInfiniteLoadingTarget
-                    : undefined
-                }
-              >
-                <Image
-                  priority={idx <= 2}
-                  fill
-                  Container={
-                    <div className="w-36 shrink-0 self-center md:w-56" />
-                  }
-                  className="rounded-sm object-cover"
-                  src={product.images[0]?.publicUrl ?? ""}
-                  aspectRatio={"1 / 1"}
-                  alt={`${product.title}'s image`}
-                  sizes={`(max-width: ${breakpoints.sm}): 144px, 224px`}
-                />
-                <div className="flex min-w-0 flex-col">
-                  <TruncatedText
-                    className="text-xl font-bold md:text-3xl"
-                    title={product.title}
-                    maxLines={2}
-                  >
-                    {product.title}
-                  </TruncatedText>
-                  <p className="text-zinc-300 md:text-3xl">{`$${product.price}`}</p>
+  console.log({ autocompleteData });
 
-                  <TruncatedText className="mt-1 text-zinc-400" maxLines={3}>
-                    {product.description}
-                  </TruncatedText>
-                </div>
-              </Link>
-            );
-          })
-        )}
+  return (
+    <>
+      <Head>
+        <title>Products | Nextcommerce</title>
+      </Head>
+      <div className="flex flex-col items-center gap-4 p-4 md:gap-8 md:p-8">
+        <div className="flex w-full flex-col items-center gap-2">
+          <div className="ml-1 flex items-center gap-2 md:ml-2 xl:ml-3">
+            <h2 className="text-3xl font-semibold md:text-5xl">Products</h2>
+            {status === "authenticated" ? (
+              <ButtonLink
+                className="text-xl"
+                href={`/products/create`}
+                variants={{ type: "secondary" }}
+              >
+                Create
+              </ButtonLink>
+            ) : null}
+          </div>
+          <FilterBy
+            searchQuery={searchQuery}
+            onSearchQueryChange={(e) => {
+              let title = e.currentTarget.value;
+              setAutocompleteTimeout(() => {
+                console.log("search for ", title);
+                void fetchAutocompleteData({ title });
+              }, 500);
+            }}
+            onSearchKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setQueryParam({ title: e.currentTarget.value }, 0);
+              }
+            }}
+            category={category}
+            setCategory={(category) => {
+              setQueryParam(
+                {
+                  categoryKey: category.key,
+                  categoryValue: category.value,
+                },
+                10
+              );
+            }}
+            price={priceQuery}
+            onPriceChange={(e) =>
+              setQueryParam({ price: e.currentTarget.value })
+            }
+          />
+        </div>
+        <div className="flex w-full flex-col items-center justify-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
+          {isLoading ? (
+            <Loader
+              className="mt-12"
+              variant="default"
+              height="5rem"
+              width="5rem"
+            />
+          ) : (
+            products.map((product, idx) => {
+              return (
+                <Link
+                  className="flex w-full items-start gap-2 rounded-sm p-4 text-base text-zinc-200 hover:bg-zinc-800 md:gap-4 md:text-2xl xl:max-w-[30%]"
+                  prefetch={false}
+                  key={product.id}
+                  href={`/products/${product.id}`}
+                  ref={
+                    idx === products.length - 1
+                      ? productInfiniteLoadingTarget
+                      : undefined
+                  }
+                >
+                  <Image
+                    priority={idx <= 2}
+                    fill
+                    Container={
+                      <div className="w-36 shrink-0 self-center md:w-56" />
+                    }
+                    className="rounded-sm object-cover"
+                    src={product.images[0]?.publicUrl ?? ""}
+                    aspectRatio={"1 / 1"}
+                    alt={`${product.title}'s image`}
+                    sizes={`(max-width: ${breakpoints.sm}): 144px, 224px`}
+                  />
+                  <div className="flex min-w-0 flex-col">
+                    <TruncatedText
+                      className="text-xl font-bold md:text-3xl"
+                      title={product.title}
+                      maxLines={2}
+                    >
+                      {product.title}
+                    </TruncatedText>
+                    <p className="text-zinc-300 md:text-3xl">{`$${product.price}`}</p>
+
+                    <TruncatedText className="mt-1 text-zinc-400" maxLines={3}>
+                      {product.description}
+                    </TruncatedText>
+                  </div>
+                </Link>
+              );
+            })
+          )}
+        </div>
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: "0" }}
+            animate={{ opacity: "1" }}
+            exit={{ opacity: "0" }}
+          >
+            {isFetchingNextPage ? (
+              <Loader className="aspect-square h-auto w-8" />
+            ) : null}
+          </motion.div>
+        </AnimatePresence>
       </div>
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: "0" }}
-          animate={{ opacity: "1" }}
-          exit={{ opacity: "0" }}
-        >
-          {isFetchingNextPage ? (
-            <Loader className="aspect-square h-auto w-8" />
-          ) : null}
-        </motion.div>
-      </AnimatePresence>
-    </div>
+    </>
   );
 };
 

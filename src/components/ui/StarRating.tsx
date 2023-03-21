@@ -134,15 +134,15 @@ const StarRating = React.forwardRef(
                     setHighlighted(-1);
                   }}
                   onKeyDown={(e) => {
-                    if (e.code === "Tab") {
+                    if (e.key === "Tab") {
                       setHighlighted(-1);
                       return;
                     }
 
                     let increment =
-                      e.code === "ArrowRight"
+                      e.key === "ArrowRight"
                         ? 1
-                        : e.code === "ArrowLeft"
+                        : e.key === "ArrowLeft"
                         ? -1
                         : 0;
                     if (!increment) {

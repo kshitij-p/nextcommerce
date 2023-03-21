@@ -53,6 +53,7 @@ const productRouter = createTRPCRouter({
           where: {
             title: {
               contains: titleQuery,
+              mode: "insensitive",
             },
             price: {
               lte: priceLte,
@@ -83,6 +84,30 @@ const productRouter = createTRPCRouter({
         };
       }
     ),
+  getAutocomplete: publicProcedure
+    .input(
+      z.object({
+        title: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input: { title } }) => {
+      const products = title
+        ? await ctx.prisma.product.findMany({
+            where: {
+              title: {
+                startsWith: title.trim(),
+                mode: "insensitive",
+              },
+            },
+          })
+        : [];
+
+      return {
+        message:
+          "Successfully got all products that start with the given title.",
+        products: products,
+      };
+    }),
   get: publicProcedure
     .input(z.object({ id: ProductIdValidator }))
     .query(async ({ input: { id }, ctx }) => {
