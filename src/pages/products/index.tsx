@@ -30,28 +30,46 @@ const testOptions = [
 ];
 
 const FilterBy = ({
-  category,
-  setCategory,
   searchQuery,
-  onSearchQueryChange,
-  onSearchKeyDown,
+  category,
   price,
-  onPriceChange,
 }: {
   searchQuery: string | undefined;
-  onSearchQueryChange: React.ChangeEventHandler<HTMLInputElement>;
-  onSearchKeyDown: React.KeyboardEventHandler<HTMLInputElement>;
   category: React.ComponentProps<typeof AllProductCategoriesSelect>["value"];
-  setCategory: React.ComponentProps<
-    typeof AllProductCategoriesSelect
-  >["setValue"];
   price: string | undefined;
-  onPriceChange: React.ChangeEventHandler<HTMLInputElement>;
 }) => {
+  const router = useRouter();
+
+  const { runAfterClearing: setQueryParamTimeout } = useTimeout();
+
+  const { runAfterClearing: setAutocompleteTimeout } = useTimeout();
+
+  const setQueryParam = (
+    params: {
+      title?: string;
+      categoryKey?: string;
+      categoryValue?: string;
+      price?: string;
+    },
+    delay = 250
+  ) => {
+    setQueryParamTimeout(async () => {
+      const searchParams = new URLSearchParams({ ...router.query, ...params });
+      await router.push(`/products?${searchParams.toString()}`, undefined, {
+        shallow: true,
+      });
+    }, delay);
+  };
+
+  const { data: autocompleteData, mutate: fetchAutocompleteData } =
+    api.product.getAutocomplete.useMutation();
+
   const [autocompleteValue, setAutocompleteValue] = useState(
     testOptions[0] as (typeof testOptions)[0]
   );
   const [autocompleteQuery, setAutocompleteQuery] = useState("");
+
+  console.log({ autocompleteData });
 
   return (
     <>
@@ -80,8 +98,19 @@ const FilterBy = ({
          focus:outline-0"
           aria-invalid={false}
           defaultValue={searchQuery}
-          onChange={onSearchQueryChange}
-          onKeyDown={onSearchKeyDown}
+          onChange={(e) => {
+            let title = e.currentTarget.value;
+            setAutocompleteTimeout(() => {
+              console.log("search for ", title);
+              void fetchAutocompleteData({ title });
+            }, 500);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              setQueryParam({ title: e.currentTarget.value }, 0);
+            }
+          }}
         />
       </label>
       <div className="flex flex-col items-baseline gap-2 text-lg">
@@ -90,7 +119,15 @@ const FilterBy = ({
           <AllProductCategoriesSelect
             listElProps={{ className: "text-sm" }}
             value={category}
-            setValue={setCategory}
+            setValue={(category) => {
+              setQueryParam(
+                {
+                  categoryKey: category.key,
+                  categoryValue: category.value,
+                },
+                10
+              );
+            }}
             openerProps={{ variants: { size: "sm", type: "secondary" } }}
           />
         </label>
@@ -101,7 +138,7 @@ const FilterBy = ({
             <input
               className="max-w-[6ch] rounded-sm border-b border-b-neutral-700 bg-neutral-800 bg-transparent focus:border-b-neutral-300 focus:outline-0"
               defaultValue={price}
-              onChange={onPriceChange}
+              onChange={(e) => setQueryParam({ price: e.currentTarget.value })}
             />
           </div>
         </label>
@@ -127,27 +164,6 @@ const AllProductsPage = () => {
   };
 
   const priceQuery = extractQueryParam(router.query.price);
-
-  const { runAfterClearing: setQueryParamTimeout } = useTimeout();
-
-  const { runAfterClearing: setAutocompleteTimeout } = useTimeout();
-
-  const setQueryParam = (
-    params: {
-      title?: string;
-      categoryKey?: string;
-      categoryValue?: string;
-      price?: string;
-    },
-    delay = 250
-  ) => {
-    setQueryParamTimeout(async () => {
-      const searchParams = new URLSearchParams({ ...router.query, ...params });
-      await router.push(`/products?${searchParams.toString()}`, undefined, {
-        shallow: true,
-      });
-    }, delay);
-  };
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     api.product.getAll.useInfiniteQuery(
@@ -177,9 +193,6 @@ const AllProductsPage = () => {
       }
     );
 
-  const { data: autocompleteData, mutate: fetchAutocompleteData } =
-    api.product.getAutocomplete.useMutation();
-
   const products =
     data?.pages.reduce((prevProducts, currPage) => {
       return [...prevProducts, ...currPage.products];
@@ -189,8 +202,6 @@ const AllProductsPage = () => {
     fetchNextPage,
     hasNextPage,
   });
-
-  console.log({ autocompleteData });
 
   //To do ssg featured products
 
@@ -215,33 +226,8 @@ const AllProductsPage = () => {
           </div>
           <FilterBy
             searchQuery={searchQuery}
-            onSearchQueryChange={(e) => {
-              let title = e.currentTarget.value;
-              setAutocompleteTimeout(() => {
-                console.log("search for ", title);
-                void fetchAutocompleteData({ title });
-              }, 500);
-            }}
-            onSearchKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                setQueryParam({ title: e.currentTarget.value }, 0);
-              }
-            }}
             category={category}
-            setCategory={(category) => {
-              setQueryParam(
-                {
-                  categoryKey: category.key,
-                  categoryValue: category.value,
-                },
-                10
-              );
-            }}
             price={priceQuery}
-            onPriceChange={(e) =>
-              setQueryParam({ price: e.currentTarget.value })
-            }
           />
         </div>
         <div className="flex w-full flex-col items-center justify-center gap-4 md:gap-8 xl:flex-row xl:flex-wrap">
