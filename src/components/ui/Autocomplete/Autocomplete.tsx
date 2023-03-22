@@ -15,6 +15,7 @@ const Autocomplete = <
 >({
   value,
   onChange,
+  placeholderValue,
   options,
   query,
   defaultQuery,
@@ -31,6 +32,7 @@ const Autocomplete = <
   options: Array<TValue>;
   value: TValue;
   onChange: (value: TValue) => void;
+  placeholderValue: TValue;
   query: string;
   defaultQuery?: string;
   onQueryChange: (query: string, triggeredByOptionSelect: boolean) => void;
@@ -80,10 +82,14 @@ const Autocomplete = <
                 <>
                   {Opener.props.children}
                   <Combobox.Input
+                    autoComplete={"off"}
                     {...inputElProps}
                     value={query}
                     defaultValue={defaultQuery}
                     onChange={(e) => {
+                      if (!e.currentTarget.value) {
+                        onChange(placeholderValue);
+                      }
                       onQueryChange(e.currentTarget.value, false);
                     }}
                   />
@@ -96,7 +102,7 @@ const Autocomplete = <
             show={open}
             appear
             {...getTransitionAnimation({
-              hidden: "transform scale-y-75 opacity-0",
+              hidden: "transform scale-y-90 opacity-0",
               visible: "transform scale-y-100 opacity-100",
             })}
             as={Fragment}
@@ -134,7 +140,10 @@ const Autocomplete = <
                   ))
                 ) : (
                   <div className="p-2">
-                    <p className="font-normal text-neutral-200">
+                    <p
+                      className="font-light italic text-neutral-300"
+                      title={noOptionsText}
+                    >
                       {noOptionsText}
                     </p>
                   </div>

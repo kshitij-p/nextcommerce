@@ -1,7 +1,8 @@
 import React, { type ForwardedRef, Fragment } from "react";
-import { Listbox } from "@headlessui/react";
+import { Listbox, Transition } from "@headlessui/react";
 import Button from "../Button";
 import { useFloating, flip, offset } from "@floating-ui/react-dom";
+import { getTransitionAnimation } from "../../../utils/animationHelpers";
 
 export const SelectListItem = React.forwardRef(
   (
@@ -85,35 +86,47 @@ const Select = <T extends Record<string, unknown>>({
 
   return (
     <Listbox value={value} onChange={setValue} multiple={multiple}>
-      <div {...rest} className={`relative flex ${className}`}>
-        <Listbox.Button as={"div"} ref={refs.setReference}>
-          <Button {...openerProps}>{value[textField] as string}</Button>
-        </Listbox.Button>
+      {({ open }) => (
+        <div {...rest} className={`relative flex ${className}`}>
+          <Listbox.Button as={"div"} ref={refs.setReference}>
+            <Button {...openerProps}>{value[textField] as string}</Button>
+          </Listbox.Button>
 
-        <Listbox.Options as={Fragment}>
-          <SelectList
-            {...listElProps}
-            style={{
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-            }}
-            ref={refs.setFloating}
-          >
-            {options.map((x) => {
-              return (
-                <Listbox.Option
-                  key={x[textField] as string}
-                  value={x}
-                  as={Fragment}
-                >
-                  <SelectListItem>{x[textField] as string}</SelectListItem>
-                </Listbox.Option>
-              );
+          <Transition
+            show={open}
+            appear
+            {...getTransitionAnimation({
+              hidden: "transform scale-y-90 opacity-0",
+              visible: "transform scale-y-100 opacity-100",
             })}
-          </SelectList>
-        </Listbox.Options>
-      </div>
+            as={Fragment}
+          >
+            <Listbox.Options as={Fragment}>
+              <SelectList
+                {...listElProps}
+                style={{
+                  position: strategy,
+                  top: y ?? 0,
+                  left: x ?? 0,
+                }}
+                ref={refs.setFloating}
+              >
+                {options.map((x) => {
+                  return (
+                    <Listbox.Option
+                      key={x[textField] as string}
+                      value={x}
+                      as={Fragment}
+                    >
+                      <SelectListItem>{x[textField] as string}</SelectListItem>
+                    </Listbox.Option>
+                  );
+                })}
+              </SelectList>
+            </Listbox.Options>
+          </Transition>
+        </div>
+      )}
     </Listbox>
   );
 };

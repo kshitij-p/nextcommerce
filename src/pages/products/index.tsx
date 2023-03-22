@@ -38,7 +38,12 @@ const FilterBy = ({
 
   const { runAfterClearing: setQueryParamTimeout } = useTimeout();
 
-  const { runAfterClearing: setAutocompleteTimeout } = useTimeout();
+  const [autocompleteTimeoutQueued, setAutocompleteTimeoutQueued] =
+    useState(false);
+  const {
+    runAfterClearing: setAutocompleteTimeout,
+    timeoutRef: autocompleteTimeoutRef,
+  } = useTimeout();
 
   const setQueryParam = (
     params: {
@@ -79,6 +84,23 @@ const FilterBy = ({
   return (
     <>
       <Autocomplete
+        placeholderValue={
+          {
+            id: "",
+            category: "Other",
+            description: "",
+            price: 1,
+            title: "",
+            userId: "",
+          } as (typeof autocompleteData)[0]
+        }
+        noOptionsText={
+          !autocompleteTimeoutQueued
+            ? autocompleteQuery === ""
+              ? "Start typing to see suggestions"
+              : "No results found"
+            : `Searching for ${autocompleteQuery}`
+        }
         Opener={
           <div
             className="flex items-center gap-1 rounded-lg
@@ -104,21 +126,36 @@ const FilterBy = ({
           textAsTitle: true,
         }}
         textField={"title"}
-        options={autocompleteData}
+        options={
+          autocompleteQuery ? autocompleteData : ([] as typeof autocompleteData)
+        }
         value={autocompleteValue}
         onChange={(value) => {
           setAutocompleteValue(value);
-          setQueryParam({ title: value.title }, 0);
+          if (value.title === "") {
+            if (searchQuery?.length) {
+              setQueryParam({ title: value.title }, 0);
+            }
+          } else {
+            setQueryParam({ title: value.title }, 0);
+          }
         }}
         query={autocompleteQuery}
         onQueryChange={(title, triggeredByOptionSelect) => {
           setAutocompleteQuery(title);
+
           if (!title) {
-            setQueryParam({ title: title }, 0);
+            clearTimeout(autocompleteTimeoutRef.current);
+            setAutocompleteTimeoutQueued(false);
+
+            return;
           }
+
           if (!triggeredByOptionSelect) {
+            setAutocompleteTimeoutQueued(true);
             setAutocompleteTimeout(() => {
               void fetchAutocompleteData({ title });
+              setAutocompleteTimeoutQueued(false);
             }, 500);
           }
         }}
