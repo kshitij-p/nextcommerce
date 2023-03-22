@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 
-const inter = Montserrat({ subsets: ["latin"] });
+const montserrat = Montserrat({ subsets: ["latin"] });
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -49,7 +49,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <>
         <style jsx global>{`
           html {
-            font-family: ${inter.style.fontFamily};
+            font-family: ${montserrat.style.fontFamily};
           }
         `}</style>
         <Toaster
