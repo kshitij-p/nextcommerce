@@ -30,7 +30,7 @@ export const SelectList = React.forwardRef(
     return (
       <ul
         {...rest}
-        className={`mobile-scrollbar z-[1500] flex flex-col gap-2 overflow-auto rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0 ${className}`}
+        className={`mobile-scrollbar z-[1500] flex origin-top flex-col gap-2 overflow-auto rounded bg-neutral-900 p-2 shadow shadow-black focus:outline-0 ${className}`}
         ref={passedRef}
       >
         {children}

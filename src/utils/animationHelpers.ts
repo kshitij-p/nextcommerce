@@ -158,3 +158,28 @@ export const getAnimationInitial = (
 ) => {
   return unmountOnChange ? anim : false;
 };
+
+const DEFAULT_TRANSITION_ANIMATION = {
+  enter: "transition ease-out duration-300",
+  hidden: "opacity-0",
+  visible: "opacity-100",
+  leave: "ease-in duration-200",
+};
+
+export const getTransitionAnimation = (
+  passedTransitionAnimation: Partial<typeof DEFAULT_TRANSITION_ANIMATION>
+) => {
+  const { enter, leave, hidden, visible } = {
+    ...DEFAULT_TRANSITION_ANIMATION,
+    ...passedTransitionAnimation,
+  };
+
+  return {
+    enter,
+    leave,
+    enterFrom: hidden,
+    enterTo: visible,
+    leaveFrom: visible,
+    leaveTo: hidden,
+  };
+};

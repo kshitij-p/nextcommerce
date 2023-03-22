@@ -1,10 +1,11 @@
 import React, { Fragment, type HTMLProps, useMemo } from "react";
-import { Combobox } from "@headlessui/react";
+import { Combobox, Transition } from "@headlessui/react";
 import {
   SelectList,
   SelectListItem,
   useSelectPositioning,
 } from "../Select/Select";
+import { getTransitionAnimation } from "../../../utils/animationHelpers";
 
 const Autocomplete = <
   TKey extends keyof TValue,
@@ -69,66 +70,80 @@ const Autocomplete = <
         onQueryChange(value[textField], true);
       }}
     >
-      <div {...rest} className={`relative flex ${className}`}>
-        <Combobox.Button as={Fragment}>
-          {React.cloneElement(Opener, {
-            ...Opener.props,
-            ref: refs.setReference,
-            children: (
-              <>
-                {Opener.props.children}
-                <Combobox.Input
-                  {...inputElProps}
-                  value={query}
-                  defaultValue={defaultQuery}
-                  onChange={(e) => {
-                    onQueryChange(e.currentTarget.value, false);
-                  }}
-                />
-              </>
-            ),
-          })}
-        </Combobox.Button>
+      {({ open }) => (
+        <div {...rest} className={`relative flex ${className}`}>
+          <Combobox.Button as={Fragment}>
+            {React.cloneElement(Opener, {
+              ...Opener.props,
+              ref: refs.setReference,
+              children: (
+                <>
+                  {Opener.props.children}
+                  <Combobox.Input
+                    {...inputElProps}
+                    value={query}
+                    defaultValue={defaultQuery}
+                    onChange={(e) => {
+                      onQueryChange(e.currentTarget.value, false);
+                    }}
+                  />
+                </>
+              ),
+            })}
+          </Combobox.Button>
 
-        <Combobox.Options as={Fragment}>
-          <SelectList
-            {...listElProps}
-            style={{
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-            }}
-            ref={refs.setFloating}
+          <Transition
+            show={open}
+            appear
+            {...getTransitionAnimation({
+              hidden: "transform scale-y-75 opacity-0",
+              visible: "transform scale-y-100 opacity-100",
+            })}
+            as={Fragment}
           >
-            {filteredOptions.length ? (
-              filteredOptions.map((option) => (
-                <Combobox.Option
-                  key={option[textField]}
-                  value={option}
-                  as={Fragment}
-                >
-                  <SelectListItem
-                    {...listItemProps}
-                    title={
-                      listItemProps?.title
-                        ? listItemProps.title
-                        : textAsTitle
-                        ? option[textField]
-                        : undefined
-                    }
-                  >
-                    {option[textField]}
-                  </SelectListItem>
-                </Combobox.Option>
-              ))
-            ) : (
-              <div className="p-2">
-                <p className="font-normal text-neutral-200">{noOptionsText}</p>
-              </div>
-            )}
-          </SelectList>
-        </Combobox.Options>
-      </div>
+            <Combobox.Options as={Fragment}>
+              <SelectList
+                {...listElProps}
+                style={{
+                  position: strategy,
+                  top: y ?? 0,
+                  left: x ?? 0,
+                }}
+                ref={refs.setFloating}
+              >
+                {filteredOptions.length ? (
+                  filteredOptions.map((option) => (
+                    <Combobox.Option
+                      key={option[textField]}
+                      value={option}
+                      as={Fragment}
+                    >
+                      <SelectListItem
+                        {...listItemProps}
+                        title={
+                          listItemProps?.title
+                            ? listItemProps.title
+                            : textAsTitle
+                            ? option[textField]
+                            : undefined
+                        }
+                      >
+                        {option[textField]}
+                      </SelectListItem>
+                    </Combobox.Option>
+                  ))
+                ) : (
+                  <div className="p-2">
+                    <p className="font-normal text-neutral-200">
+                      {noOptionsText}
+                    </p>
+                  </div>
+                )}
+              </SelectList>
+            </Combobox.Options>
+          </Transition>
+        </div>
+      )}
     </Combobox>
   );
 };
