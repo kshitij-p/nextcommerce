@@ -16,14 +16,22 @@ const getPublicUrlFromKey = (imageKey: string) => {
 
 const ProductIdValidator = z.string().min(1);
 
-const revalidateProduct = async (res: NextApiResponse, productId: string) => {
-  let revalidated;
+const revalidateProduct = async ({
+  res,
+  productId,
+}: {
+  res?: NextApiResponse;
+  productId: string;
+}) => {
+  let revalidated = false;
 
-  try {
-    await res.revalidate(`/products/${productId}`);
-    revalidated = true;
-  } catch (e) {
-    revalidated = false;
+  if (res) {
+    try {
+      await res.revalidate(`/products/${productId}`);
+      revalidated = true;
+    } catch (e) {
+      revalidated = false;
+    }
   }
 
   return revalidated;
@@ -235,7 +243,10 @@ const productRouter = createTRPCRouter({
         },
       });
 
-      let revalidated = await revalidateProduct(ctx.res, product.id);
+      let revalidated = await revalidateProduct({
+        res: ctx.res,
+        productId: product.id,
+      });
 
       return {
         message: "Successfully updated the requested product.",
@@ -286,7 +297,10 @@ const productRouter = createTRPCRouter({
         },
       });
 
-      let revalidated = await revalidateProduct(ctx.res, product.id);
+      let revalidated = await revalidateProduct({
+        res: ctx.res,
+        productId: product.id,
+      });
 
       return {
         message: "Successfully deleted the requested product.",

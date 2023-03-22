@@ -7,11 +7,11 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 
 type CreateContextOptions = {
   session: Session | null;
-  req: NextApiRequest;
-  res: NextApiResponse;
+  req?: NextApiRequest;
+  res?: NextApiResponse;
 };
 
-const createInnerTRPCContext = ({
+export const createInnerTRPCContext = ({
   session,
   res,
   req,

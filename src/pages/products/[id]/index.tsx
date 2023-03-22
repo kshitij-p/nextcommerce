@@ -3,8 +3,6 @@ import {
   type GetStaticPaths,
   type GetStaticProps,
 } from "next";
-import { prisma } from "../../../server/db";
-
 import { type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
 import Image from "../../../components/ui/Image";
@@ -31,6 +29,9 @@ import {
 } from "../../../hooks/cart/utils";
 import Error404Page from "../../404";
 import Head from "next/head";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+import { appRouter } from "../../../server/api/root";
+import { createInnerTRPCContext } from "../../../server/api/trpc";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id" | "category">;
 
@@ -46,15 +47,12 @@ export type PageProduct = Exclude<
 export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
   const id = z.string().parse(ctx.params?.id);
 
-  const product = await prisma.product.findUnique({
-    where: {
-      id: id,
-    },
-    include: {
-      images: true,
-      user: true,
-    },
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: createInnerTRPCContext({ session: null }),
   });
+
+  const { product } = await ssg.product.get.fetch({ id: id });
 
   return {
     props: {
