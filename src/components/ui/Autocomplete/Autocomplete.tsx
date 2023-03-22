@@ -19,6 +19,7 @@ const Autocomplete = <
   defaultQuery,
   onQueryChange,
   textField,
+  noOptionsText = "No options to show",
   Opener = <div />,
   inputElProps,
   listElProps,
@@ -33,6 +34,7 @@ const Autocomplete = <
   defaultQuery?: string;
   onQueryChange: (query: string, triggeredByOptionSelect: boolean) => void;
   textField: TKey;
+  noOptionsText?: string;
   Opener?: React.ReactElement<HTMLProps<HTMLElement>>;
   inputElProps?: Omit<
     React.ComponentProps<"input">,
@@ -98,26 +100,32 @@ const Autocomplete = <
             }}
             ref={refs.setFloating}
           >
-            {filteredOptions.map((option) => (
-              <Combobox.Option
-                key={option[textField]}
-                value={option}
-                as={Fragment}
-              >
-                <SelectListItem
-                  {...listItemProps}
-                  title={
-                    listItemProps?.title
-                      ? listItemProps.title
-                      : textAsTitle
-                      ? option[textField]
-                      : undefined
-                  }
+            {filteredOptions.length ? (
+              filteredOptions.map((option) => (
+                <Combobox.Option
+                  key={option[textField]}
+                  value={option}
+                  as={Fragment}
                 >
-                  {option[textField]}
-                </SelectListItem>
-              </Combobox.Option>
-            ))}
+                  <SelectListItem
+                    {...listItemProps}
+                    title={
+                      listItemProps?.title
+                        ? listItemProps.title
+                        : textAsTitle
+                        ? option[textField]
+                        : undefined
+                    }
+                  >
+                    {option[textField]}
+                  </SelectListItem>
+                </Combobox.Option>
+              ))
+            ) : (
+              <div className="p-2">
+                <p className="font-normal text-neutral-200">{noOptionsText}</p>
+              </div>
+            )}
           </SelectList>
         </Combobox.Options>
       </div>
