@@ -1,6 +1,9 @@
 import React, { type ForwardedRef } from "react";
 import { type HTMLMotionProps, motion, AnimatePresence } from "framer-motion";
-import { getAnimationVariant } from "../../utils/animationHelpers";
+import {
+  defaultAnimationTransition,
+  getAnimationVariant,
+} from "../../utils/animationHelpers";
 
 const ErrorText = React.forwardRef(
   (
@@ -24,6 +27,7 @@ const ErrorText = React.forwardRef(
             initial={"hidden"}
             animate={"visible"}
             exit={"hidden"}
+            transition={defaultAnimationTransition}
             ref={passedRef}
           >
             {children}

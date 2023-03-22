@@ -1,4 +1,4 @@
-import { type Variants } from "framer-motion";
+import { type Transition, type Variants } from "framer-motion";
 
 const animSettings = {
   startScale: "0%",
@@ -119,9 +119,10 @@ export const animationVariants = {
   },
 } as const;
 
-export const defaultAnimationTransition = {
+export const defaultAnimationTransition: Transition = {
   type: "tween",
   duration: 0.3,
+  ease: "easeIn",
 };
 
 export const getAnimationVariant = <T extends keyof typeof animationVariants>({

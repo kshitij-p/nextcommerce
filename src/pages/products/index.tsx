@@ -20,6 +20,10 @@ import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Divider from "../../components/ui/Divider";
 import Autocomplete from "../../components/ui/Autocomplete";
 import { useState } from "react";
+import {
+  defaultAnimationTransition,
+  getAnimationVariant,
+} from "../../utils/animationHelpers";
 
 const FilterBy = ({
   searchQuery,
@@ -291,9 +295,13 @@ const AllProductsPage = () => {
         </div>
         <AnimatePresence>
           <motion.div
-            initial={{ opacity: "0" }}
-            animate={{ opacity: "1" }}
-            exit={{ opacity: "0" }}
+            variants={getAnimationVariant({
+              type: "fade",
+            })}
+            initial={"hidden"}
+            animate={"visible"}
+            exit={"hidden"}
+            transition={defaultAnimationTransition}
           >
             {isFetchingNextPage ? (
               <Loader className="aspect-square h-auto w-8" />
