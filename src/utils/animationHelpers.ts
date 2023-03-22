@@ -20,37 +20,43 @@ const animSettings = {
       transform: "none",
     },
   },
-};
+} as const;
 
 export const animationVariants = {
   fade: {
-    visible: {
-      ...animSettings.autoAlpha.visible,
-    },
-    hidden: {
-      ...animSettings.autoAlpha.hidden,
+    variants: {
+      visible: {
+        ...animSettings.autoAlpha.visible,
+      },
+      hidden: {
+        ...animSettings.autoAlpha.hidden,
+      },
     },
     directional: false,
   },
   zoom: {
-    visible: {
-      ...animSettings.autoAlpha.visible,
-      scale: animSettings.endScale,
-    },
-    hidden: {
-      ...animSettings.autoAlpha.hidden,
-      scale: animSettings.startScale,
+    variants: {
+      visible: {
+        ...animSettings.autoAlpha.visible,
+        scale: animSettings.endScale,
+      },
+      hidden: {
+        ...animSettings.autoAlpha.hidden,
+        scale: animSettings.startScale,
+      },
     },
     directional: false,
   },
   scaleY: {
-    visible: {
-      ...animSettings.autoAlpha.visible,
-      scaleY: animSettings.endScale,
-    },
-    hidden: {
-      ...animSettings.autoAlpha.hidden,
-      scaleY: animSettings.startScale,
+    variants: {
+      visible: {
+        ...animSettings.autoAlpha.visible,
+        scaleY: animSettings.endScale,
+      },
+      hidden: {
+        ...animSettings.autoAlpha.hidden,
+        scaleY: animSettings.startScale,
+      },
     },
     directional: false,
   },
@@ -94,55 +100,51 @@ export const animationVariants = {
     directional: true,
   },
   pulsate: {
-    visible: {
-      opacity: 0.5,
-    },
-    hidden: {
-      opacity: 1,
+    variants: {
+      visible: {
+        opacity: 0.5,
+      },
+      hidden: {
+        opacity: 1,
+      },
     },
     directional: false,
   },
   none: {
-    visible: {},
-    hidden: {},
+    variants: {
+      visible: {},
+      hidden: {},
+    },
     directional: false,
   },
-};
+} as const;
 
 export const defaultAnimationTransition = {
   type: "tween",
   duration: 0.3,
 };
 
-export const getAnimationVariant = (
-  anim: Variants | keyof typeof animationVariants,
-  direction?: "top" | "left" | "right" | "bottom"
-) => {
-  if (typeof anim !== "object") {
-    let transition = animationVariants[anim];
-
-    if (transition) {
-      if (transition.directional && direction) {
-        let directionalVariant = transition as {
-          top: Variants;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          left: any;
-          bottom: Variants;
-          right: Variants;
-          directional: true;
-        };
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return directionalVariant[direction];
-      }
-
-      return animationVariants[anim];
+export const getAnimationVariant = <T extends keyof typeof animationVariants>({
+  type,
+  direction,
+}: (typeof animationVariants)[T]["directional"] extends true
+  ? {
+      type: T;
+      direction: keyof (typeof animationVariants)[T];
     }
+  : {
+      type: T;
+      direction?: undefined;
+    }) => {
+  let transition = animationVariants[type];
 
-    throw new Error("Invalid animation variant name provided.");
+  if (transition.directional) {
+    return transition[
+      direction as Exclude<typeof direction, undefined>
+    ] as Variants;
   }
 
-  return anim;
+  return transition.variants;
 };
 
 export const getAnimationInitial = (

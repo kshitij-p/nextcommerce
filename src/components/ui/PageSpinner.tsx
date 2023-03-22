@@ -14,8 +14,9 @@ const PageSpinner = React.forwardRef(
     return (
       <motion.div
         className="pointer-events-none absolute inset-0 flex h-screen w-full items-center justify-center"
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        variants={getAnimationVariant("fade")}
+        variants={getAnimationVariant({
+          type: "fade",
+        })}
         initial={"hidden"}
         animate={"visible"}
         transition={defaultAnimationTransition}

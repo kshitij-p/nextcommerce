@@ -27,8 +27,9 @@ const Layout = ({
         ) : (
           <motion.main
             key={router.route}
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            variants={getAnimationVariant("fade")}
+            variants={getAnimationVariant({
+              type: "fade",
+            })}
             initial={"hidden"}
             animate={"visible"}
             transition={defaultAnimationTransition}
