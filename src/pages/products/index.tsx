@@ -213,8 +213,6 @@ const AllProductsPage = () => {
     hasNextPage,
   });
 
-  //To do ssg featured products
-
   return (
     <>
       <Head>
