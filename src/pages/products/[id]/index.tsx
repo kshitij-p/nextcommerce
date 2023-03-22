@@ -32,6 +32,7 @@ import Head from "next/head";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import { appRouter } from "../../../server/api/root";
 import { createInnerTRPCContext } from "../../../server/api/trpc";
+import superjson from "superjson";
 
 type EditableProductFields = keyof Omit<Product, "userId" | "id" | "category">;
 
@@ -50,6 +51,7 @@ export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
   const ssg = createProxySSGHelpers({
     router: appRouter,
     ctx: createInnerTRPCContext({ session: null }),
+    transformer: superjson,
   });
 
   const { product } = await ssg.product.get.fetch({ id: id });
@@ -58,7 +60,7 @@ export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
     props: {
       product: product,
     } satisfies ProductPageProps,
-    revalidate: 31536000,
+    revalidate: 31536000, //1 year in seconds,
   };
 };
 

@@ -28,6 +28,7 @@ const revalidateProduct = async ({
   if (res) {
     try {
       await res.revalidate(`/products/${productId}`);
+      await res.revalidate("/");
       revalidated = true;
     } catch (e) {
       revalidated = false;

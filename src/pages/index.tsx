@@ -1,14 +1,38 @@
-import { type NextPage } from "next";
+import { type InferGetStaticPropsType, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { api, type RouterOutputs } from "../utils/api";
+import { type RouterOutputs } from "../utils/api";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
-import { breakpoints, TIME_IN_MS } from "../utils/client";
-import PageSpinner from "../components/ui/PageSpinner";
+import { breakpoints } from "../utils/client";
 import HandDrawnArrowLeftIcon from "../components/icons/HandDrawnArrowLeftIcon";
 import HandDrawnArrowRightIcon from "../components/icons/HandDrawnArrowRightIcon";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+import { createInnerTRPCContext } from "../server/api/trpc";
+import superjson from "superjson";
+import { appRouter } from "../server/api/root";
+
+export const getStaticProps: GetStaticProps<{
+  featuredProducts: RouterOutputs["product"]["getAll"]["products"];
+}> = async () => {
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: createInnerTRPCContext({ session: null }),
+    transformer: superjson,
+  });
+
+  const { products: featuredProducts } = await ssg.product.getAll.fetch({
+    limit: 10,
+  });
+
+  return {
+    props: {
+      featuredProducts,
+    },
+    revalidate: 3600, //1 Hour in seconds
+  };
+};
 
 const variants = {
   enter: (direction: number) => {
@@ -265,21 +289,9 @@ const FeaturedProducts = ({
     </div>
   );
 };
-
-const Home: NextPage = () => {
-  const { data, isLoading } = api.product.getAll.useQuery(
-    {
-      limit: 10,
-    },
-    {
-      staleTime: TIME_IN_MS.FIVE_MINUTES,
-    }
-  );
-
-  if (isLoading) {
-    return <PageSpinner />;
-  }
-
+const Home = ({
+  featuredProducts,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
       <Head>
@@ -327,7 +339,7 @@ const Home: NextPage = () => {
         </div>
         <div className="w-full px-4 py-12 md:px-8 md:py-24 xl:px-10 xl:py-28">
           <div>
-            <FeaturedProducts products={data?.products} />
+            <FeaturedProducts products={featuredProducts} />
           </div>
         </div>
       </div>
