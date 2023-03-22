@@ -147,6 +147,10 @@ export const getAnimationVariant = <T extends keyof typeof animationVariants>({
   return transition.variants;
 };
 
+export type AnimationVariant = Parameters<
+  typeof getAnimationVariant
+>[0]["type"];
+
 export const getAnimationInitial = (
   anim: keyof typeof animationVariants,
   unmountOnChange: boolean

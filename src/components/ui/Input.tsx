@@ -1,20 +1,22 @@
+import { type HTMLMotionProps } from "framer-motion";
 import React, { type ForwardedRef } from "react";
 import { useFormContext } from "react-hook-form";
+import ErrorText from "./ErrorText";
 
 const Input = React.forwardRef(
   (
     {
       name,
       showErrors = true,
-      ErrorText = <b className="text-red-500" />,
       orientation = "vertical",
       isInvalid = false,
+      errorTextProps,
       ...rest
     }: React.ComponentProps<"input"> & {
       showErrors?: boolean;
-      ErrorText?: React.ReactElement<React.HTMLProps<HTMLElement>>;
       orientation?: "vertical" | "horizontal";
       isInvalid?: boolean;
+      errorTextProps?: HTMLMotionProps<"b">;
     },
     passedRef: ForwardedRef<HTMLInputElement>
   ) => {
@@ -34,12 +36,12 @@ const Input = React.forwardRef(
           name={name}
           ref={passedRef}
         />
-        {showErrors && errorMessage
-          ? React.cloneElement(ErrorText, {
-              ...ErrorText.props,
-              children: errorMessage,
-            })
-          : null}
+        <ErrorText
+          {...errorTextProps}
+          visible={showErrors && (errorMessage?.length ? true : false)}
+        >
+          {errorMessage}
+        </ErrorText>
       </div>
     );
   }

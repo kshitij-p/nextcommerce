@@ -75,7 +75,7 @@ const LabelledInput = React.forwardRef(
       variants: passedVariants = DEFAULT_INPUT_VARIANTS,
       className = "",
       inputEl = "input",
-      ErrorText,
+      errorTextProps,
       ...rest
     }: TextareaProps | InputProps,
     passedRef: ForwardedRef<HTMLInputElement | HTMLTextAreaElement>
@@ -85,14 +85,9 @@ const LabelledInput = React.forwardRef(
     const inputProps = {
       className: `${inputClasses(variants)} ${className}`,
       name: name,
-      ErrorText: (
-        <b
-          {...ErrorText?.props}
-          className={`text-[0.75em] font-medium text-red-500 ${
-            ErrorText?.props.className ?? ""
-          }`}
-        />
-      ),
+      errorTextProps: {
+        className: errorTextProps?.className,
+      },
     };
 
     return (

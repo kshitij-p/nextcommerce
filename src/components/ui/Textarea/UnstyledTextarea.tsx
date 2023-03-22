@@ -1,3 +1,4 @@
+import { type HTMLMotionProps } from "framer-motion";
 import React, {
   type ForwardedRef,
   useCallback,
@@ -6,6 +7,7 @@ import React, {
 } from "react";
 import { useFormContext } from "react-hook-form";
 import useMultipleRefs from "../../../hooks/useMultipleRefs";
+import ErrorText from "../ErrorText";
 
 const UnstyledTextarea = React.forwardRef(
   (
@@ -13,18 +15,18 @@ const UnstyledTextarea = React.forwardRef(
       autoResize = false,
       cursorToTextEndOnFocus = false,
       showErrors = true,
-      ErrorText = <b className="text-red-500" />,
       orientation = "vertical",
       onChange,
       onFocus,
       name,
       isInvalid = false,
+      errorTextProps,
       ...rest
     }: React.ComponentProps<"textarea"> & {
       autoResize?: boolean;
       cursorToTextEndOnFocus?: boolean;
       isInvalid?: boolean;
-      ErrorText?: React.ReactElement<React.HTMLProps<HTMLElement>>;
+      errorTextProps?: HTMLMotionProps<"b">;
       showErrors?: boolean;
       orientation?: "vertical" | "horizontal";
     },
@@ -109,12 +111,12 @@ const UnstyledTextarea = React.forwardRef(
           onFocus={cursorToTextEndOnFocus ? handleFocus : onFocus}
           ref={handleRef}
         />
-        {showErrors && errorMessage
-          ? React.cloneElement(ErrorText, {
-              ...ErrorText.props,
-              children: errorMessage,
-            })
-          : null}
+        <ErrorText
+          {...errorTextProps}
+          visible={showErrors && (errorMessage?.length ? true : false)}
+        >
+          {errorMessage}
+        </ErrorText>
       </div>
     );
   }
