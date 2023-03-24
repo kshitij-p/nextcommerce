@@ -187,6 +187,8 @@ const productRouter = createTRPCRouter({
               category: category,
             },
           });
+
+          await revalidateProduct({ res: ctx.res, productId: product.id });
         } catch (e) {
           if (imageKey) {
             await deleteImageFromR2(imageKey);
