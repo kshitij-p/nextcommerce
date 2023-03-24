@@ -39,6 +39,7 @@ const UnstyledTextarea = React.forwardRef(
     const errorMessage = state?.error?.message;
     const initHeightRef = useRef<number | null>(null);
 
+    //Note: Transitioning height will make this not work properly
     const resizeToFit = useCallback(
       (el?: HTMLTextAreaElement | null) => {
         if (!autoResize || !el) {
@@ -48,8 +49,12 @@ const UnstyledTextarea = React.forwardRef(
           initHeightRef.current = el.clientHeight;
         }
 
+        const padding = parseInt(window.getComputedStyle(el).paddingBlock);
+
         el.style.height = `${initHeightRef.current ?? 0}px`;
-        el.style.height = `${el.scrollHeight}px`;
+        el.style.height = `${
+          el.scrollHeight + (isNaN(padding) ? 0 : padding)
+        }px`;
       },
       [autoResize]
     );
