@@ -36,5 +36,7 @@ const config = {
       },
     ],
   },
+  //Note: when permanent redirects are changed, cache has to be cleared (permanent redirects are cached by browsers) 
+  redirects: async () => ([{ source: "/login", destination: "/signin", permanent: true, }, { source: "/logout", destination: "/signout", permanent: true }])
 };
 export default withBundleAnalyzer(config);
