@@ -18,7 +18,9 @@ const Navbar = () => {
       });
       return;
     }
-    void signOut();
+    void signOut({
+      callbackUrl: "/",
+    });
   };
 
   return (
