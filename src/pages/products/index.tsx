@@ -69,31 +69,24 @@ const FilterBy = ({
     autocompleteMutationData?.products ??
     ([] as RouterOutputs["product"]["getAutocomplete"]["products"]);
 
-  const [autocompleteValue, setAutocompleteValue] = useState<
-    (typeof autocompleteData)[0]
-  >({
+  const placeholderValue = {
     id: "",
     category: "Other",
     description: "",
     price: 1,
     title: "",
     userId: "",
-  });
+    featured: false,
+  } as (typeof autocompleteData)[0];
+
+  const [autocompleteValue, setAutocompleteValue] =
+    useState<(typeof autocompleteData)[0]>(placeholderValue);
   const [autocompleteQuery, setAutocompleteQuery] = useState(searchQuery ?? "");
 
   return (
     <>
       <Autocomplete
-        placeholderValue={
-          {
-            id: "",
-            category: "Other",
-            description: "",
-            price: 1,
-            title: "",
-            userId: "",
-          } as (typeof autocompleteData)[0]
-        }
+        placeholderValue={placeholderValue}
         noOptionsText={
           !autocompleteTimeoutQueued
             ? autocompleteQuery === ""

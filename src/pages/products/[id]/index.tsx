@@ -34,7 +34,10 @@ import { appRouter } from "../../../server/api/root";
 import { createInnerTRPCContext } from "../../../server/api/trpc";
 import superjson from "superjson";
 
-type EditableProductFields = keyof Omit<Product, "userId" | "id" | "category">;
+type EditableProductFields = keyof Omit<
+  Product,
+  "userId" | "id" | "category" | "featured"
+>;
 
 type ProductPageProps = {
   product: RouterOutputs["product"]["get"]["product"] | null;
