@@ -7,9 +7,10 @@ import Form from "../ui/Form";
 import StarRating from "../ui/StarRating";
 import UnstyledTextarea from "../ui/Textarea/UnstyledTextarea";
 
-export const ReviewBodyValidator = z
-  .string()
-  .min(1, "Must have atleast 1 character");
+export const ReviewBodyValidator = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : value),
+  z.string().min(1, "Must have atleast 1 character")
+);
 export const ReviewRatingValidtor = z.coerce
   .number({
     required_error: "Must be a number between 1-5",
