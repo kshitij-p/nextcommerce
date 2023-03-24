@@ -262,7 +262,7 @@ const FeaturedProducts = ({
                   ${
                     isActive
                       ? "z-10 w-[34%] shadow-[0px_0px_24px_6px_black] brightness-100 focus-within:scale-[102%] focus-within:shadow-[0px_0px_24px_8px_black] hover:scale-[102%] hover:shadow-[0px_0px_24px_8px_black]"
-                      : "w-[16.5%] brightness-[35%] data-[dragging=false]:hover:brightness-75 data-[dragging=false]:focus:brightness-75"
+                      : "w-[16.5%] blur-[2px] brightness-[35%] hover:blur-0 data-[dragging=false]:hover:brightness-75 data-[dragging=false]:focus:brightness-75"
                   } transition duration-300`}
                   key={product.id}
                   draggable={false}

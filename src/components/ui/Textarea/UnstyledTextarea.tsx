@@ -39,7 +39,7 @@ const UnstyledTextarea = React.forwardRef(
     const errorMessage = state?.error?.message;
     const initHeightRef = useRef<number | null>(null);
 
-    //Note: Transitioning height will make this not work properly
+    //IMP NOTE: Transitioning height will make this not work properly
     const resizeToFit = useCallback(
       (el?: HTMLTextAreaElement | null) => {
         if (!autoResize || !el) {
