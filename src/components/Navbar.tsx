@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { extractQueryParam } from "../utils/client";
+import { useRouter } from "next/router";
 
 const Navbar = () => {
   const { status } = useSession();
 
+  const router = useRouter();
+
+  const callbackUrl = extractQueryParam(router.query.callbackUrl);
+
   const handleAuthButtonClick = () => {
     if (status !== "authenticated") {
-      void signIn();
+      void signIn("google", {
+        redirect: true,
+        callbackUrl: callbackUrl,
+      });
       return;
     }
     void signOut();

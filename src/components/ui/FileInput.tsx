@@ -5,7 +5,10 @@ import Input from "./Input";
 
 const FileInput = React.forwardRef(
   (
-    { ErrorText, ...rest }: Omit<React.ComponentProps<typeof Input>, "type">,
+    {
+      errorTextProps,
+      ...rest
+    }: Omit<React.ComponentProps<typeof Input>, "type">,
     passedRef
   ) => {
     const [fileRef, setFileRef] = useState<HTMLInputElement | null>(null);
@@ -44,14 +47,7 @@ const FileInput = React.forwardRef(
         </div>
         <Input
           {...rest}
-          ErrorText={
-            <b
-              {...ErrorText?.props}
-              className={`text-[0.75em] font-medium text-red-500 ${
-                ErrorText?.props.className ?? ""
-              }`}
-            />
-          }
+          errorTextProps={errorTextProps}
           className="hidden"
           type={"file"}
           ref={handleRef}
