@@ -154,7 +154,7 @@ const FilterBy = ({
         }}
       />
       <div className="flex flex-col items-baseline gap-2 text-lg">
-        <label className="flex w-full items-center gap-2">
+        <div className="flex w-full items-center gap-2">
           <p>Category: </p>
           <AllProductCategoriesSelect
             listElProps={{ className: "text-sm" }}
@@ -170,7 +170,7 @@ const FilterBy = ({
             }}
             openerProps={{ variants: { size: "sm", type: "secondary" } }}
           />
-        </label>
+        </div>
         <label className="flex w-full items-center gap-2">
           <p>Under: </p>
           <div>

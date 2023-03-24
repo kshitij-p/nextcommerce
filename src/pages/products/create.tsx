@@ -156,7 +156,7 @@ const CreateProductPage = () => {
                 {...inputProps}
                 {...form.register("price", { valueAsNumber: true })}
               />
-              <label className="flex items-center gap-2 md:gap-4">
+              <div className="flex items-center gap-2 md:gap-4">
                 Category
                 <ProductCategoriesSelect
                   openerProps={{ variants: { type: "secondary" } }}
@@ -165,7 +165,7 @@ const CreateProductPage = () => {
                   setValue={setCategory}
                   multiple={false}
                 />
-              </label>
+              </div>
               <FileInput accept="image/*" {...form.register("files")} />
               {/* Progressbar */}
               <div
