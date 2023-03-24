@@ -48,12 +48,8 @@ const UnstyledTextarea = React.forwardRef(
           initHeightRef.current = el.clientHeight;
         }
 
-        const padding = parseInt(window.getComputedStyle(el).paddingBlock);
-
         el.style.height = `${initHeightRef.current ?? 0}px`;
-        el.style.height = `${
-          el.scrollHeight + (isNaN(padding) ? 0 : padding)
-        }px`;
+        el.style.height = `${el.scrollHeight}px`;
       },
       [autoResize]
     );
