@@ -129,6 +129,7 @@ model Product {
     cartItems   CartItem[]
     reviews     Review[]
     category    ProductCategories @default(Other)
+    featured    Boolean           @default(false)
 
     @@index(fields: [title, price, category])
 }

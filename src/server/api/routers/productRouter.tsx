@@ -1,4 +1,4 @@
-import { ProductCategories } from "@prisma/client";
+import { type Product, ProductCategories } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { type NextApiResponse } from "next";
 import { z } from "zod";
@@ -18,17 +18,19 @@ const ProductIdValidator = z.string().min(1);
 
 const revalidateProduct = async ({
   res,
-  productId,
+  product,
 }: {
   res?: NextApiResponse;
-  productId: string;
+  product: Product;
 }) => {
   let revalidated = false;
 
   if (res) {
     try {
-      await res.revalidate(`/products/${productId}`);
-      await res.revalidate("/");
+      await res.revalidate(`/products/${product.id}`);
+      if (product.featured) {
+        await res.revalidate("/");
+      }
       revalidated = true;
     } catch (e) {
       revalidated = false;
@@ -124,6 +126,25 @@ const productRouter = createTRPCRouter({
         products: products,
       };
     }),
+  getFeatured: publicProcedure
+    .input(z.object({ limit: z.number().optional() }))
+    .query(async ({ input: { limit: passedLimit }, ctx }) => {
+      const LIMIT = passedLimit ?? 10;
+
+      const products = await ctx.prisma.product.findMany({
+        take: LIMIT,
+        where: {
+          featured: {
+            equals: true,
+          },
+        },
+      });
+
+      return {
+        message: "Successfully got the requested featured products.",
+        products: products,
+      };
+    }),
   get: publicProcedure
     .input(z.object({ id: ProductIdValidator }))
     .query(async ({ input: { id }, ctx }) => {
@@ -188,7 +209,7 @@ const productRouter = createTRPCRouter({
             },
           });
 
-          await revalidateProduct({ res: ctx.res, productId: product.id });
+          await revalidateProduct({ res: ctx.res, product });
         } catch (e) {
           if (imageKey) {
             await deleteImageFromR2(imageKey);
@@ -248,7 +269,7 @@ const productRouter = createTRPCRouter({
 
       let revalidated = await revalidateProduct({
         res: ctx.res,
-        productId: product.id,
+        product,
       });
 
       return {
@@ -302,7 +323,7 @@ const productRouter = createTRPCRouter({
 
       let revalidated = await revalidateProduct({
         res: ctx.res,
-        productId: product.id,
+        product,
       });
 
       return {
