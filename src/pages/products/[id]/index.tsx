@@ -40,12 +40,9 @@ type ProductPageProps = {
   product: RouterOutputs["product"]["get"]["product"] | null;
 };
 
-export type PageProduct = Exclude<
-  InferGetStaticPropsType<typeof getStaticProps>["product"],
-  null
->;
+export type PageProduct = Exclude<ProductPageProps["product"], null>;
 
-export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
+export const getStaticProps: GetStaticProps<{ id: string }> = async (ctx) => {
   const id = z.string().parse(ctx.params?.id);
 
   const ssg = createProxySSGHelpers({
@@ -54,12 +51,13 @@ export const getStaticProps: GetStaticProps<ProductPageProps> = async (ctx) => {
     transformer: superjson,
   });
 
-  const { product } = await ssg.product.get.fetch({ id: id });
+  await ssg.product.get.prefetch({ id: id });
 
   return {
     props: {
-      product: product,
-    } satisfies ProductPageProps,
+      trpcState: ssg.dehydrate(),
+      id: id,
+    },
     revalidate: 31536000, //1 year in seconds,
   };
 };
@@ -348,19 +346,24 @@ const ProductBuyArea = React.forwardRef(
 
 ProductBuyArea.displayName = "ProductBuyArea";
 
-const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
+const ProductPage = ({
+  id,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   const { data: session } = useSession();
 
   //This query is only for optimistically updating the ui
-  const {
-    data: { product },
-  } = api.product.get.useQuery(
-    { id: passedProduct.id },
+  const { data } = api.product.get.useQuery(
+    { id: id },
     {
       staleTime: TIME_IN_MS.FIVE_MINUTES,
-      initialData: { message: "Initial data", product: passedProduct },
     }
   );
+
+  if (!data) {
+    return <Error404Page />;
+  }
+
+  const { product } = data;
 
   const canEdit = product.userId === session?.user?.id;
 
@@ -373,80 +376,68 @@ const ProductPage = ({ product: passedProduct }: { product: PageProduct }) => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 p-5 text-zinc-300 md:p-8 xl:flex-row xl:gap-8">
-      <Image
-        priority
-        className="rounded-sm object-cover"
-        src={product.images?.[0]?.publicUrl ?? ""}
-        alt={`Image of ${product.title}`}
-        fill
-        Container={
-          <div className="w-full max-w-xl self-center xl:self-start" />
-        }
-        sizes={`576px`}
-      />
-      <div className="flex w-full flex-col gap-2 text-lg md:gap-3 md:text-3xl xl:mt-2 xl:text-2xl">
-        <EditableProductText
-          className="text-3xl font-bold text-zinc-200 md:text-5xl xl:max-w-[80%]"
-          {...editableProductTextProps}
-          fieldToEdit={"title"}
-          as={<h2 className="max-w-full text-ellipsis break-words" />}
-        >
-          {product.title}
-        </EditableProductText>
-        <div className="flex items-center text-2xl md:text-4xl">
-          <EditableProductText
-            {...editableProductTextProps}
-            fieldToEdit={"price"}
-            inputElement={"input"}
-            labelText={"$"}
-          >
-            {`${product.price}`}
-          </EditableProductText>
-        </div>
-        {/* Font size for this is defined in the parent div */}
-        <EditableProductText
-          className="flex"
-          {...editableProductTextProps}
-          fieldToEdit={"description"}
-          as={
-            <ExpandableText
-              className="mt-2 text-zinc-400 md:mt-3 xl:max-w-[80%]"
-              maxLines={10}
-            />
-          }
-        >
-          {product.description}
-        </EditableProductText>
-        <div className="mt-1 flex flex-wrap gap-2">
-          <ProductBuyArea product={product} />
-          {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
-        </div>
-        <div className="mt-8 md:mt-12">
-          <Reviews product={product} />
-        </div>
-      </div>
-
-      {/* To do add image fall back here */}
-    </div>
-  );
-};
-
-const MainPage = ({
-  product,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
-  if (!product) {
-    return <Error404Page />;
-  }
-
-  return (
     <>
       <Head>
         <title>{`${product.title} | Nextcommerce`}</title>
       </Head>
-      <ProductPage product={product} />
+      <div className="flex w-full flex-col gap-4 p-5 text-zinc-300 md:p-8 xl:flex-row xl:gap-8">
+        <Image
+          priority
+          className="rounded-sm object-cover"
+          src={product.images?.[0]?.publicUrl ?? ""}
+          alt={`Image of ${product.title}`}
+          fill
+          Container={
+            <div className="w-full max-w-xl self-center xl:self-start" />
+          }
+          sizes={`576px`}
+        />
+        <div className="flex w-full flex-col gap-2 text-lg md:gap-3 md:text-3xl xl:mt-2 xl:text-2xl">
+          <EditableProductText
+            className="text-3xl font-bold text-zinc-200 md:text-5xl xl:max-w-[80%]"
+            {...editableProductTextProps}
+            fieldToEdit={"title"}
+            as={<h2 className="max-w-full text-ellipsis break-words" />}
+          >
+            {product.title}
+          </EditableProductText>
+          <div className="flex items-center text-2xl md:text-4xl">
+            <EditableProductText
+              {...editableProductTextProps}
+              fieldToEdit={"price"}
+              inputElement={"input"}
+              labelText={"$"}
+            >
+              {`${product.price}`}
+            </EditableProductText>
+          </div>
+          {/* Font size for this is defined in the parent div */}
+          <EditableProductText
+            className="flex"
+            {...editableProductTextProps}
+            fieldToEdit={"description"}
+            as={
+              <ExpandableText
+                className="mt-2 text-zinc-400 md:mt-3 xl:max-w-[80%]"
+                maxLines={10}
+              />
+            }
+          >
+            {product.description}
+          </EditableProductText>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <ProductBuyArea product={product} />
+            {canEdit ? <ProductDeleteDialog productId={product.id} /> : null}
+          </div>
+          <div className="mt-8 md:mt-12">
+            <Reviews product={product} />
+          </div>
+        </div>
+
+        {/* To do add image fall back here */}
+      </div>
     </>
   );
 };
 
-export default PageWithFallback(MainPage);
+export default PageWithFallback(ProductPage);
