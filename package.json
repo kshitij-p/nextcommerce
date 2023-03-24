@@ -60,5 +60,6 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.5.3"
-  }
+  },
+  "sideEffects": false
 }
