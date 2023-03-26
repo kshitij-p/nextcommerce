@@ -50,6 +50,7 @@ const CreateProductPage = () => {
   const { mutate: createProduct } = api.product.create.useMutation({
     onSuccess: async (data) => {
       await utils.product.getAll.invalidate();
+      await utils.product.getAutocomplete.invalidate();
       setProductLink(data.product.id);
       setProgress(100);
     },

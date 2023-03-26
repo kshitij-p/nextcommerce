@@ -97,6 +97,8 @@ const ProductEditDialog = ({
     onSettled: async () => {
       await utils.product.get.invalidate({ id: product.id });
       await utils.cart.get.invalidate();
+      await utils.product.getAutocomplete.invalidate();
+      //getAll is only invalidated on success to save requests
     },
     onMutate: async () => {
       await utils.product.get.cancel({ id: product.id });
@@ -227,6 +229,7 @@ const ProductDeleteDialog = ({ productId }: { productId: string }) => {
   const { mutate, isLoading } = api.product.delete.useMutation({
     onSuccess: async () => {
       await utils.product.getAll.invalidate();
+      await utils.product.getAutocomplete.invalidate();
       await utils.cart.get.invalidate();
 
       toast("This product has been deleted", {
