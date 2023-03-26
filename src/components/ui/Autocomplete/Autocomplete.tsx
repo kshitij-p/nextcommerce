@@ -86,6 +86,7 @@ const Autocomplete = <
                     {...inputElProps}
                     value={query}
                     defaultValue={defaultQuery}
+                    displayValue={() => query}
                     onChange={(e) => {
                       if (!e.currentTarget.value) {
                         onChange(placeholderValue);

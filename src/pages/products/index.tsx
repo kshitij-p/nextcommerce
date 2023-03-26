@@ -77,21 +77,22 @@ const FilterBy = ({
   const [autocompleteQuery, setAutocompleteQuery] = useState(searchQuery ?? "");
 
   const {
-    data: autocompleteMutationData,
+    data: { products: autocompleteData },
     refetch: fetchAutocompleteData,
     isFetching,
   } = api.product.getAutocomplete.useQuery(
     { title: autocompleteQuery },
     {
+      initialData: {
+        message: "Initial data",
+        products: [],
+      },
+      initialDataUpdatedAt: 0,
       enabled: false,
       refetchOnWindowFocus: false,
       staleTime: TIME_IN_MS.ONE_MINUTE,
     }
   );
-
-  const autocompleteData =
-    autocompleteMutationData?.products ??
-    ([] as RouterOutputs["product"]["getAutocomplete"]["products"]);
 
   const searchingStateNoOptionsText = `Searching for ${autocompleteQuery}`;
 
