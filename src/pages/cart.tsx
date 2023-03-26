@@ -194,37 +194,72 @@ const CartPage = () => {
     [cart]
   );
 
+  const cartIsEmpty = cart.cartItems.length <= 0;
+
   return (
     <>
       <Head>
         <title>My cart | Nextcommerce</title>
       </Head>
       <div className="p-4 md:p-8">
-        <div className="mobile-scrollbar flex h-[70vh] w-full flex-col gap-1 overflow-auto">
-          {cart.cartItems.map((cartItem, idx) => {
-            return (
-              <CartItem cartItem={cartItem} key={cartItem.id} index={idx} />
-            );
-          })}
-        </div>
-        <div className="flex w-full flex-col items-center">
-          <div className="text-md flex w-full max-w-xl flex-col items-center md:text-4xl">
-            <div className="flex w-full items-end justify-between gap-1 px-4">
-              <p>{`Total: `}</p>
-              <b>{`$${totalPrice}`}</b>
+        <div
+          className={`mobile-scrollbar flex h-[70vh] w-full flex-col gap-1 ${
+            cartIsEmpty ? "overflow-visible" : "overflow-auto"
+          }`}
+        >
+          {!cartIsEmpty ? (
+            cart.cartItems.map((cartItem, idx) => {
+              return (
+                <CartItem cartItem={cartItem} key={cartItem.id} index={idx} />
+              );
+            })
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center">
+              <Image
+                Container={
+                  <div className="relative aspect-square w-72 shrink-0 md:w-80" />
+                }
+                src={"/images/empty-cart.webp"}
+                fill
+                alt={"Animated girl turning an empty carboad box upside down"}
+              />
+              <div className="flex flex-col items-center gap-1 text-center text-lg text-neutral-100 md:gap-2 md:text-2xl">
+                <b className="text-3xl md:text-5xl">Your cart is empty</b>
+                <p className="text-neutral-500">
+                  Add{" "}
+                  <Link
+                    className="underline-teal-anim p-0 font-medium italic text-neutral-400 focus:outline-0"
+                    href={"/products"}
+                    prefetch={false}
+                  >
+                    products
+                  </Link>{" "}
+                  to your cart <br /> and they will appear here!
+                </p>
+              </div>
             </div>
-            <Divider
-              className="my-2 bg-neutral-800"
-              thickness="1px"
-              size="100%"
-            />
-          </div>
-          <div className="mt-2">
-            <Button variants={{ type: "secondary", size: "lg" }}>
-              Checkout
-            </Button>
-          </div>
+          )}
         </div>
+        {!cartIsEmpty ? (
+          <div className="flex w-full flex-col items-center">
+            <div className="flex w-full max-w-xl flex-col items-center text-2xl md:text-4xl">
+              <div className="flex w-full items-end justify-between gap-1 px-4">
+                <p>{`Total: `}</p>
+                <b className="truncate">{`$${totalPrice}`}</b>
+              </div>
+              <Divider
+                className="my-2 bg-neutral-800"
+                thickness="1px"
+                size="100%"
+              />
+            </div>
+            <div className="mt-2">
+              <Button variants={{ type: "secondary", size: "lg" }}>
+                Checkout
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </>
   );

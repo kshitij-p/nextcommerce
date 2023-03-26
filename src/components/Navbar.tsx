@@ -32,6 +32,7 @@ const Navbar = () => {
         <Link
           className="underline-teal-anim focus:outline focus:outline-2 focus:outline-teal-500"
           href="/products"
+          prefetch={false}
         >
           Products
         </Link>
