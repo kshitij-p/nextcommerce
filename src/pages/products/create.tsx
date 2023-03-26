@@ -122,7 +122,7 @@ const CreateProductPage = () => {
       <Head>
         <title>Create a product | Nextcommerce</title>
       </Head>
-      <div className="flex flex-col xl:flex-row">
+      <div className="flex flex-col xl:flex-row xl:p-8">
         <div className="w-full shrink-0 xl:order-last xl:w-[50%] ">
           <div className="relative aspect-video w-full shrink-0 xl:aspect-square xl:w-3/4">
             <Image
@@ -137,8 +137,12 @@ const CreateProductPage = () => {
           </div>
         </div>
         <div className="flex w-full xl:w-1/2">
-          <Form form={form} onSubmit={handleCreate} className={"p-4 md:p-8"}>
-            <div className="flex flex-col gap-4 text-2xl text-neutral-300 md:text-4xl">
+          <Form
+            form={form}
+            onSubmit={handleCreate}
+            className={"p-4 md:p-8 xl:p-0"}
+          >
+            <div className="flex flex-col gap-4 text-2xl text-neutral-300 md:gap-6 md:text-4xl">
               <div className="mb-2 md:mb-8">
                 <h2 className="text-4xl font-extrabold text-neutral-50 md:text-7xl">
                   Create a product
@@ -148,6 +152,7 @@ const CreateProductPage = () => {
 
               <LabelledInput
                 {...inputProps}
+                className={`${inputProps.className} h-40 md:h-60`}
                 inputEl="textarea"
                 style={{ resize: "none" }}
                 {...form.register("description")}
