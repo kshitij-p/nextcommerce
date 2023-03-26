@@ -102,7 +102,7 @@ const productRouter = createTRPCRouter({
         limit: z.number().optional(),
       })
     )
-    .mutation(async ({ ctx, input: { title, limit: passedLimit } }) => {
+    .query(async ({ ctx, input: { title, limit: passedLimit } }) => {
       const LIMIT = passedLimit ?? 20;
 
       const products = title

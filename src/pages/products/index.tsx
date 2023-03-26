@@ -62,13 +62,6 @@ const FilterBy = ({
     }, delay);
   };
 
-  const { data: autocompleteMutationData, mutate: fetchAutocompleteData } =
-    api.product.getAutocomplete.useMutation({});
-
-  const autocompleteData =
-    autocompleteMutationData?.products ??
-    ([] as RouterOutputs["product"]["getAutocomplete"]["products"]);
-
   const placeholderValue = {
     id: "",
     category: "Other",
@@ -83,6 +76,25 @@ const FilterBy = ({
     useState<(typeof autocompleteData)[0]>(placeholderValue);
   const [autocompleteQuery, setAutocompleteQuery] = useState(searchQuery ?? "");
 
+  const {
+    data: autocompleteMutationData,
+    refetch: fetchAutocompleteData,
+    isFetching,
+  } = api.product.getAutocomplete.useQuery(
+    { title: autocompleteQuery },
+    {
+      enabled: false,
+      refetchOnWindowFocus: false,
+      staleTime: TIME_IN_MS.ONE_MINUTE,
+    }
+  );
+
+  const autocompleteData =
+    autocompleteMutationData?.products ??
+    ([] as RouterOutputs["product"]["getAutocomplete"]["products"]);
+
+  const searchingStateNoOptionsText = `Searching for ${autocompleteQuery}`;
+
   return (
     <>
       <Autocomplete
@@ -91,8 +103,10 @@ const FilterBy = ({
           !autocompleteTimeoutQueued
             ? autocompleteQuery === ""
               ? "Start typing to see suggestions"
+              : isFetching
+              ? searchingStateNoOptionsText
               : "No results found"
-            : `Searching for ${autocompleteQuery}`
+            : searchingStateNoOptionsText
         }
         Opener={
           <div
@@ -147,7 +161,7 @@ const FilterBy = ({
           if (!triggeredByOptionSelect) {
             setAutocompleteTimeoutQueued(true);
             setAutocompleteTimeout(() => {
-              void fetchAutocompleteData({ title });
+              void fetchAutocompleteData();
               setAutocompleteTimeoutQueued(false);
             }, 500);
           }
