@@ -306,7 +306,9 @@ const Home = ({
         </style>
       </Head>
       <div>
-        <div className={`hero-section relative inset-0 h-screen w-full`}>
+        <div
+          className={`hero-section relative inset-0 h-[70vh] w-full max-md:max-h-[460px] lg:h-screen`}
+        >
           <div className={`absolute inset-0 h-full w-full`}>
             <div
               className={`absolute inset-0 z-[2] h-full w-full bg-[url("/images/hero-fg.webp")] bg-cover bg-[left_center] brightness-90 lg:inset-[unset] lg:right-0 lg:aspect-square lg:w-[70%] lg:bg-[right_30%]`}

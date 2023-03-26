@@ -214,7 +214,7 @@ const CartPage = () => {
               );
             })
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4">
               <Image
                 Container={
                   <div className="relative aspect-square w-72 shrink-0 md:w-80" />
