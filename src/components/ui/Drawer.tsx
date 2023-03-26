@@ -17,6 +17,7 @@ const Drawer = ({
       size={{
         maxHeight: "100vh",
         height: "100vh",
+        maxWidth: "85vw",
       }}
       transitionProps={{
         container: {
