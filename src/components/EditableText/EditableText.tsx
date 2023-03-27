@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { flushSync } from "react-dom";
+import ErrorText from "../ui/ErrorText";
 import Input from "../ui/Input";
 import UnstyledTextarea from "../ui/Textarea/UnstyledTextarea";
 import EditableHoverButton from "./EditableHoverButton";
@@ -68,7 +69,9 @@ const EditableText = ({
   const textElProps = {
     className: `w-full resize-none rounded-sm bg-transparent p-2 focus:${
       errorMsg ? "outline-red-500" : "outline-teal-500"
-    } outline outline-2 ${errorMsg ? "outline-red-200" : "outline-teal-200"}`,
+    } outline outline-2 ${
+      errorMsg ? "outline-red-200" : "outline-teal-200"
+    } transition-colors duration-500`,
     autoFocus: true,
     value: text,
     onChange: (
@@ -114,7 +117,9 @@ const EditableText = ({
               <Input {...textElProps} />
             )}
           </label>
-          {errorMsg ? <p className="text-lg text-red-500">{errorMsg}</p> : null}
+          <ErrorText className="text-lg" visible={errorMsg.length > 0}>
+            {errorMsg}
+          </ErrorText>
         </div>
       ) : (
         <div className="flex">
