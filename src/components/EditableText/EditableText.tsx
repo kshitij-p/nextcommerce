@@ -22,6 +22,7 @@ const EditableText = ({
   labelText,
   as = <p />,
   inputElement = "textarea",
+  inputContainerProps,
   onChangeComplete,
   className = "",
   ...rest
@@ -40,6 +41,7 @@ const EditableText = ({
   labelText?: string;
   as?: React.ReactElement<Record<string, unknown>>;
   inputElement?: "textarea" | "input";
+  inputContainerProps?: React.ComponentProps<"div">;
   onChangeComplete?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -93,12 +95,18 @@ const EditableText = ({
   return (
     <div {...rest} className={`group relative ${className}`} ref={containerRef}>
       {editing ? (
-        <div className="flex flex-col">
-          <label className="flex items-center gap-1">
+        <div
+          {...inputContainerProps}
+          className={`flex w-full flex-col ${
+            inputContainerProps?.className ?? ""
+          }`}
+        >
+          <label className="flex w-full items-center gap-1">
             {labelText ? <p>{labelText}</p> : null}
             {inputElement === "textarea" ? (
               <UnstyledTextarea
                 {...textElProps}
+                containerProps={{ className: "w-full" }}
                 autoResize
                 cursorToTextEndOnFocus
               />

@@ -51,7 +51,10 @@ const Navbar = () => {
     <header className="sticky inset-0 z-[1300] bg-neutral-1000/50 backdrop-blur-[6px]">
       <nav className="flex items-center justify-center gap-4 p-2 text-lg font-light tracking-wider md:gap-12 md:p-4 md:text-3xl xl:gap-16 [&>*]:shrink-0">
         <div className="flex items-center justify-center gap-[inherit] xl:w-full xl:justify-around [&>*]:shrink-0">
-          <Link className="text-xl font-bold md:text-4xl" href="/">
+          <Link
+            className="rounded-sm text-xl font-bold focus:outline focus:outline-2 focus:outline-teal-500 md:text-4xl"
+            href="/"
+          >
             NEXT
           </Link>
 

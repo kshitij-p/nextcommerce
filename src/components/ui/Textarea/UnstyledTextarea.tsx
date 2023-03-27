@@ -20,12 +20,14 @@ const UnstyledTextarea = React.forwardRef(
       onFocus,
       name,
       isInvalid = false,
+      containerProps,
       errorTextProps,
       ...rest
     }: React.ComponentProps<"textarea"> & {
       autoResize?: boolean;
       cursorToTextEndOnFocus?: boolean;
       isInvalid?: boolean;
+      containerProps?: React.ComponentProps<"div">;
       errorTextProps?: HTMLMotionProps<"b">;
       showErrors?: boolean;
       orientation?: "vertical" | "horizontal";
@@ -100,9 +102,10 @@ const UnstyledTextarea = React.forwardRef(
 
     return (
       <div
+        {...containerProps}
         className={`flex ${
           orientation === "vertical" ? "flex-col" : "flex-row"
-        }`}
+        } ${containerProps?.className ?? ""}`}
       >
         <textarea
           {...rest}

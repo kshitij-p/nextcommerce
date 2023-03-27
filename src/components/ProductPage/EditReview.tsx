@@ -137,6 +137,7 @@ export const EditableReviewText = ({
   canEdit: boolean;
   as?: React.ReactElement<Record<string, unknown>>;
   inputElement?: "textarea" | "input";
+  inputContainerProps?: React.ComponentProps<"div">;
   fieldToEdit: EditableReviewFields;
   review: ProductReview;
   onChangeComplete?: (

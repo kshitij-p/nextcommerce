@@ -176,6 +176,7 @@ const EditableProductText = ({
   inputElement?: "textarea" | "input";
   fieldToEdit: EditableProductFields;
   product: React.ComponentProps<typeof ProductEditDialog>["product"];
+  inputContainerProps?: React.ComponentProps<"div">;
   onChangeComplete?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -419,7 +420,8 @@ const ProductPage = ({
           </div>
           {/* Font size for this is defined in the parent div */}
           <EditableProductText
-            className="flex"
+            className="flex w-full"
+            inputContainerProps={{ className: "xl:max-w-[80%]" }}
             {...editableProductTextProps}
             fieldToEdit={"description"}
             as={

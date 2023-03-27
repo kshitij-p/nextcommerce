@@ -138,7 +138,8 @@ const Review = ({ review }: { review: ProductReview }) => {
       </div>
       <div>
         <EditableReviewText
-          className="flex"
+          className="flex w-full"
+          inputContainerProps={{ className: "xl:max-w-[80%]" }}
           canEdit={canEdit}
           review={review}
           fieldToEdit={"body"}
