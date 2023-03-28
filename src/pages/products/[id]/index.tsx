@@ -5,13 +5,14 @@ import {
 } from "next";
 import { type Product } from "@prisma/client";
 import PageWithFallback from "../../../components/PageWithFallback";
-import Image from "../../../components/ui/Image";
+import Image from "../../../components/ui/Image/Image";
 import ExpandableText from "../../../components/ui/ExpandableText";
 import Button from "../../../components/ui/Button";
 import { useSession } from "next-auth/react";
 import React, { type ForwardedRef, useState } from "react";
 import { api, type RouterOutputs } from "../../../utils/api";
-import { TIME_IN_MS, toast } from "../../../utils/client";
+import { FALLBACK_IMG_URL, TIME_IN_MS } from "../../../utils/client";
+import toast from "../../../utils/toast";
 import { z } from "zod";
 import EditableText, {
   useEditableText,
@@ -391,7 +392,7 @@ const ProductPage = ({
         <Image
           priority
           className="rounded-sm object-cover"
-          src={product.images?.[0]?.publicUrl ?? ""}
+          src={product.images?.[0]?.publicUrl ?? FALLBACK_IMG_URL}
           alt={`Image of ${product.title}`}
           fill
           Container={
@@ -441,8 +442,6 @@ const ProductPage = ({
             <Reviews product={product} />
           </div>
         </div>
-
-        {/* To do add image fall back here */}
       </div>
     </>
   );

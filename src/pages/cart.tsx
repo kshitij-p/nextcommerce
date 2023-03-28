@@ -2,13 +2,13 @@ import Link from "next/link";
 import React, { useMemo } from "react";
 import Button from "../components/ui/Button";
 import Divider from "../components/ui/Divider";
-import Image from "../components/ui/Image";
+import Image from "../components/ui/Image/Image";
 import ProtectedPage from "../components/ProtectedPage";
 import TruncatedText from "../components/ui/TruncatedText";
 import useEditCartQuantity from "../hooks/cart/useEditCartQuantity";
 import useTRPCUtils from "../hooks/useTRPCUtils";
 import { api, type RouterOutputs } from "../utils/api";
-import { breakpoints, TIME_IN_MS } from "../utils/client";
+import { breakpoints, FALLBACK_IMG_URL, TIME_IN_MS } from "../utils/client";
 import Head from "next/head";
 
 const RemoveFromCartButton = ({
@@ -113,7 +113,7 @@ const CartItem = ({
           />
         }
         className="rounded-sm object-cover"
-        src={product.images[0]?.publicUrl ?? ""}
+        src={product.images[0]?.publicUrl ?? FALLBACK_IMG_URL}
         alt={`Image of ${product.title}`}
         sizes={`(max-width: ${breakpoints.sm}): 144px, 224px`}
       />
@@ -182,8 +182,6 @@ const CartPage = () => {
     },
     initialDataUpdatedAt: 0,
   });
-
-  ///To do add a fallback image here
 
   const totalPrice = useMemo(
     () =>

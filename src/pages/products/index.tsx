@@ -1,8 +1,13 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Image from "../../components/ui/Image";
+import Image from "../../components/ui/Image/Image";
 import TruncatedText from "../../components/ui/TruncatedText";
-import { breakpoints, extractQueryParam, TIME_IN_MS } from "../../utils/client";
+import {
+  breakpoints,
+  extractQueryParam,
+  FALLBACK_IMG_URL,
+  TIME_IN_MS,
+} from "../../utils/client";
 import { api, type RouterOutputs } from "../../utils/api";
 import ButtonLink from "../../components/ui/ButtonLink";
 import Loader from "../../components/ui/Loader";
@@ -312,7 +317,7 @@ const AllProductsPage = () => {
                       <div className="w-36 shrink-0 self-center md:w-56" />
                     }
                     className="rounded-sm object-cover"
-                    src={product.images[0]?.publicUrl ?? ""}
+                    src={product.images[0]?.publicUrl ?? FALLBACK_IMG_URL}
                     aspectRatio={"1 / 1"}
                     alt={`${product.title}'s image`}
                     sizes={`(max-width: ${breakpoints.sm}): 144px, 224px`}

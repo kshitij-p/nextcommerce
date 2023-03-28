@@ -1,7 +1,6 @@
 import { ProductCategories } from "@prisma/client";
 import { type ParsedUrlQuery } from "querystring";
 import { z } from "zod";
-import toast from "./toast";
 
 export const TIME_IN_MS = {
   ONE_MINUTE: 100 * 60,
@@ -59,4 +58,4 @@ export const breakpoints = {
   "2xl": "1536px",
 } as const;
 
-export { toast };
+export const FALLBACK_IMG_URL = "/images/fallback-img.svg";

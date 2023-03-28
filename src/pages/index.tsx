@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { type RouterOutputs } from "../utils/api";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
-import { breakpoints } from "../utils/client";
+import { breakpoints, FALLBACK_IMG_URL } from "../utils/client";
 import HandDrawnArrowLeftIcon from "../components/icons/HandDrawnArrowLeftIcon";
 import HandDrawnArrowRightIcon from "../components/icons/HandDrawnArrowRightIcon";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
@@ -126,8 +126,6 @@ const FeaturedProducts = ({
   if (!products) {
     return null;
   }
-
-  //To do add image placeholder here
 
   return (
     <div className="flex flex-col gap-2 md:gap-4 xl:gap-8">
@@ -250,7 +248,7 @@ const FeaturedProducts = ({
                   draggable={false}
                   className="object-cover"
                   fill
-                  src={product.images?.[0]?.publicUrl ?? ""}
+                  src={product.images?.[0]?.publicUrl ?? FALLBACK_IMG_URL}
                   alt={`Image of ${product.title}`}
                   sizes={`(max-width: ${breakpoints.sm}) 210px, (max-width: ${breakpoints.md}) 250px, (max-width: ${breakpoints.lg}): 330px, 640px`}
                 />

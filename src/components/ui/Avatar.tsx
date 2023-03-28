@@ -1,11 +1,10 @@
 import React from "react";
-import Image from "./Image";
-
-const DEFAULT_FALLBACK = "";
+import { FALLBACK_IMG_URL } from "../../utils/client";
+import Image from "./Image/Image";
 
 const Avatar = ({
   alt,
-  src = DEFAULT_FALLBACK,
+  src = FALLBACK_IMG_URL,
   className = "",
   ...rest
 }: Omit<React.ComponentProps<typeof Image>, "fill" | "src"> & {
@@ -15,7 +14,7 @@ const Avatar = ({
     <Image
       {...rest}
       className={`rounded-[50%] ${className}`}
-      src={src ?? DEFAULT_FALLBACK}
+      src={src ?? FALLBACK_IMG_URL}
       alt={alt}
       fill
     />
