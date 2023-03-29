@@ -43,23 +43,25 @@ const CreateProductPage = () => {
   const form = useForm({ schema: CreateProductFormSchema });
 
   const [productLink, setProductLink] = useState("");
+  const [isUploadingToR2, setIsUploadingToR2] = useState(false);
 
   const [progress, setProgress] = useState(0);
   const [category, setCategory] = useState(DEFAULT_CATEGORY_OPTION_VALUE);
 
-  const { mutate: createProduct } = api.product.create.useMutation({
-    onSuccess: async (data) => {
-      await utils.product.getAll.invalidate();
-      await utils.product.getAutocomplete.invalidate();
-      setProductLink(data.product.id);
-      setProgress(100);
-    },
-    onError: () => {
-      setProgress(0);
-    },
-  });
+  const { mutate: createProduct, isLoading: isLoadingCreateProduct } =
+    api.product.create.useMutation({
+      onSuccess: async (data) => {
+        await utils.product.getAll.invalidate();
+        await utils.product.getAutocomplete.invalidate();
+        setProductLink(data.product.id);
+        setProgress(100);
+      },
+      onError: () => {
+        setProgress(0);
+      },
+    });
 
-  const { mutateAsync: getPresignedUrl } =
+  const { mutateAsync: getPresignedUrl, isLoading: isLoadingPresignedUrl } =
     api.image.getPresignedUrl.useMutation({
       onSuccess: () => {
         setProgress(25);
@@ -87,6 +89,8 @@ const CreateProductPage = () => {
 
     const { presignedUrl, key } = await getPresignedUrl();
 
+    setIsUploadingToR2(true);
+
     try {
       await fetch(presignedUrl, {
         method: "PUT",
@@ -98,6 +102,8 @@ const CreateProductPage = () => {
     } catch (e) {
       return;
     }
+
+    setIsUploadingToR2(false);
 
     setProgress(50);
 
@@ -117,6 +123,8 @@ const CreateProductPage = () => {
     className: "w-full mobile-scrollbar",
     variants: { padding: "lg" },
   };
+
+  //to do throw a warning preventing the user from going to another page while the upload is happenin
 
   return (
     <>
@@ -140,6 +148,9 @@ const CreateProductPage = () => {
         <div className="flex w-full xl:w-1/2">
           <Form
             form={form}
+            disabled={
+              isLoadingPresignedUrl || isUploadingToR2 || isLoadingCreateProduct
+            }
             onSubmit={handleCreate}
             className={"p-4 md:p-8 xl:p-0"}
           >
