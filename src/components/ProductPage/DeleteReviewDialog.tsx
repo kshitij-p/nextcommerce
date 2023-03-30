@@ -24,6 +24,7 @@ const DeleteReviewDialog = ({ review }: { review: ProductReview }) => {
 
   return (
     <DangerDialog
+      openerProps={{ className: "mt-1 md:mt-2" }}
       open={open}
       setOpen={setOpen}
       title={"Delete this review"}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import ProtectedPage from "../../components/ProtectedPage";
 import { api } from "../../utils/api";
@@ -124,7 +124,29 @@ const CreateProductPage = () => {
     variants: { padding: "lg" },
   };
 
+  const productIsBeingCreated =
+    isLoadingPresignedUrl || isUploadingToR2 || isLoadingCreateProduct;
+
   //to do throw a warning preventing the user from going to another page while the upload is happenin
+  useEffect(() => {
+    if (!productIsBeingCreated) {
+      return;
+    }
+
+    const closureMessage =
+      "Your product is still being created. Please wait a few seconds for it to finish before you leave.";
+    const preventTabClose = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = closureMessage;
+      return closureMessage;
+    };
+
+    window.addEventListener("beforeunload", preventTabClose);
+
+    return function cleanup() {
+      window.removeEventListener("beforeunload", preventTabClose);
+    };
+  }, [productIsBeingCreated]);
 
   return (
     <>
@@ -148,9 +170,7 @@ const CreateProductPage = () => {
         <div className="flex w-full xl:w-1/2">
           <Form
             form={form}
-            disabled={
-              isLoadingPresignedUrl || isUploadingToR2 || isLoadingCreateProduct
-            }
+            disabled={productIsBeingCreated}
             onSubmit={handleCreate}
             className={"p-4 md:p-8 xl:p-0"}
           >
@@ -188,7 +208,7 @@ const CreateProductPage = () => {
               <div
                 className={`${
                   progress > 0 ? "relative h-1" : "absolute h-0"
-                } w-full rounded-sm bg-teal-400 transition-all duration-300`}
+                } w-full rounded-sm bg-teal-600 transition-all duration-300`}
                 style={{
                   width: `${progress}%`,
                 }}

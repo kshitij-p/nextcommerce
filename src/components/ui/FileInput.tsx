@@ -32,7 +32,7 @@ const FileInput = React.forwardRef(
 
     return (
       <div className="relative flex flex-col">
-        <div>
+        <div className="flex flex-col gap-2">
           <Button
             variants={{ type: "secondary" }}
             onClick={() => {
