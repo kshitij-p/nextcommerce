@@ -34,6 +34,7 @@ import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import { appRouter } from "../../../server/api/root";
 import { createInnerTRPCContext } from "../../../server/api/trpc";
 import superjson from "superjson";
+import { prisma } from "../../../server/db";
 
 type EditableProductFields = keyof Omit<
   Product,
@@ -66,11 +67,19 @@ export const getStaticProps: GetStaticProps<{ id: string }> = async (ctx) => {
   };
 };
 
-export const getStaticPaths: GetStaticPaths = () => {
-  //To do: pre render all featured products here
+export const getStaticPaths: GetStaticPaths = async () => {
+  const featuredProducts = await prisma.product.findMany({
+    where: {
+      featured: true,
+    },
+  });
+
+  const paths = featuredProducts.map((product) => ({
+    params: { id: product.id },
+  }));
 
   return {
-    paths: [],
+    paths: paths,
     fallback: true,
   };
 };

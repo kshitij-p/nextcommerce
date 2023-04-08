@@ -101,8 +101,6 @@ const FeaturedProducts = ({
 }: {
   products: RouterOutputs["product"]["getAll"]["products"] | undefined;
 }) => {
-  console.log({ products });
-
   const [state, setState] = useState({
     direction: 0,
     index: 0,
