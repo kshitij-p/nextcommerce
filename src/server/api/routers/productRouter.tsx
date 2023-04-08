@@ -138,6 +138,9 @@ const productRouter = createTRPCRouter({
             equals: true,
           },
         },
+        include: {
+          images: true,
+        },
       });
 
       return {

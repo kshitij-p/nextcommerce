@@ -25,6 +25,8 @@ const server = z.object({
   R2_BUCKET_NAME: z.string(),
   R2_PUBLIC_URL: z.string(),
 
+  ADMIN_USER_EMAIL: z.string()
+
 });
 
 const client = z.object({
@@ -49,6 +51,8 @@ const processEnv = {
 
   R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
   R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
+
+  ADMIN_USER_EMAIL: process.env.ADMIN_USER_EMAIL
 };
 
 // Don't touch the part below

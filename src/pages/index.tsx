@@ -14,7 +14,7 @@ import superjson from "superjson";
 import { appRouter } from "../server/api/root";
 
 export const getStaticProps: GetStaticProps<{
-  featuredProducts: RouterOutputs["product"]["getAll"]["products"];
+  featuredProducts: RouterOutputs["product"]["getFeatured"]["products"];
 }> = async () => {
   const ssg = createProxySSGHelpers({
     router: appRouter,
@@ -22,7 +22,7 @@ export const getStaticProps: GetStaticProps<{
     transformer: superjson,
   });
 
-  const { products: featuredProducts } = await ssg.product.getAll.fetch({
+  const { products: featuredProducts } = await ssg.product.getFeatured.fetch({
     limit: 10,
   });
 
@@ -101,6 +101,8 @@ const FeaturedProducts = ({
 }: {
   products: RouterOutputs["product"]["getAll"]["products"] | undefined;
 }) => {
+  console.log({ products });
+
   const [state, setState] = useState({
     direction: 0,
     index: 0,

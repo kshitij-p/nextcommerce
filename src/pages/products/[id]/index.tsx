@@ -67,6 +67,8 @@ export const getStaticProps: GetStaticProps<{ id: string }> = async (ctx) => {
 };
 
 export const getStaticPaths: GetStaticPaths = () => {
+  //To do: pre render all featured products here
+
   return {
     paths: [],
     fallback: true,
