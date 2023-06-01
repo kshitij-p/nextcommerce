@@ -2,7 +2,7 @@ import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 
-import { Montserrat } from "@next/font/google";
+import { Montserrat } from "next/font/google";
 
 import { api } from "../utils/api";
 
