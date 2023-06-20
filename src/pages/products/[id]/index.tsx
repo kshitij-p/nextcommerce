@@ -363,6 +363,7 @@ const ProductBuyArea = React.forwardRef(
         <Button
           disabled={actionsDisabled}
           onClick={() => {
+            if (actionsDisabled) return;
             buyProduct({ productId: product.id, quantity: quantity.value });
           }}
         >

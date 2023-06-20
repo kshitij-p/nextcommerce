@@ -10,6 +10,7 @@ import useTRPCUtils from "../hooks/useTRPCUtils";
 import { api, type RouterOutputs } from "../utils/api";
 import { breakpoints, FALLBACK_IMG_URL, TIME_IN_MS } from "../utils/client";
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 const RemoveFromCartButton = ({
   cartItemId,
@@ -168,8 +169,11 @@ const CartItem = ({
 };
 
 const CartPage = () => {
+  const router = useRouter();
+
   const {
     data: { cart },
+    isLoading: isLoadingCart,
   } = api.cart.get.useQuery(undefined, {
     staleTime: TIME_IN_MS.FIVE_MINUTES,
     initialData: {
@@ -183,6 +187,14 @@ const CartPage = () => {
     initialDataUpdatedAt: 0,
   });
 
+  const { mutate: checkoutCart, isLoading: isCheckingOutCart } =
+    api.payments.checkoutCart.useMutation({
+      onSuccess: async (checkoutSession) => {
+        if (!checkoutSession.url) return;
+        await router.push(checkoutSession.url);
+      },
+    });
+
   const totalPrice = useMemo(
     () =>
       cart.cartItems.reduce(
@@ -193,6 +205,8 @@ const CartPage = () => {
   );
 
   const cartIsEmpty = cart.cartItems.length <= 0;
+
+  const checkoutDisabled = isLoadingCart || isCheckingOutCart;
 
   return (
     <>
@@ -252,7 +266,14 @@ const CartPage = () => {
               />
             </div>
             <div className="mt-2">
-              <Button variants={{ type: "secondary", size: "lg" }}>
+              <Button
+                variants={{ type: "secondary", size: "lg" }}
+                disabled={checkoutDisabled}
+                onClick={() => {
+                  if (checkoutDisabled) return;
+                  checkoutCart();
+                }}
+              >
                 Checkout
               </Button>
             </div>
