@@ -12,7 +12,7 @@ const server = z.object({
     // Since NextAuth.js automatically uses the VERCEL_URL if present.
     (str) => process.env.VERCEL_URL ?? str,
     // VERCEL_URL doesn't include `https` so it cant be validated as a URL
-    process.env.VERCEL ? z.string().min(1) : z.string().url(),
+    process.env.VERCEL ? z.string().min(1) : z.string().url()
   ),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
@@ -21,12 +21,14 @@ const server = z.object({
   R2_ACCESS_ID: z.string(),
   R2_SECRET_KEY: z.string(),
 
-
   R2_BUCKET_NAME: z.string(),
   R2_PUBLIC_URL: z.string(),
 
-  ADMIN_USER_EMAIL: z.string()
+  ADMIN_USER_EMAIL: z.string(),
 
+  STRIPE_PUBLISH_KEY: z.string(),
+
+  STRIPE_SECRET_KEY: z.string(),
 });
 
 const client = z.object({
@@ -52,7 +54,11 @@ const processEnv = {
   R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
   R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
 
-  ADMIN_USER_EMAIL: process.env.ADMIN_USER_EMAIL
+  ADMIN_USER_EMAIL: process.env.ADMIN_USER_EMAIL,
+
+  STRIPE_PUBLISH_KEY: process.env.STRIPE_PUBLISH_KEY,
+
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 };
 
 // Don't touch the part below
@@ -78,7 +84,7 @@ if (!!process.env.SKIP_ENV_VALIDATION == false) {
   if (parsed.success === false) {
     console.error(
       "❌ Invalid environment variables:",
-      parsed.error.flatten().fieldErrors,
+      parsed.error.flatten().fieldErrors
     );
     throw new Error("Invalid environment variables");
   }
@@ -92,7 +98,7 @@ if (!!process.env.SKIP_ENV_VALIDATION == false) {
         throw new Error(
           process.env.NODE_ENV === "production"
             ? "❌ Attempted to access a server-side environment variable on the client"
-            : `❌ Attempted to access server-side environment variable '${prop}' on the client`,
+            : `❌ Attempted to access server-side environment variable '${prop}' on the client`
         );
       return target[/** @type {keyof typeof target} */ (prop)];
     },

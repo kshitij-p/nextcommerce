@@ -9,12 +9,35 @@ import {
 } from "../../../utils/client";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { deleteImage, deleteImageFromR2 } from "./imageRouter/util";
+import { stripeClient } from "../../../utils";
 
 const getPublicUrlFromKey = (imageKey: string) => {
   return `${env.R2_PUBLIC_URL}/${imageKey}`;
 };
 
 const ProductIdValidator = z.string().min(1);
+
+const getProductPageUrl = (id: string) => `/products/${id}`;
+
+const createStripePrice = async (
+  userId: string,
+  { price, title }: Pick<Product, "price" | "title">
+) => {
+  return await stripeClient.prices.create({
+    currency: "USD",
+    unit_amount: price * 100, //* 100 to convert to dollars since unit_amount expects cents
+    product_data: {
+      name: `${userId}-${title}`,
+      active: true,
+    },
+  });
+};
+
+const archiveStripePrice = async (id: string) => {
+  return await stripeClient.prices.update(id, {
+    active: false,
+  });
+};
 
 const revalidateProduct = async ({
   res,
@@ -27,7 +50,7 @@ const revalidateProduct = async ({
 
   if (res) {
     try {
-      await res.revalidate(`/products/${product.id}`);
+      await res.revalidate(getProductPageUrl(product.id));
       if (product.featured) {
         await res.revalidate("/");
       }
@@ -187,6 +210,7 @@ const productRouter = createTRPCRouter({
         input: { title, description, imageKey, price, category },
         ctx,
       }) => {
+        const { session } = ctx;
         const images = [];
 
         if (imageKey) {
@@ -197,8 +221,14 @@ const productRouter = createTRPCRouter({
         }
 
         let product;
+        let stripePrice;
 
         try {
+          stripePrice = await createStripePrice(session.user.id, {
+            price,
+            title,
+          });
+
           product = await ctx.prisma.product.create({
             data: {
               description: description,
@@ -209,6 +239,7 @@ const productRouter = createTRPCRouter({
                 create: images,
               },
               category: category,
+              stripePriceId: stripePrice.id,
             },
           });
 
@@ -216,6 +247,9 @@ const productRouter = createTRPCRouter({
         } catch (e) {
           if (imageKey) {
             await deleteImageFromR2(imageKey);
+          }
+          if (stripePrice?.id) {
+            await archiveStripePrice(stripePrice.id);
           }
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -238,6 +272,7 @@ const productRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input: { id, title, description, price }, ctx }) => {
+      const { session } = ctx;
       const product = await ctx.prisma.product.findUnique({
         where: {
           id: id,
@@ -253,10 +288,25 @@ const productRouter = createTRPCRouter({
         });
       }
 
-      if (product.userId !== ctx.session.user.id) {
+      if (product.userId !== session.user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
         });
+      }
+
+      let stripePriceId;
+
+      title = title?.length ? title : undefined;
+
+      if (price) {
+        await archiveStripePrice(product.stripePriceId);
+
+        stripePriceId = (
+          await createStripePrice(session.user.id, {
+            price,
+            title: title ?? product.title,
+          })
+        ).id;
       }
 
       const updatedProduct = await ctx.prisma.product.update({
@@ -265,8 +315,9 @@ const productRouter = createTRPCRouter({
         },
         data: {
           description: description?.length ? description : undefined,
-          title: title?.length ? title : undefined,
-          price: price,
+          title,
+          price,
+          stripePriceId,
         },
       });
 
@@ -323,6 +374,8 @@ const productRouter = createTRPCRouter({
           id: id,
         },
       });
+
+      await archiveStripePrice(deletedProduct.stripePriceId);
 
       let revalidated = await revalidateProduct({
         res: ctx.res,

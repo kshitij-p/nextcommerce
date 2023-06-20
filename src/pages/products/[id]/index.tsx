@@ -35,10 +35,11 @@ import { appRouter } from "../../../server/api/root";
 import { createInnerTRPCContext } from "../../../server/api/trpc";
 import superjson from "superjson";
 import { prisma } from "../../../server/db";
+import { useRouter } from "next/router";
 
 type EditableProductFields = keyof Omit<
   Product,
-  "userId" | "id" | "category" | "featured"
+  "userId" | "id" | "category" | "featured" | "stripePriceId"
 >;
 
 type ProductPageProps = {
@@ -281,6 +282,8 @@ const ProductBuyArea = React.forwardRef(
     const { status } = useSession();
     const isLoggedIn = status === "authenticated";
 
+    const router = useRouter();
+
     const utils = api.useContext();
 
     const [quantityOptions] = useState(() => {
@@ -320,6 +323,14 @@ const ProductBuyArea = React.forwardRef(
       }
     );
 
+    const { mutate: buyProduct, isLoading: isProcessingBuyNow } =
+      api.payments.checkoutProduct.useMutation({
+        onSuccess: async (checkoutSession) => {
+          if (!checkoutSession.url) return;
+          await router.push(checkoutSession.url);
+        },
+      });
+
     const handleAddToCart = async () => {
       if (!isLoggedIn) {
         return;
@@ -338,16 +349,25 @@ const ProductBuyArea = React.forwardRef(
       }
     };
 
+    const actionsDisabled = isProcessingBuyNow || isAdding || isUpdatingQty;
+
     return (
       <>
         <Button
           variants={{ type: "secondary" }}
-          disabled={isAdding || isUpdatingQty}
+          disabled={actionsDisabled}
           onClick={handleAddToCart}
         >
           Add to cart
         </Button>
-        <Button>Buy now</Button>
+        <Button
+          disabled={actionsDisabled}
+          onClick={() => {
+            buyProduct({ productId: product.id, quantity: quantity.value });
+          }}
+        >
+          Buy now
+        </Button>
         <Select
           openerProps={{ className: "h-full" }}
           listElProps={{ className: "text-center" }}

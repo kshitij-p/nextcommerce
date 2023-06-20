@@ -131,5 +131,7 @@ model Product {
     category    ProductCategories @default(Other)
     featured    Boolean           @default(false)
 
+    stripePriceId String @default("") @db.Text
+
     @@index(fields: [title, price, category])
 }
