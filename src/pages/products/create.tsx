@@ -155,10 +155,10 @@ const CreateProductPage = () => {
       </Head>
       <div className="flex flex-col xl:flex-row xl:p-8">
         <div className="w-full shrink-0 xl:order-last xl:w-[50%] ">
-          <div className="relative aspect-video w-full shrink-0 xl:aspect-square xl:w-3/4">
+          <div className="relative aspect-video w-full shrink-0 xl:aspect-square">
             <Image
               priority
-              className="object-cover object-center xl:rounded-3xl"
+              className="object-cover object-center xl:rounded"
               src={bannerImg}
               alt={"Image of a girl writing"}
               fill
@@ -172,11 +172,11 @@ const CreateProductPage = () => {
             form={form}
             disabled={productIsBeingCreated}
             onSubmit={handleCreate}
-            className={"p-4 md:p-8 xl:p-0"}
+            className={"w-full p-4 md:p-8"}
           >
-            <div className="flex flex-col gap-4 text-2xl text-neutral-300 md:gap-6 md:text-4xl">
-              <div className="mb-2 md:mb-8">
-                <h2 className="text-4xl font-extrabold text-neutral-50 md:text-7xl">
+            <div className="flex w-full flex-col gap-4 text-lg text-neutral-300 md:text-2xl">
+              <div className="mb-2">
+                <h2 className="text-3xl font-bold text-neutral-50 md:text-4xl">
                   Create a product
                 </h2>
               </div>

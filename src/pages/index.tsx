@@ -128,10 +128,10 @@ const FeaturedProducts = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 md:gap-4 xl:gap-8">
+    <div className="flex flex-col gap-2 md:gap-4 xl:gap-10">
       <div className="flex items-center justify-between">
         <a
-          className="underline-teal-anim text-2xl font-bold focus:outline-0 md:text-5xl xl:text-7xl"
+          className="underline-teal-anim text-2xl font-bold focus:outline-0 md:text-4xl xl:text-6xl"
           id={"featured-products"}
           href={"#featured-products"}
         >

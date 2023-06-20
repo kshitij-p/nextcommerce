@@ -5,12 +5,10 @@ module.exports = {
     extend: {
       colors: {
         neutral: {
-          1000: "#0d0d0d"
-        }
-      }
+          1000: "hsl(180 4% 5%)",
+        },
+      },
     },
   },
-  plugins: [
-    require('@headlessui/tailwindcss')
-  ],
+  plugins: [require("@headlessui/tailwindcss")],
 };
